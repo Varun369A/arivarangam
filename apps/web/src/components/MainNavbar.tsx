@@ -38,7 +38,7 @@ function CreditsBadge() {
       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-primary-50 to-purple-50 border border-primary-100 text-primary-700 text-sm font-medium hover:from-primary-100 hover:to-purple-100 transition-colors"
     >
       <Zap className="w-3.5 h-3.5 text-brand-purple" />
-      <span>{balance.toLocaleString('en-IN')} cr</span>
+      <span>{(balance ?? 0).toLocaleString('en-IN')} cr</span>
     </Link>
   )
 }

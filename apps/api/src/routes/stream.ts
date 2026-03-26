@@ -79,7 +79,7 @@ export async function streamRoutes(fastify: FastifyInstance): Promise<void> {
       });
 
       for (const event of events) {
-        reply.raw.write(`event: ${event.type}\ndata: ${JSON.stringify({ ...event.data, timestamp: event.createdAt.toISOString() })}\n\n`);
+        reply.raw.write(`event: ${event.type}\ndata: ${JSON.stringify({ ...(event.data as object ?? {}), timestamp: event.createdAt.toISOString() })}\n\n`);
       }
 
       reply.raw.write(`event: stream_end\ndata: ${JSON.stringify({ reason: 'task_complete' })}\n\n`);

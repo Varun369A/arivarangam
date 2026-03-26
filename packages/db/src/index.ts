@@ -12,7 +12,7 @@ const logLevels = process.env.NODE_ENV === 'production'
   : (['query', 'error', 'warn'] as const);
 
 export const prisma: PrismaClient = globalThis.__prisma ?? new PrismaClient({
-  log: logLevels,
+  log: logLevels as any,
 });
 
 if (process.env.NODE_ENV !== 'production') {
