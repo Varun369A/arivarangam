@@ -13,8 +13,8 @@ import {
   Zap,
   Brain,
   Play,
-  Star,
 } from 'lucide-react';
+import { Logo } from '@/components/Logo';
 
 // ─── Fade-in helper ───────────────────────────────────────────────────────────
 const fadeUp = {
@@ -81,19 +81,19 @@ const CATEGORIES = [
 const STEPS = [
   {
     num: '01',
-    icon: <Brain className="w-6 h-6 text-indigo-600" />,
+    icon: <Brain className="w-6 h-6" style={{ color: '#1E3461' }} />,
     title: 'Describe what you need',
     desc: 'Type your task in plain English. No technical jargon required — just tell us what you want to build or create.',
   },
   {
     num: '02',
-    icon: <Zap className="w-6 h-6 text-purple-600" />,
+    icon: <Zap className="w-6 h-6" style={{ color: '#C4882A' }} />,
     title: 'AI builds it autonomously',
     desc: 'Our agent picks the best model, executes the task, and self-corrects errors — all without you lifting a finger.',
   },
   {
     num: '03',
-    icon: <Sparkles className="w-6 h-6 text-green-600" />,
+    icon: <Sparkles className="w-6 h-6" style={{ color: '#059669' }} />,
     title: 'Get results instantly',
     desc: 'Download code, read reports, preview images, or play audio. All results are yours to use.',
   },
@@ -107,8 +107,8 @@ const PRICING = [
     credits: 300,
     popular: false,
     desc: 'Perfect to try',
-    color: 'border-slate-200',
-    btn: 'bg-slate-900 hover:bg-slate-800 text-white',
+    color: 'border-[#E8E5DF]',
+    btn: 'bg-[#1E3461] hover:bg-[#16284D] text-white',
   },
   {
     id: 'starter',
@@ -117,8 +117,8 @@ const PRICING = [
     credits: 1000,
     popular: false,
     desc: 'For individuals',
-    color: 'border-slate-200',
-    btn: 'bg-slate-900 hover:bg-slate-800 text-white',
+    color: 'border-[#E8E5DF]',
+    btn: 'bg-[#1E3461] hover:bg-[#16284D] text-white',
   },
   {
     id: 'pro',
@@ -127,8 +127,8 @@ const PRICING = [
     credits: 3000,
     popular: true,
     desc: 'Best value',
-    color: 'border-indigo-400',
-    btn: 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white',
+    color: 'border-[#1E3461]',
+    btn: 'bg-[#1E3461] hover:bg-[#16284D] text-white',
   },
   {
     id: 'business',
@@ -137,8 +137,8 @@ const PRICING = [
     credits: 8000,
     popular: false,
     desc: 'For teams',
-    color: 'border-slate-200',
-    btn: 'bg-slate-900 hover:bg-slate-800 text-white',
+    color: 'border-[#E8E5DF]',
+    btn: 'bg-[#1E3461] hover:bg-[#16284D] text-white',
   },
 ];
 
@@ -152,41 +152,83 @@ const COMPETITORS = [
 // ─── Mini Task Preview ─────────────────────────────────────────────────────────
 function TaskPreview() {
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-5 w-full max-w-sm mx-auto">
+    <div
+      className="bg-white rounded-2xl w-full max-w-sm mx-auto p-5"
+      style={{
+        border: '1px solid #E8E5DF',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
+      }}
+    >
+      {/* Window chrome */}
       <div className="flex items-center gap-2 mb-4">
         <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
         <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
         <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
-        <span className="ml-2 text-xs text-slate-400 font-mono">Task #1024</span>
+        <span className="ml-2 text-xs text-[#6B7280] font-mono">Task #1024</span>
       </div>
-      <div className="bg-indigo-50 rounded-xl p-3 mb-3 border border-indigo-100">
-        <p className="text-sm text-indigo-800 font-medium">
-          "Build a full-stack todo app with auth and PostgreSQL"
+
+      {/* Prompt */}
+      <div
+        className="rounded-xl p-3 mb-4"
+        style={{ background: '#FEF3C7', border: '1px solid #C4882A30' }}
+      >
+        <p className="text-sm font-medium" style={{ color: '#92400E' }}>
+          &quot;Build a full-stack todo app with auth and PostgreSQL&quot;
         </p>
       </div>
-      <div className="space-y-2">
-        {['Analyzing task…', 'Scaffolding Next.js project…', 'Writing API routes…', 'Done! 47 files created'].map(
-          (step, i) => (
-            <div key={i} className="flex items-center gap-2">
-              {i < 3 ? (
-                <div
-                  className={`w-4 h-4 rounded-full border-2 ${i < 2 ? 'border-indigo-500 bg-indigo-500' : 'border-indigo-300 bg-white'} flex items-center justify-center`}
-                >
-                  {i < 2 && <CheckCircle2 className="w-3 h-3 text-white" />}
-                </div>
-              ) : (
-                <CheckCircle2 className="w-4 h-4 text-green-500" />
-              )}
-              <span className={`text-xs ${i === 3 ? 'text-green-600 font-semibold' : i === 2 ? 'text-slate-500' : 'text-slate-400 line-through'}`}>
-                {step}
-              </span>
-            </div>
-          ),
-        )}
+
+      {/* Progress steps */}
+      <div className="space-y-2.5">
+        {[
+          'Analyzing task…',
+          'Scaffolding Next.js project…',
+          'Writing API routes…',
+          'Done! 47 files created',
+        ].map((step, i) => (
+          <div key={i} className="flex items-center gap-2.5">
+            {i < 3 ? (
+              <div
+                className="w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0"
+                style={{
+                  borderColor: i < 2 ? '#1E3461' : '#E8E5DF',
+                  background: i < 2 ? '#1E3461' : 'white',
+                }}
+              >
+                {i < 2 && (
+                  <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                    <path d="M1.5 4L3 5.5L6.5 2.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </div>
+            ) : (
+              <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: '#059669' }} />
+            )}
+            <span
+              className="text-xs"
+              style={{
+                color:
+                  i === 3
+                    ? '#059669'
+                    : i === 2
+                    ? '#6B7280'
+                    : '#9CA3AF',
+                textDecoration: i < 2 ? 'line-through' : 'none',
+                fontWeight: i === 3 ? 600 : 400,
+              }}
+            >
+              {step}
+            </span>
+          </div>
+        ))}
       </div>
-      <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
-        <span className="text-xs text-slate-400">Credits used</span>
-        <span className="text-xs font-bold text-indigo-600">42 / ~50 estimated</span>
+
+      {/* Footer */}
+      <div
+        className="mt-4 pt-3 flex items-center justify-between"
+        style={{ borderTop: '1px solid #E8E5DF' }}
+      >
+        <span className="text-xs" style={{ color: '#6B7280' }}>Credits used</span>
+        <span className="text-xs font-bold" style={{ color: '#1E3461' }}>42 / ~50 estimated</span>
       </div>
     </div>
   );
@@ -196,29 +238,39 @@ function TaskPreview() {
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
+
       {/* ── Navbar ── */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+      <nav
+        className="sticky top-0 z-50 bg-white"
+        style={{ borderBottom: '1px solid #E8E5DF' }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-sm">
-              <span className="text-white font-bold text-sm">A</span>
-            </div>
-            <span className="font-bold text-slate-800 text-lg">arrivarangam</span>
+          <Link href="/" className="flex items-center">
+            <Logo size={30} showText={true} />
           </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-            <Link href="#how" className="hover:text-indigo-600 transition-colors">How it works</Link>
-            <Link href="#pricing" className="hover:text-indigo-600 transition-colors">Pricing</Link>
-            <Link href="#why" className="hover:text-indigo-600 transition-colors">Why us</Link>
+
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium" style={{ color: '#374151' }}>
+            <Link href="#how" className="hover:text-[#1E3461] transition-colors">How it works</Link>
+            <Link href="#pricing" className="hover:text-[#1E3461] transition-colors">Pricing</Link>
+            <Link href="#why" className="hover:text-[#1E3461] transition-colors">Why us</Link>
           </div>
+
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors">
+            <Link
+              href="/login"
+              className="text-sm font-medium transition-colors"
+              style={{ color: '#374151' }}
+            >
               Sign in
             </Link>
             <Link
               href="/signup"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
+              className="text-sm font-semibold px-4 py-2 rounded-lg transition-all duration-200 text-white"
+              style={{ background: '#1E3461' }}
+              onMouseEnter={e => (e.currentTarget.style.background = '#16284D')}
+              onMouseLeave={e => (e.currentTarget.style.background = '#1E3461')}
             >
-              Get started free
+              Get started
             </Link>
           </div>
         </div>
@@ -227,111 +279,125 @@ export default function LandingPage() {
       {/* ── Hero ── */}
       <section
         className="relative min-h-[90vh] flex items-center justify-center overflow-hidden"
-        style={{
-          background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 30%, #e0e7ff 60%, #dbeafe 100%)',
-        }}
+        style={{ background: '#FFFFFF' }}
       >
-        {/* Animated blobs */}
+        {/* Dot grid pattern */}
         <div
-          className="absolute top-[-5%] left-[-5%] w-[500px] h-[500px] rounded-full opacity-40 pointer-events-none"
+          className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'radial-gradient(circle, #c4b5fd 0%, #a5b4fc 100%)',
-            filter: 'blur(80px)',
-            animation: 'float 8s ease-in-out infinite',
-          }}
-        />
-        <div
-          className="absolute bottom-[-5%] right-[-5%] w-[400px] h-[400px] rounded-full opacity-30 pointer-events-none"
-          style={{
-            background: 'radial-gradient(circle, #93c5fd 0%, #6ee7b7 100%)',
-            filter: 'blur(80px)',
-            animation: 'float 10s ease-in-out infinite',
-            animationDelay: '3s',
+            backgroundImage: 'radial-gradient(#E8E5DF 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+            opacity: 0.7,
           }}
         />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 grid lg:grid-cols-2 gap-16 items-center">
           {/* Text */}
           <div>
+            {/* Badge */}
             <motion.div
               variants={fadeUp}
               initial="hidden"
               animate="show"
               custom={0}
-              className="inline-flex items-center gap-2 bg-white/70 backdrop-blur-sm border border-indigo-200 rounded-full px-4 py-1.5 text-sm text-indigo-700 font-medium mb-6 shadow-sm"
+              className="inline-flex items-center gap-2 mb-6 px-3.5 py-1.5 rounded-full text-xs font-semibold uppercase tracking-widest"
+              style={{
+                border: '1px solid #C4882A',
+                color: '#C4882A',
+                background: '#FEF3C7',
+              }}
             >
-              <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
-              New users get 100 free credits
+              Autonomous AI Platform
             </motion.div>
+
             <motion.h1
               variants={fadeUp}
               initial="hidden"
               animate="show"
               custom={0.1}
-              className="text-5xl sm:text-6xl font-extrabold text-slate-900 leading-tight tracking-tight mb-6"
+              className="mb-6"
+              style={{
+                fontSize: '56px',
+                fontWeight: 900,
+                color: '#0A0D14',
+                letterSpacing: '-0.03em',
+                lineHeight: 1.1,
+              }}
             >
-              Build anything{' '}
-              <span
-                className="bg-clip-text text-transparent"
-                style={{
-                  backgroundImage: 'linear-gradient(135deg, #6366f1, #7c3aed, #2563eb)',
-                }}
-              >
-                with AI.
-              </span>
+              The AI Platform
               <br />
-              Autonomously.
+              Built for{' '}
+              <span style={{ color: '#1E3461' }}>Execution</span>
             </motion.h1>
+
             <motion.p
               variants={fadeUp}
               initial="hidden"
               animate="show"
               custom={0.2}
-              className="text-lg text-slate-600 max-w-lg mb-8 leading-relaxed"
+              className="max-w-lg mb-8"
+              style={{ fontSize: '16px', lineHeight: 1.7, color: '#374151' }}
             >
               One platform for code, research, images and voice. Our AI agents pick the best
-              model for your task and deliver results — no subscriptions, pay only per credit.
-              <strong className="text-slate-800"> 20-70x cheaper</strong> than Lovable or Bolt.
+              model for every task and deliver results — no subscriptions, pay only per credit.{' '}
+              <strong style={{ color: '#0A0D14' }}>20-70x cheaper</strong> than Lovable or Bolt.
             </motion.p>
+
+            {/* CTAs */}
             <motion.div
               variants={fadeUp}
               initial="hidden"
               animate="show"
               custom={0.3}
-              className="flex flex-wrap gap-3"
+              className="flex flex-wrap gap-3 mb-8"
             >
               <Link
                 href="/signup"
-                className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 shadow-lg shadow-indigo-200 hover:shadow-indigo-300"
+                className="inline-flex items-center gap-2 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200"
+                style={{
+                  background: '#1E3461',
+                  boxShadow: '0 4px 14px rgba(30,52,97,0.25)',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = '#16284D')}
+                onMouseLeave={e => (e.currentTarget.style.background = '#1E3461')}
               >
                 Start Building Free
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="#how"
-                className="inline-flex items-center gap-2 bg-white/80 hover:bg-white text-slate-700 font-semibold px-6 py-3 rounded-xl border border-slate-200 transition-all duration-200"
+                className="inline-flex items-center gap-2 font-semibold px-6 py-3 rounded-lg transition-all duration-200"
+                style={{
+                  background: 'white',
+                  border: '1px solid #E8E5DF',
+                  color: '#374151',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+                }}
               >
-                <Play className="w-4 h-4 text-indigo-500" />
+                <Play className="w-4 h-4" style={{ color: '#1E3461' }} />
                 See it in action
               </Link>
             </motion.div>
+
+            {/* Trust signals */}
             <motion.div
               variants={fadeUp}
               initial="hidden"
               animate="show"
               custom={0.4}
-              className="mt-8 flex items-center gap-6 text-sm text-slate-500"
+              className="flex items-center gap-6 text-sm"
+              style={{ color: '#6B7280' }}
             >
               {['No subscription', 'Pay per use', '4 AI models'].map((t) => (
                 <div key={t} className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                  <CheckCircle2 className="w-4 h-4" style={{ color: '#059669' }} />
                   {t}
                 </div>
               ))}
             </motion.div>
           </div>
 
-          {/* Preview */}
+          {/* Preview card */}
           <motion.div
             initial={{ opacity: 0, scale: 0.92, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -343,7 +409,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Categories ── */}
-      <section id="categories" className="py-24 bg-white">
+      <section id="categories" className="py-24" style={{ background: '#FFFFFF' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             variants={fadeUp}
@@ -352,12 +418,23 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-14"
           >
-            <p className="text-sm font-semibold text-indigo-600 uppercase tracking-widest mb-3">Capabilities</p>
-            <h2 className="text-4xl font-extrabold text-slate-900 mb-4">Everything you need, one platform</h2>
-            <p className="text-lg text-slate-500 max-w-xl mx-auto">
+            <p
+              className="text-xs font-semibold uppercase tracking-widest mb-3"
+              style={{ color: '#C4882A' }}
+            >
+              Capabilities
+            </p>
+            <h2
+              className="mb-4"
+              style={{ fontSize: '40px', fontWeight: 800, color: '#0A0D14', letterSpacing: '-0.02em' }}
+            >
+              Everything you need, one platform
+            </h2>
+            <p className="text-lg max-w-xl mx-auto" style={{ color: '#6B7280' }}>
               Four powerful AI categories, each powered by the model best suited for that job.
             </p>
           </motion.div>
+
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {CATEGORIES.map((cat, i) => (
               <motion.div
@@ -368,15 +445,26 @@ export default function LandingPage() {
                 viewport={{ once: true }}
                 custom={i * 0.1}
                 whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                className={`${cat.bg} ${cat.border} border rounded-2xl p-6 cursor-pointer group`}
+                className="bg-white rounded-2xl p-6 cursor-pointer"
+                style={{
+                  border: '1px solid #E8E5DF',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
+                }}
               >
                 <div className={`${cat.iconBg} w-12 h-12 rounded-xl flex items-center justify-center mb-4`}>
                   <span className={cat.iconColor}>{cat.icon}</span>
                 </div>
-                <h3 className="text-lg font-bold text-slate-800 mb-2">{cat.label}</h3>
-                <p className="text-sm text-slate-600 mb-4 leading-relaxed">{cat.desc}</p>
+                <h3
+                  className="mb-2"
+                  style={{ fontSize: '18px', fontWeight: 700, color: '#0A0D14' }}
+                >
+                  {cat.label}
+                </h3>
+                <p className="text-sm mb-4 leading-relaxed" style={{ color: '#374151' }}>
+                  {cat.desc}
+                </p>
                 <div className={`${cat.tag} text-xs font-medium px-2.5 py-1 rounded-full inline-block`}>
-                  Try: "{cat.example}"
+                  Try: &quot;{cat.example}&quot;
                 </div>
               </motion.div>
             ))}
@@ -385,11 +473,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── How it works ── */}
-      <section
-        id="how"
-        className="py-24"
-        style={{ background: 'linear-gradient(180deg, #f8faff 0%, #ffffff 100%)' }}
-      >
+      <section id="how" className="py-24" style={{ background: '#F7F6F3' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             variants={fadeUp}
@@ -398,13 +482,30 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <p className="text-sm font-semibold text-purple-600 uppercase tracking-widest mb-3">How it works</p>
-            <h2 className="text-4xl font-extrabold text-slate-900 mb-4">From idea to results in seconds</h2>
-            <p className="text-lg text-slate-500 max-w-xl mx-auto">No setup. No configuration. Just describe what you want.</p>
+            <p
+              className="text-xs font-semibold uppercase tracking-widest mb-3"
+              style={{ color: '#1E3461' }}
+            >
+              How it works
+            </p>
+            <h2
+              className="mb-4"
+              style={{ fontSize: '40px', fontWeight: 800, color: '#0A0D14', letterSpacing: '-0.02em' }}
+            >
+              From idea to results in seconds
+            </h2>
+            <p className="text-lg max-w-xl mx-auto" style={{ color: '#6B7280' }}>
+              No setup. No configuration. Just describe what you want.
+            </p>
           </motion.div>
+
           <div className="grid md:grid-cols-3 gap-10 relative">
             {/* Connector line */}
-            <div className="hidden md:block absolute top-8 left-[20%] right-[20%] h-0.5 bg-gradient-to-r from-indigo-200 via-purple-200 to-green-200" />
+            <div
+              className="hidden md:block absolute top-8 left-[20%] right-[20%] h-px"
+              style={{ background: 'linear-gradient(to right, #1E3461, #C4882A, #059669)' }}
+            />
+
             {STEPS.map((step, i) => (
               <motion.div
                 key={step.num}
@@ -416,14 +517,30 @@ export default function LandingPage() {
                 className="relative text-center"
               >
                 <div className="inline-flex flex-col items-center">
-                  <div className="relative w-16 h-16 bg-white border-2 border-indigo-100 rounded-2xl flex items-center justify-center shadow-sm mb-6 z-10">
+                  <div
+                    className="relative w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6 z-10"
+                    style={{
+                      border: '1px solid #E8E5DF',
+                      boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
+                    }}
+                  >
                     {step.icon}
-                    <span className="absolute -top-2 -right-2 w-6 h-6 bg-indigo-600 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                    <span
+                      className="absolute -top-2 -right-2 w-6 h-6 text-white text-xs font-bold rounded-full flex items-center justify-center"
+                      style={{ background: '#1E3461' }}
+                    >
                       {i + 1}
                     </span>
                   </div>
-                  <h3 className="text-xl font-bold text-slate-800 mb-3">{step.title}</h3>
-                  <p className="text-slate-500 leading-relaxed max-w-xs">{step.desc}</p>
+                  <h3
+                    className="mb-3"
+                    style={{ fontSize: '20px', fontWeight: 700, color: '#0A0D14' }}
+                  >
+                    {step.title}
+                  </h3>
+                  <p className="leading-relaxed max-w-xs" style={{ color: '#6B7280' }}>
+                    {step.desc}
+                  </p>
                 </div>
               </motion.div>
             ))}
@@ -432,7 +549,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Pricing ── */}
-      <section id="pricing" className="py-24 bg-white">
+      <section id="pricing" className="py-24" style={{ background: '#FFFFFF' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             variants={fadeUp}
@@ -441,9 +558,19 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-6"
           >
-            <p className="text-sm font-semibold text-indigo-600 uppercase tracking-widest mb-3">Pricing</p>
-            <h2 className="text-4xl font-extrabold text-slate-900 mb-4">Pay once, use when you want</h2>
-            <p className="text-lg text-slate-500 max-w-xl mx-auto">
+            <p
+              className="text-xs font-semibold uppercase tracking-widest mb-3"
+              style={{ color: '#C4882A' }}
+            >
+              Pricing
+            </p>
+            <h2
+              className="mb-4"
+              style={{ fontSize: '40px', fontWeight: 800, color: '#0A0D14', letterSpacing: '-0.02em' }}
+            >
+              Pay once, use when you want
+            </h2>
+            <p className="text-lg max-w-xl mx-auto" style={{ color: '#6B7280' }}>
               No monthly subscriptions. Buy credits, use them at your own pace. Credits never expire.
             </p>
           </motion.div>
@@ -454,10 +581,16 @@ export default function LandingPage() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true }}
-            className="flex items-center justify-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl px-6 py-3 mb-12 max-w-lg mx-auto"
+            className="flex items-center justify-center gap-2 rounded-xl px-6 py-3 mb-12 max-w-lg mx-auto"
+            style={{
+              background: '#FEF3C7',
+              border: '1px solid #C4882A40',
+            }}
           >
-            <Sparkles className="w-5 h-5 text-green-600" />
-            <span className="text-green-800 font-semibold">New users get 100 free credits — no card required</span>
+            <Sparkles className="w-5 h-5" style={{ color: '#C4882A' }} />
+            <span className="font-semibold" style={{ color: '#92400E' }}>
+              New users get <strong>100 free credits</strong> — no card required
+            </span>
           </motion.div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -470,31 +603,69 @@ export default function LandingPage() {
                 viewport={{ once: true }}
                 custom={i * 0.1}
                 whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                className={`relative bg-white rounded-2xl border-2 ${pack.color} p-6 ${pack.popular ? 'shadow-xl shadow-indigo-100' : 'shadow-sm'}`}
+                className="relative bg-white rounded-2xl p-6"
+                style={{
+                  border: `2px solid ${pack.popular ? '#1E3461' : '#E8E5DF'}`,
+                  boxShadow: pack.popular
+                    ? '0 4px 24px rgba(30,52,97,0.12)'
+                    : '0 1px 3px rgba(0,0,0,0.06)',
+                }}
               >
+                {/* Popular header band */}
                 {pack.popular && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold px-4 py-1 rounded-full">
+                  <div
+                    className="absolute -top-3.5 left-1/2 -translate-x-1/2 text-white text-xs font-bold px-4 py-1 rounded-full"
+                    style={{ background: '#1E3461' }}
+                  >
                     POPULAR
                   </div>
                 )}
+
                 <div className="mb-5">
-                  <p className="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">{pack.desc}</p>
-                  <h3 className="text-2xl font-extrabold text-slate-800">{pack.name}</h3>
+                  <p
+                    className="text-xs font-semibold uppercase tracking-widest mb-1"
+                    style={{ color: '#6B7280' }}
+                  >
+                    {pack.desc}
+                  </p>
+                  <h3
+                    style={{
+                      fontSize: '22px',
+                      fontWeight: 800,
+                      color: pack.popular ? '#1E3461' : '#0A0D14',
+                    }}
+                  >
+                    {pack.name}
+                  </h3>
                 </div>
+
                 <div className="mb-6">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-black text-slate-900">₹{pack.price}</span>
+                    <span
+                      style={{
+                        fontSize: '36px',
+                        fontWeight: 900,
+                        color: '#0A0D14',
+                        letterSpacing: '-0.02em',
+                      }}
+                    >
+                      ₹{pack.price}
+                    </span>
                   </div>
-                  <p className="text-slate-500 text-sm mt-1">
-                    <span className="font-bold text-slate-700">{pack.credits.toLocaleString()}</span> credits
+                  <p className="text-sm mt-1" style={{ color: '#6B7280' }}>
+                    <span className="font-bold" style={{ color: '#374151' }}>
+                      {pack.credits.toLocaleString()}
+                    </span>{' '}
+                    credits
                   </p>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>
                     ≈ ₹{(pack.price / pack.credits).toFixed(2)} per credit
                   </p>
                 </div>
+
                 <Link
                   href="/signup"
-                  className={`block w-full text-center py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${pack.btn}`}
+                  className={`block w-full text-center py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${pack.btn}`}
                 >
                   Get started
                 </Link>
@@ -507,19 +678,16 @@ export default function LandingPage() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true }}
-            className="text-center text-sm text-slate-400 mt-8"
+            className="text-center text-sm mt-8"
+            style={{ color: '#9CA3AF' }}
           >
             7-day refund on unused credit packs · Credits do not expire · No hidden fees
           </motion.p>
         </div>
       </section>
 
-      {/* ── Why Arivarangam ── */}
-      <section
-        id="why"
-        className="py-24"
-        style={{ background: 'linear-gradient(180deg, #f5f3ff 0%, #f0f4ff 100%)' }}
-      >
+      {/* ── Why Arrivarangam ── */}
+      <section id="why" className="py-24" style={{ background: '#F7F6F3' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             variants={fadeUp}
@@ -528,12 +696,20 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="text-center mb-14"
           >
-            <p className="text-sm font-semibold text-purple-600 uppercase tracking-widest mb-3">Why us</p>
-            <h2 className="text-4xl font-extrabold text-slate-900 mb-4">
+            <p
+              className="text-xs font-semibold uppercase tracking-widest mb-3"
+              style={{ color: '#1E3461' }}
+            >
+              Why us
+            </p>
+            <h2
+              className="mb-4"
+              style={{ fontSize: '40px', fontWeight: 800, color: '#0A0D14', letterSpacing: '-0.02em' }}
+            >
               20–70x cheaper than the rest
             </h2>
-            <p className="text-lg text-slate-500 max-w-xl mx-auto">
-              We built on top of the best models at cost, pass the savings to you.
+            <p className="text-lg max-w-xl mx-auto" style={{ color: '#6B7280' }}>
+              We built on top of the best models at cost and pass the savings to you.
               Our 91% margin goal means we stay sustainable — and you pay less.
             </p>
           </motion.div>
@@ -546,29 +722,55 @@ export default function LandingPage() {
             viewport={{ once: true }}
             className="overflow-x-auto mb-16"
           >
-            <table className="w-full max-w-2xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-              <thead className="bg-slate-50 border-b border-slate-100">
-                <tr>
+            <table
+              className="w-full max-w-2xl mx-auto bg-white rounded-2xl overflow-hidden"
+              style={{
+                border: '1px solid #E8E5DF',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
+              }}
+            >
+              <thead>
+                <tr style={{ background: '#F7F6F3', borderBottom: '1px solid #E8E5DF' }}>
                   {['Platform', '₹699 buys…', 'Credits', 'Verdict'].map((h) => (
-                    <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">{h}</th>
+                    <th
+                      key={h}
+                      className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-widest"
+                      style={{ color: '#6B7280' }}
+                    >
+                      {h}
+                    </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
-                {COMPETITORS.map((c) => (
+              <tbody>
+                {COMPETITORS.map((c, i) => (
                   <tr
                     key={c.name}
-                    className={c.highlight ? 'bg-indigo-50' : 'bg-white'}
+                    style={{
+                      background: c.highlight ? '#FEF3C7' : 'white',
+                      borderTop: i > 0 ? '1px solid #E8E5DF' : 'none',
+                    }}
                   >
-                    <td className={`px-5 py-4 font-semibold ${c.highlight ? 'text-indigo-700' : 'text-slate-700'}`}>
+                    <td
+                      className="px-5 py-4 font-semibold"
+                      style={{ color: c.highlight ? '#92400E' : '#374151' }}
+                    >
                       {c.name}
                       {c.highlight && (
-                        <span className="ml-2 text-xs bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full">You</span>
+                        <span
+                          className="ml-2 text-xs px-2 py-0.5 rounded-full"
+                          style={{ background: '#C4882A20', color: '#C4882A' }}
+                        >
+                          You
+                        </span>
                       )}
                     </td>
-                    <td className="px-5 py-4 text-sm text-slate-600">{c.price}</td>
-                    <td className="px-5 py-4 text-sm font-medium text-slate-700">{c.credits}</td>
-                    <td className={`px-5 py-4 text-sm font-semibold ${c.highlight ? 'text-green-600' : 'text-red-500'}`}>
+                    <td className="px-5 py-4 text-sm" style={{ color: '#374151' }}>{c.price}</td>
+                    <td className="px-5 py-4 text-sm font-medium" style={{ color: '#374151' }}>{c.credits}</td>
+                    <td
+                      className="px-5 py-4 text-sm font-semibold"
+                      style={{ color: c.highlight ? '#059669' : '#DC2626' }}
+                    >
                       {c.ratio}
                     </td>
                   </tr>
@@ -591,14 +793,25 @@ export default function LandingPage() {
                 whileInView="show"
                 viewport={{ once: true }}
                 custom={i * 0.1}
-                className="text-center bg-white rounded-2xl border border-indigo-100 shadow-sm p-6"
+                className="text-center bg-white rounded-2xl p-6"
+                style={{
+                  border: '1px solid #E8E5DF',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+                }}
               >
-                <div className="text-4xl font-black bg-clip-text text-transparent mb-2"
-                  style={{ backgroundImage: 'linear-gradient(135deg, #6366f1, #7c3aed)' }}>
+                <div
+                  className="mb-2"
+                  style={{
+                    fontSize: '36px',
+                    fontWeight: 900,
+                    color: '#1E3461',
+                    letterSpacing: '-0.02em',
+                  }}
+                >
                   {s.stat}
                 </div>
-                <div className="font-bold text-slate-800 text-lg">{s.label}</div>
-                <div className="text-sm text-slate-500 mt-1">{s.sub}</div>
+                <div className="font-bold text-lg" style={{ color: '#0A0D14' }}>{s.label}</div>
+                <div className="text-sm mt-1" style={{ color: '#6B7280' }}>{s.sub}</div>
               </motion.div>
             ))}
           </div>
@@ -606,7 +819,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── CTA banner ── */}
-      <section className="py-20 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700">
+      <section className="py-20" style={{ background: '#1E3461' }}>
         <motion.div
           variants={fadeUp}
           initial="hidden"
@@ -614,15 +827,21 @@ export default function LandingPage() {
           viewport={{ once: true }}
           className="max-w-3xl mx-auto px-4 text-center"
         >
-          <h2 className="text-4xl font-extrabold text-white mb-4">
+          <h2
+            className="mb-4 text-white"
+            style={{ fontSize: '40px', fontWeight: 800, letterSpacing: '-0.02em' }}
+          >
             Ready to build with AI?
           </h2>
-          <p className="text-indigo-200 text-lg mb-8">
-            Start with 100 free credits. No credit card required.
+          <p className="text-lg mb-8" style={{ color: 'rgba(255,255,255,0.7)' }}>
+            Start with{' '}
+            <strong style={{ color: '#C4882A' }}>100 free credits</strong>
+            . No credit card required.
           </p>
           <Link
             href="/signup"
-            className="inline-flex items-center gap-2 bg-white text-indigo-700 hover:text-indigo-800 font-bold px-8 py-3.5 rounded-xl text-lg transition-all duration-200 hover:shadow-xl"
+            className="inline-flex items-center gap-2 font-bold px-8 py-3.5 rounded-lg text-lg transition-all duration-200"
+            style={{ background: 'white', color: '#1E3461' }}
           >
             Start Building Free
             <ArrowRight className="w-5 h-5" />
@@ -631,21 +850,20 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="bg-white border-t border-slate-100 py-12">
+      <footer className="bg-white py-12" style={{ borderTop: '1px solid #E8E5DF' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">A</span>
-              </div>
-              <span className="font-bold text-slate-700">arrivarangam</span>
+            <Link href="/">
+              <Logo size={28} showText={true} />
             </Link>
-            <div className="flex items-center gap-6 text-sm text-slate-500">
-              <Link href="/terms" className="hover:text-slate-700 transition-colors">Terms</Link>
-              <Link href="/privacy" className="hover:text-slate-700 transition-colors">Privacy</Link>
-              <Link href="/login" className="hover:text-slate-700 transition-colors">Sign in</Link>
+            <div className="flex items-center gap-6 text-sm" style={{ color: '#6B7280' }}>
+              <Link href="/terms" className="hover:text-[#1E3461] transition-colors">Terms</Link>
+              <Link href="/privacy" className="hover:text-[#1E3461] transition-colors">Privacy</Link>
+              <Link href="/login" className="hover:text-[#1E3461] transition-colors">Sign in</Link>
             </div>
-            <p className="text-sm text-slate-400">© 2025 Arrivarangam. All rights reserved.</p>
+            <p className="text-sm" style={{ color: '#9CA3AF' }}>
+              © 2025 Arrivarangam. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>

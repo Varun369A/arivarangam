@@ -61,21 +61,44 @@ export default function SignupPage() {
 
   return (
     <>
-      {/* Badge */}
+      {/* Free credits badge */}
       <div className="flex justify-center mb-6">
-        <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 text-indigo-700 text-xs font-semibold px-3.5 py-1.5 rounded-full">
-          <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+        <div
+          className="inline-flex items-center gap-1.5 text-xs font-semibold px-3.5 py-1.5 rounded-full"
+          style={{
+            background: '#FEF3C7',
+            border: '1px solid #C4882A40',
+            color: '#92400E',
+          }}
+        >
+          <Sparkles className="w-3.5 h-3.5" style={{ color: '#C4882A' }} />
           100 free credits on signup!
         </div>
       </div>
 
-      <div className="text-center mb-7">
-        <h1 className="text-2xl font-bold text-slate-800 mb-1">Create your account</h1>
-        <p className="text-sm text-slate-500">Start building with AI in seconds</p>
+      {/* Heading */}
+      <div className="mb-7">
+        <h1
+          className="mb-1"
+          style={{ fontSize: '24px', fontWeight: 800, color: '#0A0D14', letterSpacing: '-0.02em' }}
+        >
+          Create your account
+        </h1>
+        <p className="text-sm" style={{ color: '#6B7280' }}>
+          Start building with AI in seconds
+        </p>
       </div>
 
+      {/* Error */}
       {error && (
-        <div className="mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
+        <div
+          className="mb-5 px-4 py-3 rounded-xl text-sm font-medium"
+          style={{
+            background: '#FEF2F2',
+            border: '1px solid #FECACA',
+            color: '#DC2626',
+          }}
+        >
           {error}
         </div>
       )}
@@ -83,7 +106,11 @@ export default function SignupPage() {
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
         {/* Name */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5" htmlFor="name">
+          <label
+            className="block text-sm font-semibold mb-1.5"
+            htmlFor="name"
+            style={{ color: '#374151' }}
+          >
             Full name
           </label>
           <input
@@ -93,16 +120,25 @@ export default function SignupPage() {
             value={form.name}
             onChange={(e) => update('name', e.target.value)}
             placeholder="Arun Kumar"
-            className={`w-full px-3.5 py-2.5 rounded-xl border text-sm text-slate-800 placeholder:text-slate-400
-              focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow
-              ${fieldErrors.name ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-white'}`}
+            className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition-shadow"
+            style={{
+              border: `1px solid ${fieldErrors.name ? '#DC2626' : '#E8E5DF'}`,
+              background: fieldErrors.name ? '#FEF2F2' : '#FFFFFF',
+              color: '#0A0D14',
+            }}
+            onFocus={e => (e.currentTarget.style.borderColor = '#1E3461')}
+            onBlur={e => (e.currentTarget.style.borderColor = fieldErrors.name ? '#DC2626' : '#E8E5DF')}
           />
-          {fieldErrors.name && <p className="mt-1 text-xs text-red-600">{fieldErrors.name}</p>}
+          {fieldErrors.name && <p className="mt-1 text-xs" style={{ color: '#DC2626' }}>{fieldErrors.name}</p>}
         </div>
 
         {/* Email */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5" htmlFor="signup-email">
+          <label
+            className="block text-sm font-semibold mb-1.5"
+            htmlFor="signup-email"
+            style={{ color: '#374151' }}
+          >
             Email address
           </label>
           <input
@@ -112,16 +148,25 @@ export default function SignupPage() {
             value={form.email}
             onChange={(e) => update('email', e.target.value)}
             placeholder="you@example.com"
-            className={`w-full px-3.5 py-2.5 rounded-xl border text-sm text-slate-800 placeholder:text-slate-400
-              focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow
-              ${fieldErrors.email ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-white'}`}
+            className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition-shadow"
+            style={{
+              border: `1px solid ${fieldErrors.email ? '#DC2626' : '#E8E5DF'}`,
+              background: fieldErrors.email ? '#FEF2F2' : '#FFFFFF',
+              color: '#0A0D14',
+            }}
+            onFocus={e => (e.currentTarget.style.borderColor = '#1E3461')}
+            onBlur={e => (e.currentTarget.style.borderColor = fieldErrors.email ? '#DC2626' : '#E8E5DF')}
           />
-          {fieldErrors.email && <p className="mt-1 text-xs text-red-600">{fieldErrors.email}</p>}
+          {fieldErrors.email && <p className="mt-1 text-xs" style={{ color: '#DC2626' }}>{fieldErrors.email}</p>}
         </div>
 
         {/* Password */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5" htmlFor="signup-pw">
+          <label
+            className="block text-sm font-semibold mb-1.5"
+            htmlFor="signup-pw"
+            style={{ color: '#374151' }}
+          >
             Password
           </label>
           <div className="relative">
@@ -132,25 +177,35 @@ export default function SignupPage() {
               value={form.password}
               onChange={(e) => update('password', e.target.value)}
               placeholder="Min. 8 characters"
-              className={`w-full px-3.5 py-2.5 pr-10 rounded-xl border text-sm text-slate-800 placeholder:text-slate-400
-                focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow
-                ${fieldErrors.password ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-white'}`}
+              className="w-full px-3.5 py-2.5 pr-10 rounded-lg text-sm outline-none transition-shadow"
+              style={{
+                border: `1px solid ${fieldErrors.password ? '#DC2626' : '#E8E5DF'}`,
+                background: fieldErrors.password ? '#FEF2F2' : '#FFFFFF',
+                color: '#0A0D14',
+              }}
+              onFocus={e => (e.currentTarget.style.borderColor = '#1E3461')}
+              onBlur={e => (e.currentTarget.style.borderColor = fieldErrors.password ? '#DC2626' : '#E8E5DF')}
             />
             <button
               type="button"
               onClick={() => setShowPw(!showPw)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+              style={{ color: '#9CA3AF' }}
               tabIndex={-1}
             >
               {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
-          {fieldErrors.password && <p className="mt-1 text-xs text-red-600">{fieldErrors.password}</p>}
+          {fieldErrors.password && <p className="mt-1 text-xs" style={{ color: '#DC2626' }}>{fieldErrors.password}</p>}
         </div>
 
         {/* Confirm Password */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5" htmlFor="signup-confirm-pw">
+          <label
+            className="block text-sm font-semibold mb-1.5"
+            htmlFor="signup-confirm-pw"
+            style={{ color: '#374151' }}
+          >
             Confirm password
           </label>
           <div className="relative">
@@ -161,21 +216,27 @@ export default function SignupPage() {
               value={form.confirmPassword}
               onChange={(e) => update('confirmPassword', e.target.value)}
               placeholder="Repeat your password"
-              className={`w-full px-3.5 py-2.5 pr-10 rounded-xl border text-sm text-slate-800 placeholder:text-slate-400
-                focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow
-                ${fieldErrors.confirmPassword ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-white'}`}
+              className="w-full px-3.5 py-2.5 pr-10 rounded-lg text-sm outline-none transition-shadow"
+              style={{
+                border: `1px solid ${fieldErrors.confirmPassword ? '#DC2626' : '#E8E5DF'}`,
+                background: fieldErrors.confirmPassword ? '#FEF2F2' : '#FFFFFF',
+                color: '#0A0D14',
+              }}
+              onFocus={e => (e.currentTarget.style.borderColor = '#1E3461')}
+              onBlur={e => (e.currentTarget.style.borderColor = fieldErrors.confirmPassword ? '#DC2626' : '#E8E5DF')}
             />
             <button
               type="button"
               onClick={() => setShowConfirmPw(!showConfirmPw)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+              style={{ color: '#9CA3AF' }}
               tabIndex={-1}
             >
               {showConfirmPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
           {fieldErrors.confirmPassword && (
-            <p className="mt-1 text-xs text-red-600">{fieldErrors.confirmPassword}</p>
+            <p className="mt-1 text-xs" style={{ color: '#DC2626' }}>{fieldErrors.confirmPassword}</p>
           )}
         </div>
 
@@ -190,29 +251,47 @@ export default function SignupPage() {
                 setTerms(e.target.checked);
                 if (fieldErrors.terms) setFieldErrors((fe) => { const copy = { ...fe }; delete copy.terms; return copy; });
               }}
-              className="w-4 h-4 mt-0.5 accent-indigo-600 rounded flex-shrink-0"
+              className="w-4 h-4 mt-0.5 rounded flex-shrink-0"
+              style={{ accentColor: '#1E3461' }}
             />
-            <label htmlFor="terms" className="text-sm text-slate-600 cursor-pointer select-none leading-relaxed">
+            <label
+              htmlFor="terms"
+              className="text-sm cursor-pointer select-none leading-relaxed"
+              style={{ color: '#6B7280' }}
+            >
               I agree to the{' '}
-              <Link href="/terms" className="text-indigo-600 hover:text-indigo-800 underline underline-offset-2" target="_blank">
+              <Link
+                href="/terms"
+                className="underline underline-offset-2 transition-colors"
+                style={{ color: '#1E3461' }}
+                target="_blank"
+              >
                 Terms of Service
               </Link>
               {' '}and{' '}
-              <Link href="/privacy" className="text-indigo-600 hover:text-indigo-800 underline underline-offset-2" target="_blank">
+              <Link
+                href="/privacy"
+                className="underline underline-offset-2 transition-colors"
+                style={{ color: '#1E3461' }}
+                target="_blank"
+              >
                 Privacy Policy
               </Link>
             </label>
           </div>
-          {fieldErrors.terms && <p className="mt-1.5 text-xs text-red-600">{fieldErrors.terms}</p>}
+          {fieldErrors.terms && (
+            <p className="mt-1.5 text-xs" style={{ color: '#DC2626' }}>{fieldErrors.terms}</p>
+          )}
         </div>
 
         {/* Submit */}
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-sm text-white
-            bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800
-            disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-md shadow-indigo-100 mt-1"
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-semibold text-sm text-white transition-all duration-200 mt-1 disabled:opacity-60 disabled:cursor-not-allowed"
+          style={{ background: '#1E3461' }}
+          onMouseEnter={e => { if (!loading) e.currentTarget.style.background = '#16284D'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = '#1E3461'; }}
         >
           {loading ? (
             <>
@@ -228,19 +307,25 @@ export default function SignupPage() {
         </button>
       </form>
 
+      {/* Divider */}
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-slate-200" />
+          <div className="w-full" style={{ borderTop: '1px solid #E8E5DF' }} />
         </div>
         <div className="relative flex justify-center">
-          <span className="px-3 bg-white text-xs text-slate-400">Already have an account?</span>
+          <span className="px-3 bg-white text-xs" style={{ color: '#9CA3AF' }}>
+            Already have an account?
+          </span>
         </div>
       </div>
 
       <Link
         href="/login"
-        className="block w-full text-center py-2.5 rounded-xl border border-slate-200 text-slate-700 font-medium text-sm
-          hover:bg-slate-50 hover:border-slate-300 transition-all duration-200"
+        className="block w-full text-center py-2.5 rounded-lg font-medium text-sm transition-all duration-200"
+        style={{
+          border: '1px solid #E8E5DF',
+          color: '#374151',
+        }}
       >
         Sign in instead
       </Link>

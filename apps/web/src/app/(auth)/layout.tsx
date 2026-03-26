@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { Logo } from '@/components/Logo'
 
 export const metadata: Metadata = {
   title: {
@@ -10,67 +11,47 @@ export const metadata: Metadata = {
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
-      {/* Pastel gradient background */}
+    <div
+      className="min-h-screen flex flex-col items-center justify-center relative"
+      style={{ background: '#FFFFFF' }}
+    >
+      {/* Dot grid background */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          background:
-            'linear-gradient(135deg, #f0e7ff 0%, #e8edff 30%, #e0eaff 55%, #dbeafe 80%, #e0f2fe 100%)',
+          backgroundImage: 'radial-gradient(#E8E5DF 1px, transparent 1px)',
+          backgroundSize: '24px 24px',
+          opacity: 0.65,
         }}
       />
 
-      {/* Decorative blobs */}
-      <div
-        className="absolute top-[-10%] left-[-5%] w-96 h-96 rounded-full opacity-30 animate-float"
-        style={{
-          background: 'radial-gradient(circle, #c4b5fd 0%, #a5b4fc 100%)',
-          filter: 'blur(60px)',
-        }}
-      />
-      <div
-        className="absolute bottom-[-10%] right-[-5%] w-80 h-80 rounded-full opacity-25 animate-float"
-        style={{
-          background: 'radial-gradient(circle, #93c5fd 0%, #6ee7b7 100%)',
-          filter: 'blur(60px)',
-          animationDelay: '2s',
-        }}
-      />
-      <div
-        className="absolute top-[40%] right-[10%] w-64 h-64 rounded-full opacity-20 animate-float"
-        style={{
-          background: 'radial-gradient(circle, #f9a8d4 0%, #c4b5fd 100%)',
-          filter: 'blur(50px)',
-          animationDelay: '4s',
-        }}
-      />
-
-      {/* Logo */}
+      {/* Logo at top */}
       <div className="relative z-10 mb-8">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-brand-purple flex items-center justify-center shadow-glow">
-            <span className="text-white font-bold text-base leading-none">A</span>
-          </div>
-          <span className="text-xl font-bold text-slate-800 group-hover:text-primary-600 transition-colors">
-            arrivarangam
-          </span>
+        <Link href="/">
+          <Logo size={32} showText={true} />
         </Link>
       </div>
 
       {/* Card */}
       <div className="relative z-10 w-full max-w-md px-4">
-        <div className="bg-white/90 backdrop-blur-md rounded-xl3 border border-white/70 shadow-xl p-8">
+        <div
+          className="bg-white rounded-2xl p-8"
+          style={{
+            border: '1px solid #E8E5DF',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
+          }}
+        >
           {children}
         </div>
       </div>
 
       {/* Footer links */}
-      <div className="relative z-10 mt-8 flex items-center gap-4 text-xs text-slate-500">
-        <Link href="/terms" className="hover:text-slate-700 transition-colors">
+      <div className="relative z-10 mt-8 flex items-center gap-4 text-xs" style={{ color: '#9CA3AF' }}>
+        <Link href="/terms" className="hover:text-[#374151] transition-colors">
           Terms
         </Link>
         <span>·</span>
-        <Link href="/privacy" className="hover:text-slate-700 transition-colors">
+        <Link href="/privacy" className="hover:text-[#374151] transition-colors">
           Privacy
         </Link>
         <span>·</span>

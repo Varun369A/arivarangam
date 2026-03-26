@@ -21,7 +21,6 @@ export default function LoginPage() {
     setError('');
     setFieldErrors({});
 
-    // Client-side validation
     const errs: Record<string, string> = {};
     if (!email.trim()) errs.email = 'Email is required.';
     if (!password) errs.password = 'Password is required.';
@@ -43,21 +42,41 @@ export default function LoginPage() {
 
   return (
     <>
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-slate-800 mb-1">Welcome back</h1>
-        <p className="text-sm text-slate-500">Sign in to your Arrivarangam account</p>
+      {/* Heading */}
+      <div className="mb-8">
+        <h1
+          className="mb-1"
+          style={{ fontSize: '24px', fontWeight: 800, color: '#0A0D14', letterSpacing: '-0.02em' }}
+        >
+          Welcome back
+        </h1>
+        <p className="text-sm" style={{ color: '#6B7280' }}>
+          Sign in to your Arrivarangam account
+        </p>
       </div>
 
+      {/* Error */}
       {error && (
-        <div className="mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
+        <div
+          className="mb-5 px-4 py-3 rounded-xl text-sm font-medium"
+          style={{
+            background: '#FEF2F2',
+            border: '1px solid #FECACA',
+            color: '#DC2626',
+          }}
+        >
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} noValidate className="space-y-4">
+      <form onSubmit={handleSubmit} noValidate className="space-y-5">
         {/* Email */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5" htmlFor="email">
+          <label
+            className="block text-sm font-semibold mb-1.5"
+            htmlFor="email"
+            style={{ color: '#374151' }}
+          >
             Email address
           </label>
           <input
@@ -67,24 +86,35 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className={`w-full px-3.5 py-2.5 rounded-xl border text-sm text-slate-800 placeholder:text-slate-400
-              focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow
-              ${fieldErrors.email ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-white'}`}
+            className="w-full px-3.5 py-2.5 rounded-lg text-sm transition-shadow outline-none"
+            style={{
+              border: `1px solid ${fieldErrors.email ? '#DC2626' : '#E8E5DF'}`,
+              background: fieldErrors.email ? '#FEF2F2' : '#FFFFFF',
+              color: '#0A0D14',
+              boxShadow: 'none',
+            }}
+            onFocus={e => (e.currentTarget.style.borderColor = '#1E3461')}
+            onBlur={e => (e.currentTarget.style.borderColor = fieldErrors.email ? '#DC2626' : '#E8E5DF')}
           />
           {fieldErrors.email && (
-            <p className="mt-1 text-xs text-red-600">{fieldErrors.email}</p>
+            <p className="mt-1 text-xs" style={{ color: '#DC2626' }}>{fieldErrors.email}</p>
           )}
         </div>
 
         {/* Password */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-sm font-medium text-slate-700" htmlFor="password">
+            <label
+              className="block text-sm font-semibold"
+              htmlFor="password"
+              style={{ color: '#374151' }}
+            >
               Password
             </label>
             <Link
               href="/forgot-password"
-              className="text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+              className="text-xs font-medium transition-colors"
+              style={{ color: '#C4882A' }}
             >
               Forgot password?
             </Link>
@@ -97,21 +127,27 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className={`w-full px-3.5 py-2.5 pr-10 rounded-xl border text-sm text-slate-800 placeholder:text-slate-400
-                focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow
-                ${fieldErrors.password ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-white'}`}
+              className="w-full px-3.5 py-2.5 pr-10 rounded-lg text-sm transition-shadow outline-none"
+              style={{
+                border: `1px solid ${fieldErrors.password ? '#DC2626' : '#E8E5DF'}`,
+                background: fieldErrors.password ? '#FEF2F2' : '#FFFFFF',
+                color: '#0A0D14',
+              }}
+              onFocus={e => (e.currentTarget.style.borderColor = '#1E3461')}
+              onBlur={e => (e.currentTarget.style.borderColor = fieldErrors.password ? '#DC2626' : '#E8E5DF')}
             />
             <button
               type="button"
               onClick={() => setShowPw(!showPw)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+              style={{ color: '#9CA3AF' }}
               tabIndex={-1}
             >
               {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
           {fieldErrors.password && (
-            <p className="mt-1 text-xs text-red-600">{fieldErrors.password}</p>
+            <p className="mt-1 text-xs" style={{ color: '#DC2626' }}>{fieldErrors.password}</p>
           )}
         </div>
 
@@ -122,9 +158,14 @@ export default function LoginPage() {
             type="checkbox"
             checked={remember}
             onChange={(e) => setRemember(e.target.checked)}
-            className="w-4 h-4 accent-indigo-600 rounded"
+            className="w-4 h-4 rounded"
+            style={{ accentColor: '#1E3461' }}
           />
-          <label htmlFor="remember" className="text-sm text-slate-600 cursor-pointer select-none">
+          <label
+            htmlFor="remember"
+            className="text-sm cursor-pointer select-none"
+            style={{ color: '#6B7280' }}
+          >
             Remember me for 30 days
           </label>
         </div>
@@ -133,9 +174,10 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-sm text-white
-            bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800
-            disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-md shadow-indigo-100 mt-2"
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-semibold text-sm text-white transition-all duration-200 mt-1 disabled:opacity-60 disabled:cursor-not-allowed"
+          style={{ background: '#1E3461' }}
+          onMouseEnter={e => { if (!loading) e.currentTarget.style.background = '#16284D'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = '#1E3461'; }}
         >
           {loading ? (
             <>
@@ -151,19 +193,25 @@ export default function LoginPage() {
         </button>
       </form>
 
+      {/* Divider */}
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-slate-200" />
+          <div className="w-full" style={{ borderTop: '1px solid #E8E5DF' }} />
         </div>
-        <div className="relative flex justify-center text-xs text-slate-400 bg-transparent">
-          <span className="px-3 bg-white">Don't have an account?</span>
+        <div className="relative flex justify-center">
+          <span className="px-3 bg-white text-xs" style={{ color: '#9CA3AF' }}>
+            Don&apos;t have an account?
+          </span>
         </div>
       </div>
 
       <Link
         href="/signup"
-        className="block w-full text-center py-2.5 rounded-xl border border-slate-200 text-slate-700 font-medium text-sm
-          hover:bg-slate-50 hover:border-slate-300 transition-all duration-200"
+        className="block w-full text-center py-2.5 rounded-lg font-medium text-sm transition-all duration-200"
+        style={{
+          border: '1px solid #E8E5DF',
+          color: '#374151',
+        }}
       >
         Create a free account
       </Link>

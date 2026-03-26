@@ -34,15 +34,14 @@ export const metadata: Metadata = {
     description: 'Build faster with AI agents that understand your codebase.',
   },
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon-16x16.png',
-    apple: '/apple-touch-icon.png',
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
   },
   viewport: {
     width: 'device-width',
     initialScale: 1,
   },
-  themeColor: '#6366F1',
+  themeColor: '#1E3461',
   colorScheme: 'light',
 }
 

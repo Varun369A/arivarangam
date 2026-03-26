@@ -6,19 +6,43 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <article className="[&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-1.5 [&_li]:text-slate-600 [&_li]:leading-relaxed [&_p]:leading-relaxed [&_strong]:font-semibold [&_strong]:text-slate-700 [&_a]:text-indigo-600 [&_a:hover]:text-indigo-800 [&_h3]:font-semibold [&_h3]:text-slate-700">
+    <article
+      style={{
+        ['--link-color' as string]: '#1E3461',
+        ['--link-hover' as string]: '#16284D',
+      }}
+      className="[&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-1.5 [&_li]:leading-relaxed [&_p]:leading-relaxed [&_strong]:font-semibold [&_a]:underline [&_a]:underline-offset-2"
+    >
       {/* Header */}
-      <div className="not-prose mb-10">
-        <div className="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
-          Legal
+      <div className="not-prose mb-12">
+        <div
+          className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full mb-5"
+          style={{
+            background: '#FEF3C7',
+            border: '1px solid #C4882A40',
+            color: '#C4882A',
+          }}
+        >
+          Legal Document
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3">Terms of Service</h1>
-        <p className="text-slate-500 text-sm">
+        <h1
+          className="mb-3"
+          style={{
+            fontSize: '40px',
+            fontWeight: 800,
+            color: '#0A0D14',
+            letterSpacing: '-0.02em',
+            lineHeight: 1.15,
+          }}
+        >
+          Terms of Service
+        </h1>
+        <p className="text-sm" style={{ color: '#6B7280' }}>
           Effective date: 1 January 2025 · Last updated: 26 March 2025
         </p>
       </div>
 
-      <p className="text-[15px] text-slate-600 leading-relaxed mb-8">
+      <p className="mb-8" style={{ fontSize: '15px', color: '#374151', lineHeight: 1.7 }}>
         These Terms of Service (&quot;Terms&quot;) govern your access to and use of the Arrivarangam platform
         (&quot;Platform&quot;, &quot;we&quot;, &quot;us&quot; or &quot;our&quot;). By creating an account or using the Platform you agree to
         be bound by these Terms. If you do not agree, please do not use the Platform.
@@ -42,7 +66,7 @@ export default function TermsPage() {
           You must be at least 13 years old (or the age of digital consent in your jurisdiction) to use the
           Platform. You are responsible for maintaining the confidentiality of your account credentials.
           You must notify us immediately at{' '}
-          <a href="mailto:support@arivarangam.com" className="text-indigo-600 hover:text-indigo-800">
+          <a href="mailto:support@arivarangam.com" style={{ color: '#1E3461' }}>
             support@arivarangam.com
           </a>{' '}
           of any unauthorised access to your account.
@@ -55,48 +79,48 @@ export default function TermsPage() {
 
       <Section title="3. Credit System">
         <ul>
-          <li>
-            <strong>Free credits:</strong> New users receive 100 complimentary credits upon account
+          <li style={{ color: '#374151' }}>
+            <strong style={{ color: '#0A0D14' }}>Free credits:</strong> New users receive 100 complimentary credits upon account
             creation. These credits do not expire but may not be transferred or redeemed for cash.
           </li>
-          <li>
-            <strong>Paid credits:</strong> Credits purchased via credit packs are valid indefinitely and
+          <li style={{ color: '#374151' }}>
+            <strong style={{ color: '#0A0D14' }}>Paid credits:</strong> Credits purchased via credit packs are valid indefinitely and
             do not expire. Credits are deducted when a task is completed. If a task fails, credits are
             either not deducted or refunded to your balance.
           </li>
-          <li>
-            <strong>Refund policy:</strong> Unused credit packs (where no credits have been consumed)
-            are eligible for a full refund within <strong>7 days</strong> of purchase. Once any credits
+          <li style={{ color: '#374151' }}>
+            <strong style={{ color: '#0A0D14' }}>Refund policy:</strong> Unused credit packs (where no credits have been consumed)
+            are eligible for a full refund within <strong style={{ color: '#0A0D14' }}>7 days</strong> of purchase. Once any credits
             from a pack have been used, the pack is non-refundable. We do not offer partial refunds on
             partially used credit balances.
           </li>
-          <li>
-            <strong>Credit transfers:</strong> Credits cannot be transferred between accounts under any
+          <li style={{ color: '#374151' }}>
+            <strong style={{ color: '#0A0D14' }}>Credit transfers:</strong> Credits cannot be transferred between accounts under any
             circumstances.
           </li>
-          <li>
-            <strong>Pricing:</strong> We reserve the right to change credit pricing at any time.
+          <li style={{ color: '#374151' }}>
+            <strong style={{ color: '#0A0D14' }}>Pricing:</strong> We reserve the right to change credit pricing at any time.
             Pre-purchased credits will always be honoured at the rate they were purchased.
           </li>
         </ul>
       </Section>
 
       <Section title="4. Acceptable Use">
-        <p>You agree <strong>not</strong> to use the Platform to:</p>
+        <p>You agree <strong style={{ color: '#0A0D14' }}>not</strong> to use the Platform to:</p>
         <ul>
-          <li>Generate, distribute or facilitate illegal content of any kind.</li>
-          <li>Create content that infringes third-party intellectual property rights.</li>
-          <li>Produce harmful, abusive, defamatory, obscene or harassing content.</li>
-          <li>Attempt to generate malware, exploit code, or other malicious software.</li>
-          <li>
+          <li style={{ color: '#374151' }}>Generate, distribute or facilitate illegal content of any kind.</li>
+          <li style={{ color: '#374151' }}>Create content that infringes third-party intellectual property rights.</li>
+          <li style={{ color: '#374151' }}>Produce harmful, abusive, defamatory, obscene or harassing content.</li>
+          <li style={{ color: '#374151' }}>Attempt to generate malware, exploit code, or other malicious software.</li>
+          <li style={{ color: '#374151' }}>
             Reverse-engineer, scrape, or abuse the Platform&apos;s APIs beyond your personal
             authorised usage.
           </li>
-          <li>
+          <li style={{ color: '#374151' }}>
             Resell or sublicense access to the Platform without our express written consent.
           </li>
-          <li>Circumvent rate limits, access controls, or any security measures.</li>
-          <li>
+          <li style={{ color: '#374151' }}>Circumvent rate limits, access controls, or any security measures.</li>
+          <li style={{ color: '#374151' }}>
             Engage in bulk automated usage that degrades service quality for other users.
           </li>
         </ul>
@@ -139,14 +163,14 @@ export default function TermsPage() {
       <Section title="7. Account Termination">
         <p>We may suspend or terminate your account at our sole discretion if you:</p>
         <ul>
-          <li>Violate these Terms or our Acceptable Use Policy.</li>
-          <li>Engage in fraud, chargebacks, or payment disputes made in bad faith.</li>
-          <li>Attempt to harm other users or the Platform infrastructure.</li>
-          <li>Remain inactive for more than 24 months (you will be notified first).</li>
+          <li style={{ color: '#374151' }}>Violate these Terms or our Acceptable Use Policy.</li>
+          <li style={{ color: '#374151' }}>Engage in fraud, chargebacks, or payment disputes made in bad faith.</li>
+          <li style={{ color: '#374151' }}>Attempt to harm other users or the Platform infrastructure.</li>
+          <li style={{ color: '#374151' }}>Remain inactive for more than 24 months (you will be notified first).</li>
         </ul>
         <p>
           You may terminate your account at any time by contacting{' '}
-          <a href="mailto:support@arivarangam.com" className="text-indigo-600 hover:text-indigo-800">
+          <a href="mailto:support@arivarangam.com" style={{ color: '#1E3461' }}>
             support@arivarangam.com
           </a>
           . Upon termination, unused credits are subject to the refund policy in Section 3.
@@ -180,13 +204,13 @@ export default function TermsPage() {
 
       <Section title="10. Governing Law & Dispute Resolution">
         <p>
-          These Terms are governed by the laws of <strong>India</strong>, without regard to conflict
+          These Terms are governed by the laws of <strong style={{ color: '#0A0D14' }}>India</strong>, without regard to conflict
           of law principles. Any disputes shall be subject to the exclusive jurisdiction of courts
           in Chennai, Tamil Nadu, India.
         </p>
         <p>
           For minor disputes, we encourage you to first contact us at{' '}
-          <a href="mailto:legal@arivarangam.com" className="text-indigo-600 hover:text-indigo-800">
+          <a href="mailto:legal@arivarangam.com" style={{ color: '#1E3461' }}>
             legal@arivarangam.com
           </a>{' '}
           so we can resolve the matter amicably.
@@ -205,7 +229,7 @@ export default function TermsPage() {
       <Section title="12. Contact">
         <p>
           For questions about these Terms, please contact us at{' '}
-          <a href="mailto:legal@arivarangam.com" className="text-indigo-600 hover:text-indigo-800">
+          <a href="mailto:legal@arivarangam.com" style={{ color: '#1E3461' }}>
             legal@arivarangam.com
           </a>
           .
@@ -218,8 +242,20 @@ export default function TermsPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mb-10">
-      <h2 className="text-xl font-bold text-slate-800 mb-3 pb-2 border-b border-slate-100">{title}</h2>
-      <div className="space-y-3 text-slate-600 leading-relaxed text-[15px]">{children}</div>
+      <h2
+        className="mb-3 pb-2"
+        style={{
+          fontSize: '18px',
+          fontWeight: 700,
+          color: '#0A0D14',
+          borderBottom: '1px solid #E8E5DF',
+        }}
+      >
+        {title}
+      </h2>
+      <div className="space-y-3" style={{ color: '#374151', lineHeight: 1.7, fontSize: '15px' }}>
+        {children}
+      </div>
     </section>
   );
 }
