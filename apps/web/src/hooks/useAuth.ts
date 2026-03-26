@@ -54,16 +54,17 @@ export function useAuth(): UseAuthReturn {
   const login = useCallback(
     async (payload: AuthLoginPayload) => {
       try {
-        const data = await authApi.login(payload)
+        const res = await authApi.login(payload)
+        const { token, user } = res.data
         // Store token in cookie (7-day expiry, accessible across client)
-        Cookies.set('accessToken', data.accessToken, {
+        Cookies.set('accessToken', token, {
           expires: 7,
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'Lax',
         })
         // Populate query cache immediately
-        queryClient.setQueryData<User>(AUTH_QUERY_KEY, data.user)
-        toast.success(`Welcome back, ${data.user.name.split(' ')[0]}!`)
+        queryClient.setQueryData<User>(AUTH_QUERY_KEY, user)
+        toast.success(`Welcome back, ${user.name.split(' ')[0]}!`)
         router.push('/dashboard')
       } catch (err) {
         throw new Error(getApiError(err))
@@ -75,14 +76,15 @@ export function useAuth(): UseAuthReturn {
   const signup = useCallback(
     async (payload: AuthSignupPayload) => {
       try {
-        const data = await authApi.signup(payload)
-        Cookies.set('accessToken', data.accessToken, {
+        const res = await authApi.signup(payload)
+        const { token, user } = res.data
+        Cookies.set('accessToken', token, {
           expires: 7,
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'Lax',
         })
-        queryClient.setQueryData<User>(AUTH_QUERY_KEY, data.user)
-        toast.success(`Account created! Welcome, ${data.user.name.split(' ')[0]}!`)
+        queryClient.setQueryData<User>(AUTH_QUERY_KEY, user)
+        toast.success(`Account created! Welcome, ${user.name.split(' ')[0]}!`)
         router.push('/dashboard')
       } catch (err) {
         throw new Error(getApiError(err))

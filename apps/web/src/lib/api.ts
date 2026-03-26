@@ -68,8 +68,11 @@ export interface User {
 }
 
 export interface AuthResponse {
-  accessToken: string
-  user: User
+  success: boolean
+  data: {
+    token: string
+    user: User
+  }
 }
 
 export interface TaskCreatePayload {
