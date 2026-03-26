@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['@arrivarangam/types', '@arrivarangam/config'],
+  transpilePackages: ['@arivarangam/types', '@arivarangam/config'],
   images: {
     domains: ['avatars.githubusercontent.com', 'oaidalleapiprodscus.blob.core.windows.net'],
   },

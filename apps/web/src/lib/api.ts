@@ -205,7 +205,10 @@ export const authApi = {
 
   logout: () => api.post<void>('/auth/logout').then((r) => r.data),
 
-  me: () => api.get<User>('/auth/me').then((r) => r.data),
+  me: () =>
+    api
+      .get<{ success: boolean; data: { user: User } }>('/auth/me')
+      .then((r) => r.data.data.user),
 
   adminOtpSend: (payload: AuthLoginPayload) =>
     api.post<{ success: boolean; data: { message: string } }>('/auth/admin-otp-send', payload).then((r) => r.data),
@@ -225,7 +228,9 @@ export const authApi = {
     api.post<{ message: string }>('/auth/verify-email', { token }).then((r) => r.data),
 
   updateProfile: (data: { name?: string }) =>
-    api.patch<User>('/auth/me', data).then((r) => r.data),
+    api
+      .patch<{ success: boolean; data: { user: User } }>('/auth/me', data)
+      .then((r) => r.data.data.user),
 
   changePassword: (oldPassword: string, newPassword: string) =>
     api

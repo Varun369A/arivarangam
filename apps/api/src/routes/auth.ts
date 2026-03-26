@@ -363,6 +363,57 @@ export async function authRoutes(fastify: FastifyInstance): Promise<void> {
     });
   });
 
+  // PATCH /me
+  fastify.patch('/me', { preHandler: requireAuth }, async (request: FastifyRequest, reply: FastifyReply) => {
+    const user = (request as any).user;
+    const schema = z.object({
+      name: z.string().min(2).max(100).optional(),
+    });
+
+    const parseResult = schema.safeParse(request.body);
+    if (!parseResult.success) {
+      return reply.code(400).send({ success: false, error: 'Validation failed' });
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: user.id },
+      data: parseResult.data,
+      select: {
+        id: true, name: true, email: true, tier: true, credits: true,
+        isAdmin: true, isEmailVerified: true, avatar: true,
+      },
+    });
+
+    return reply.send({ success: true, data: { user: updated } });
+  });
+
+  // POST /me/change-password
+  fastify.post('/me/change-password', { preHandler: requireAuth }, async (request: FastifyRequest, reply: FastifyReply) => {
+    const user = (request as any).user;
+    const schema = z.object({
+      oldPassword: z.string().min(1),
+      newPassword: z.string().min(8).max(128),
+    });
+
+    const parseResult = schema.safeParse(request.body);
+    if (!parseResult.success) {
+      return reply.code(400).send({ success: false, error: 'Validation failed' });
+    }
+
+    const { oldPassword, newPassword } = parseResult.data;
+
+    const fullUser = await prisma.user.findUnique({ where: { id: user.id } });
+    if (!fullUser) return reply.code(404).send({ success: false, error: 'User not found' });
+
+    const valid = await bcrypt.compare(oldPassword, fullUser.password);
+    if (!valid) return reply.code(401).send({ success: false, error: 'Current password is incorrect' });
+
+    const hashed = await bcrypt.hash(newPassword, 12);
+    await prisma.user.update({ where: { id: user.id }, data: { password: hashed } });
+
+    return reply.send({ success: true, data: { message: 'Password changed successfully.' } });
+  });
+
   // ─── POST /admin-otp-send ──────────────────────────────────────────────────
   // Step 1 of admin 2FA: validate credentials, generate & store OTP
 
