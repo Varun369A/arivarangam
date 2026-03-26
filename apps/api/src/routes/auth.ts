@@ -5,6 +5,7 @@ import { prisma } from '@arrivarangam/db';
 import { requireAuth } from '../middleware/auth';
 import { creditService } from '../services/CreditService';
 import { getConfig } from '@arrivarangam/config';
+import { getRedis } from '../redis';
 
 // ─── Schemas ───────────────────────────────────────────────────────────────────
 
@@ -359,6 +360,102 @@ export async function authRoutes(fastify: FastifyInstance): Promise<void> {
     return reply.send({
       success: true,
       data: { message: 'Email verified successfully!' },
+    });
+  });
+
+  // ─── POST /admin-otp-send ──────────────────────────────────────────────────
+  // Step 1 of admin 2FA: validate credentials, generate & store OTP
+
+  fastify.post('/admin-otp-send', async (request: FastifyRequest, reply: FastifyReply) => {
+    const parseResult = loginSchema.safeParse(request.body);
+    if (!parseResult.success) {
+      return reply.code(400).send({ success: false, error: 'Invalid email or password' });
+    }
+
+    const { email, password } = parseResult.data;
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    const authError = { success: false, error: 'Invalid credentials', code: 'INVALID_CREDENTIALS' };
+
+    if (!user || user.status !== 'ACTIVE') return reply.code(401).send(authError);
+    if (!user.isAdmin) return reply.code(403).send({ success: false, error: 'Admin access required', code: 'NOT_ADMIN' });
+
+    const passwordValid = await bcrypt.compare(password, user.password);
+    if (!passwordValid) return reply.code(401).send(authError);
+
+    // Generate 6-digit OTP
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const redis = getRedis();
+    const otpKey = `admin:otp:${normalizedEmail}`;
+
+    // Store OTP with 5-minute TTL
+    await redis.set(otpKey, otp, 'EX', 300);
+
+    // Stub: log OTP (replace with real email sending)
+    console.log(`[Admin 2FA] OTP for ${normalizedEmail}: ${otp}`);
+    console.log(`[Admin 2FA] OTP expires in 5 minutes`);
+
+    return reply.send({
+      success: true,
+      data: { message: `OTP sent to ${normalizedEmail.replace(/(.{2}).*@/, '$1***@')}` },
+    });
+  });
+
+  // ─── POST /admin-otp-verify ────────────────────────────────────────────────
+  // Step 2 of admin 2FA: verify OTP and return JWT
+
+  fastify.post('/admin-otp-verify', async (request: FastifyRequest, reply: FastifyReply) => {
+    const schema = z.object({
+      email: z.string().email(),
+      otp: z.string().length(6, 'OTP must be 6 digits'),
+    });
+
+    const parseResult = schema.safeParse(request.body);
+    if (!parseResult.success) {
+      return reply.code(400).send({ success: false, error: 'Invalid request' });
+    }
+
+    const { email, otp } = parseResult.data;
+    const normalizedEmail = email.toLowerCase().trim();
+    const redis = getRedis();
+    const otpKey = `admin:otp:${normalizedEmail}`;
+
+    const storedOtp = await redis.get(otpKey);
+
+    if (!storedOtp) {
+      return reply.code(400).send({ success: false, error: 'OTP expired or not requested. Please start again.', code: 'OTP_EXPIRED' });
+    }
+
+    if (storedOtp !== otp) {
+      return reply.code(401).send({ success: false, error: 'Invalid OTP. Please check and try again.', code: 'INVALID_OTP' });
+    }
+
+    // OTP valid — delete it (single use)
+    await redis.del(otpKey);
+
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    if (!user || !user.isAdmin) {
+      return reply.code(403).send({ success: false, error: 'Admin access required' });
+    }
+
+    const token = signJWT(fastify, user);
+    setCookieToken(reply, token);
+
+    return reply.send({
+      success: true,
+      data: {
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          tier: user.tier,
+          credits: user.credits,
+          isAdmin: user.isAdmin,
+          isEmailVerified: user.isEmailVerified,
+        },
+      },
     });
   });
 }

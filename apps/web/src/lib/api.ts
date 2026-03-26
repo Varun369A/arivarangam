@@ -207,6 +207,12 @@ export const authApi = {
 
   me: () => api.get<User>('/auth/me').then((r) => r.data),
 
+  adminOtpSend: (payload: AuthLoginPayload) =>
+    api.post<{ success: boolean; data: { message: string } }>('/auth/admin-otp-send', payload).then((r) => r.data),
+
+  adminOtpVerify: (payload: { email: string; otp: string }) =>
+    api.post<AuthResponse>('/auth/admin-otp-verify', payload).then((r) => r.data),
+
   forgotPassword: (email: string) =>
     api.post<{ message: string }>('/auth/forgot-password', { email }).then((r) => r.data),
 
