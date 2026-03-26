@@ -47,7 +47,7 @@ function EventRow({ event }: { event: TaskEvent }) {
   };
 
   const cfg: EventCfg = cfgMap[event.type] ?? { icon: '·', iconCls: 'text-slate-400', textCls: 'text-slate-500' };
-  const d = event.data ?? {};
+  const d = (event.data ?? {}) as any;
 
   const content = () => {
     switch (event.type) {
