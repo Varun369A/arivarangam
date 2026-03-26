@@ -67,7 +67,7 @@ export function MainNavbar() {
               <span className="text-white font-bold text-sm leading-none">A</span>
             </div>
             <span className="text-lg font-bold text-slate-800 hidden sm:block group-hover:text-primary-600 transition-colors">
-              arrivarangam
+              arivarangam
             </span>
           </Link>
 

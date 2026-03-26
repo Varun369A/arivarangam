@@ -4,7 +4,7 @@ import { MainNavbar } from '@/components/MainNavbar'
 export const metadata: Metadata = {
   title: {
     default: 'Dashboard',
-    template: '%s | Arrivarangam',
+    template: '%s | Arivarangam',
   },
 }
 

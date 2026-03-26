@@ -37,9 +37,9 @@ export default function PrivacyPage() {
       </div>
 
       <p className="mb-8" style={{ fontSize: '15px', color: '#374151', lineHeight: 1.7 }}>
-        Arrivarangam (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) is committed to protecting your privacy. This Privacy Policy
+        Arivarangam (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) is committed to protecting your privacy. This Privacy Policy
         explains how we collect, use, store, and share your personal information when you use our
-        platform. By using Arrivarangam, you agree to the practices described here.
+        platform. By using Arivarangam, you agree to the practices described here.
       </p>
 
       <Section title="1. Information We Collect">

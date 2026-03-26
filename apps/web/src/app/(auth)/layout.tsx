@@ -5,7 +5,7 @@ import { Logo } from '@/components/Logo'
 export const metadata: Metadata = {
   title: {
     default: 'Sign In',
-    template: '%s | Arrivarangam',
+    template: '%s | Arivarangam',
   },
 }
 
@@ -55,7 +55,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           Privacy
         </Link>
         <span>·</span>
-        <span>© 2025 Arrivarangam</span>
+        <span>© 2025 Arivarangam</span>
       </div>
     </div>
   )

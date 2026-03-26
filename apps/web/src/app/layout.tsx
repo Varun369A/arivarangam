@@ -11,26 +11,26 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Arrivarangam — AI-Powered Development Platform',
-    template: '%s | Arrivarangam',
+    default: 'Arivarangam — AI-Powered Development Platform',
+    template: '%s | Arivarangam',
   },
   description:
-    'Arrivarangam is an AI-powered platform that helps you build, manage, and deploy code with intelligent agents.',
+    'Arivarangam is an AI-powered platform that helps you build, manage, and deploy code with intelligent agents.',
   keywords: ['AI', 'code generation', 'development', 'automation', 'agents'],
-  authors: [{ name: 'Arrivarangam' }],
-  creator: 'Arrivarangam',
+  authors: [{ name: 'Arivarangam' }],
+  creator: 'Arivarangam',
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   openGraph: {
     type: 'website',
     locale: 'en_IN',
     url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-    title: 'Arrivarangam — AI-Powered Development Platform',
+    title: 'Arivarangam — AI-Powered Development Platform',
     description: 'Build faster with AI agents that understand your codebase.',
-    siteName: 'Arrivarangam',
+    siteName: 'Arivarangam',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Arrivarangam',
+    title: 'Arivarangam',
     description: 'Build faster with AI agents that understand your codebase.',
   },
   icons: {

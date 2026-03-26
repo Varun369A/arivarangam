@@ -4,7 +4,7 @@ import { AdminSidebar } from '@/components/AdminSidebar'
 export const metadata: Metadata = {
   title: {
     default: 'Admin Panel',
-    template: '%s | Admin | Arrivarangam',
+    template: '%s | Admin | Arivarangam',
   },
 }
 

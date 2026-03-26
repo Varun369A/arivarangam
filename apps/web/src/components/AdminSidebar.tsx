@@ -36,7 +36,7 @@ export function AdminSidebar() {
           <p className="text-xs font-bold text-primary-700 tracking-wide uppercase leading-none">
             Admin
           </p>
-          <p className="text-[10px] text-slate-400 leading-tight">arrivarangam</p>
+          <p className="text-[10px] text-slate-400 leading-tight">arivarangam</p>
         </div>
       </div>
 

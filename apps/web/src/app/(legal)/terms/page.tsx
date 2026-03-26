@@ -43,14 +43,14 @@ export default function TermsPage() {
       </div>
 
       <p className="mb-8" style={{ fontSize: '15px', color: '#374151', lineHeight: 1.7 }}>
-        These Terms of Service (&quot;Terms&quot;) govern your access to and use of the Arrivarangam platform
+        These Terms of Service (&quot;Terms&quot;) govern your access to and use of the Arivarangam platform
         (&quot;Platform&quot;, &quot;we&quot;, &quot;us&quot; or &quot;our&quot;). By creating an account or using the Platform you agree to
         be bound by these Terms. If you do not agree, please do not use the Platform.
       </p>
 
       <Section title="1. Service Description">
         <p>
-          Arrivarangam is an AI-powered platform that enables users to run tasks including code generation,
+          Arivarangam is an AI-powered platform that enables users to run tasks including code generation,
           research, image generation, and voice synthesis. Tasks are executed by AI models selected by our
           orchestration system based on category and context. Results are delivered asynchronously and made
           available through the user dashboard.
@@ -179,7 +179,7 @@ export default function TermsPage() {
 
       <Section title="8. Limitation of Liability">
         <p>
-          To the maximum extent permitted by applicable law, Arrivarangam and its officers, employees,
+          To the maximum extent permitted by applicable law, Arivarangam and its officers, employees,
           and agents shall not be liable for any indirect, incidental, special, consequential, or
           punitive damages, or any loss of profits or data, arising from your use of or inability to
           use the Platform.

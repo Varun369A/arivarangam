@@ -18,7 +18,7 @@ export function Logo({
         viewBox="0 0 32 32"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        aria-label="Arrivarangam"
+        aria-label="Arivarangam"
       >
         <defs>
           <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
@@ -48,7 +48,7 @@ export function Logo({
             inverted ? 'text-white' : 'text-[#0A0D14]'
           }`}
         >
-          arrivarangam
+          arivarangam
         </span>
       )}
     </div>

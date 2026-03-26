@@ -478,7 +478,7 @@ function BillingTab() {
         key: order.keyId,
         amount: order.amount,
         currency: order.currency,
-        name: 'Arrivarangam',
+        name: 'Arivarangam',
         description: `${pack.name} — ${pack.credits.toLocaleString('en-IN')} credits`,
         order_id: order.orderId,
         prefill: {},
@@ -634,7 +634,7 @@ function ApiKeysTab() {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-bold text-slate-800 mb-1">API Keys</h2>
-        <p className="text-sm text-slate-500">Programmatic access to Arrivarangam.</p>
+        <p className="text-sm text-slate-500">Programmatic access to Arivarangam.</p>
       </div>
 
       <div className="bg-gradient-to-br from-slate-50 to-indigo-50 border border-indigo-100 rounded-2xl p-10 text-center max-w-md">
@@ -643,7 +643,7 @@ function ApiKeysTab() {
         </div>
         <h3 className="text-lg font-bold text-slate-700 mb-2">Coming soon</h3>
         <p className="text-sm text-slate-500 leading-relaxed">
-          API key management will let you integrate Arrivarangam into your own workflows and pipelines.
+          API key management will let you integrate Arivarangam into your own workflows and pipelines.
           We&apos;re working on it — stay tuned!
         </p>
       </div>

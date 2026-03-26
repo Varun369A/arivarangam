@@ -51,7 +51,7 @@ export default function LoginPage() {
           Welcome back
         </h1>
         <p className="text-sm" style={{ color: '#6B7280' }}>
-          Sign in to your Arrivarangam account
+          Sign in to your Arivarangam account
         </p>
       </div>
 

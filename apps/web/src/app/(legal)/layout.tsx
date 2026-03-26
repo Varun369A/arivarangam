@@ -5,7 +5,7 @@ import { Logo } from '@/components/Logo';
 export const metadata: Metadata = {
   title: {
     default: 'Legal',
-    template: '%s | Arrivarangam',
+    template: '%s | Arivarangam',
   },
 };
 
@@ -39,7 +39,7 @@ export default function LegalLayout({ children }: { children: React.ReactNode })
       {/* Footer */}
       <footer className="mt-12 py-8" style={{ borderTop: '1px solid #E8E5DF' }}>
         <div className="max-w-3xl mx-auto px-4 text-center text-xs" style={{ color: '#9CA3AF' }}>
-          © 2025 Arrivarangam · All rights reserved ·{' '}
+          © 2025 Arivarangam · All rights reserved ·{' '}
           <a
             href="mailto:legal@arivarangam.com"
             className="transition-colors"

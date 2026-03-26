@@ -686,7 +686,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Why Arrivarangam ── */}
+      {/* ── Why Arivarangam ── */}
       <section id="why" className="py-24" style={{ background: '#F7F6F3' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -862,7 +862,7 @@ export default function LandingPage() {
               <Link href="/login" className="hover:text-[#1E3461] transition-colors">Sign in</Link>
             </div>
             <p className="text-sm" style={{ color: '#9CA3AF' }}>
-              © 2025 Arrivarangam. All rights reserved.
+              © 2025 Arivarangam. All rights reserved.
             </p>
           </div>
         </div>
