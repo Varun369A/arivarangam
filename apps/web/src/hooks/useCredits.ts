@@ -17,7 +17,7 @@ export const ESTIMATE_QUERY_KEY = (prompt: string, category: string) =>
 // ---------------------------------------------------------------------------
 
 export interface UseCreditsReturn {
-  balance: number | undefined
+  balance: number | null
   isLoading: boolean
   error: string | null
   refresh: () => void
@@ -41,7 +41,7 @@ export function useCredits(): UseCreditsReturn {
   )
 
   return {
-    balance: data?.balance,
+    balance: data?.balance ?? null,
     isLoading,
     error: error ? 'Failed to load credits' : null,
     refresh: () => {

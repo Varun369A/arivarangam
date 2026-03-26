@@ -120,7 +120,6 @@ model User {
   tasks             Task[]
   repos             Repo[]
   transactions      CreditTransaction[]
-  creditLogs        CreditTransaction[]  @relation("CreditLogs")
   securityEvents    SecurityEvent[]
 
   @@index([email])
@@ -240,7 +239,6 @@ model CreditTransaction {
 
   // Relations
   user                 User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userCreditLog        User?                   @relation("CreditLogs", fields: [userId], references: [id])
 
   @@index([userId])
   @@index([type])
