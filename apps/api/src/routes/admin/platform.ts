@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
-import { prisma } from '@arrivarangam/db';
+import { prisma } from '@arivarangam/db';
 import { getRedis } from '../../redis';
 import { callClaudeHaiku } from '../../connectors/claude';
 import { pingOpenAI } from '../../connectors/openai';

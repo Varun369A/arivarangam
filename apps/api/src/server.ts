@@ -9,7 +9,7 @@ import FastifyJWT from '@fastify/jwt';
 import FastifyRateLimit from '@fastify/rate-limit';
 import cron from 'node-cron';
 
-import { getConfig } from '@arrivarangam/config';
+import { getConfig } from '@arivarangam/config';
 
 import { authRoutes } from './routes/auth';
 import { taskRoutes } from './routes/tasks';
@@ -22,7 +22,7 @@ import { adminRoutes } from './routes/admin/index';
 import { PlatformMonitor } from './platform/Monitor';
 import { SelfImprove } from './platform/SelfImprove';
 import { closeRedis } from './redis';
-import { prisma } from '@arrivarangam/db';
+import { prisma } from '@arivarangam/db';
 
 // ─── Build Server ─────────────────────────────────────────────────────────────
 

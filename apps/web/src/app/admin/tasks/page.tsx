@@ -18,7 +18,7 @@ import { useQuery, useQueryClient } from 'react-query';
 import toast from 'react-hot-toast';
 import api, { getApiError } from '@/lib/api';
 import { cn, formatDateTime, formatDate, formatCredits } from '@/lib/utils';
-import type { TaskCategory, TaskStatus, StoredTaskEvent } from '@arrivarangam/types';
+import type { TaskCategory, TaskStatus, StoredTaskEvent } from '@arivarangam/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

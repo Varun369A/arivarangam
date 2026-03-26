@@ -15,7 +15,7 @@ import { useQuery, useQueryClient } from 'react-query';
 import toast from 'react-hot-toast';
 import api, { getApiError } from '@/lib/api';
 import { cn, formatDateTime } from '@/lib/utils';
-import type { SecurityEvent, SecurityEventSeverity, SecurityEventType } from '@arrivarangam/types';
+import type { SecurityEvent, SecurityEventSeverity, SecurityEventType } from '@arivarangam/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

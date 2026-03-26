@@ -13,7 +13,7 @@ import {
 import { useQuery } from 'react-query';
 import api from '@/lib/api';
 import { cn, formatINR, formatDateTime, formatCredits } from '@/lib/utils';
-import type { CreditTransactionType, CreditTransactionStatus, AdminRevenueStats } from '@arrivarangam/types';
+import type { CreditTransactionType, CreditTransactionStatus, AdminRevenueStats } from '@arivarangam/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

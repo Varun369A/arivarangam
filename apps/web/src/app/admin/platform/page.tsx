@@ -21,7 +21,7 @@ import type {
   PlatformLogType,
   PlatformLogSeverity,
   ModelPerformance,
-} from '@arrivarangam/types';
+} from '@arivarangam/types';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-import { getConfig } from '@arrivarangam/config';
+import { getConfig } from '@arivarangam/config';
 
 let _redis: Redis | null = null;
 

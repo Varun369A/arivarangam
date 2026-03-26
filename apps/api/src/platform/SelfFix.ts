@@ -5,7 +5,7 @@
  * After approval it applies the patch automatically.
  */
 
-import { prisma } from '@arrivarangam/db'
+import { prisma } from '@arivarangam/db'
 import { callClaude } from '../connectors/claude'
 import * as fs from 'fs'
 import * as path from 'path'

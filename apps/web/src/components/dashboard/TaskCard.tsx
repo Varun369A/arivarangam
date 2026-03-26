@@ -5,7 +5,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { Zap, Code2, Search, Image, Mic, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TaskStatusBadge } from '@/components/ui/Badge';
-import type { Task, TaskCategory } from '@arrivarangam/types';
+import type { Task, TaskCategory } from '@arivarangam/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

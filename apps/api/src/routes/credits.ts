@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
-import { prisma } from '@arrivarangam/db';
+import { prisma } from '@arivarangam/db';
 import { requireAuth } from '../middleware/auth';
 import { creditService } from '../services/CreditService';
 import { billingService, CREDIT_PACKS } from '../services/BillingService';

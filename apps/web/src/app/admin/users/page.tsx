@@ -17,7 +17,7 @@ import { useQuery, useQueryClient } from 'react-query';
 import toast from 'react-hot-toast';
 import api, { getApiError } from '@/lib/api';
 import { cn, formatDate, formatDateTime, formatCredits } from '@/lib/utils';
-import type { UserTier, UserStatus, Task, CreditTransaction } from '@arrivarangam/types';
+import type { UserTier, UserStatus, Task, CreditTransaction } from '@arivarangam/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

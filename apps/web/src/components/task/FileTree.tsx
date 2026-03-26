@@ -10,7 +10,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { TaskFile } from '@arrivarangam/types';
+import type { TaskFile } from '@arivarangam/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

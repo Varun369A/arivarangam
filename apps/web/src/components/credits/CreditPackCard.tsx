@@ -5,7 +5,7 @@ import { Zap, Star, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatINR } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
-import type { CreditPack } from '@arrivarangam/types';
+import type { CreditPack } from '@arivarangam/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

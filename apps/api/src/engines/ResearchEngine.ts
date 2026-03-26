@@ -1,5 +1,5 @@
-import { prisma } from '@arrivarangam/db';
-import type { TaskEvent } from '@arrivarangam/types';
+import { prisma } from '@arivarangam/db';
+import type { TaskEvent } from '@arivarangam/types';
 import { callClaudeSonnet } from '../connectors/claude';
 import { search } from '../connectors/perplexity';
 import { taskService } from '../services/TaskService';

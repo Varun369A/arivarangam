@@ -1,10 +1,10 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
-import { prisma } from '@arrivarangam/db';
+import { prisma } from '@arivarangam/db';
 import { requireAuth } from '../middleware/auth';
 import { creditService } from '../services/CreditService';
-import { getConfig } from '@arrivarangam/config';
+import { getConfig } from '@arivarangam/config';
 import { getRedis } from '../redis';
 
 // ─── Schemas ───────────────────────────────────────────────────────────────────
@@ -56,7 +56,7 @@ function signJWT(server: FastifyInstance, user: { id: string; email: string; tie
 }
 
 function setCookieToken(reply: FastifyReply, token: string): void {
-  reply.setCookie('arrivarangam_token', token, {
+  reply.setCookie('arivarangam_token', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
@@ -207,7 +207,7 @@ export async function authRoutes(fastify: FastifyInstance): Promise<void> {
 
   // POST /logout
   fastify.post('/logout', async (request: FastifyRequest, reply: FastifyReply) => {
-    reply.clearCookie('arrivarangam_token', { path: '/' });
+    reply.clearCookie('arivarangam_token', { path: '/' });
     return reply.send({ success: true, data: { message: 'Logged out successfully' } });
   });
 

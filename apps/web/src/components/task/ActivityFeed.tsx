@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
-import type { StoredTaskEvent, TaskEventType } from '@arrivarangam/types';
+import type { StoredTaskEvent, TaskEventType } from '@arivarangam/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

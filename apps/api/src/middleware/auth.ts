@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { prisma } from '@arrivarangam/db';
+import { prisma } from '@arivarangam/db';
 
 // ─── CORS Headers Helper ──────────────────────────────────────────────────────
 // Always set CORS headers so auth errors don't cause CORS failures on the client.
@@ -32,7 +32,7 @@ export async function requireAuth(
 
     // 2. Try cookie
     if (!token) {
-      token = (request.cookies as Record<string, string | undefined>)?.arrivarangam_token;
+      token = (request.cookies as Record<string, string | undefined>)?.arivarangam_token;
     }
 
     // 3. Try query param ?token=

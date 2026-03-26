@@ -1,6 +1,6 @@
-import { prisma } from '@arrivarangam/db';
+import { prisma } from '@arivarangam/db';
 import { Prisma } from '@prisma/client';
-import type { CreditEstimate, TaskCategory } from '@arrivarangam/types';
+import type { CreditEstimate, TaskCategory } from '@arivarangam/types';
 import { callClaudeHaiku } from '../connectors/claude';
 import { getRedis, PURCHASE_RATE_KEY, PURCHASE_IP_KEY } from '../redis';
 

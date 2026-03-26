@@ -24,7 +24,7 @@ import type {
   Task,
   PlatformLog,
   SecurityEvent,
-} from '@arrivarangam/types';
+} from '@arivarangam/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

@@ -1,4 +1,4 @@
-import { getConfig } from '@arrivarangam/config';
+import { getConfig } from '@arivarangam/config';
 
 // ─── Perplexity AI Connector ──────────────────────────────────────────────────
 // Uses Perplexity's OpenAI-compatible API

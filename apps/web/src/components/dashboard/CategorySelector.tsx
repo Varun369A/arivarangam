@@ -3,7 +3,7 @@
 import React from 'react';
 import { Code2, Search, Image, Mic } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { TaskCategory } from '@arrivarangam/types';
+import type { TaskCategory } from '@arivarangam/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

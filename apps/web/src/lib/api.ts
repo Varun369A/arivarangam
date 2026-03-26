@@ -41,7 +41,7 @@ api.interceptors.response.use(
 )
 
 // ---------------------------------------------------------------------------
-// Types (inline — real canonical types live in @arrivarangam/types)
+// Types (inline — real canonical types live in @arivarangam/types)
 // ---------------------------------------------------------------------------
 
 export interface AuthLoginPayload {

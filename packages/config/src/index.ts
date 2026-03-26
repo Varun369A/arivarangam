@@ -84,7 +84,7 @@ function loadConfig(): AppConfig {
 
   return {
     // Database
-    DATABASE_URL: isTest ? optionalEnv('DATABASE_URL', 'postgresql://localhost/arrivarangam_test') : requireEnv('DATABASE_URL'),
+    DATABASE_URL: isTest ? optionalEnv('DATABASE_URL', 'postgresql://localhost/arivarangam_test') : requireEnv('DATABASE_URL'),
     REDIS_URL: optionalEnv('REDIS_URL', 'redis://localhost:6379'),
 
     // Auth
@@ -106,7 +106,7 @@ function loadConfig(): AppConfig {
     R2_ACCOUNT_ID: isTest ? optionalEnv('R2_ACCOUNT_ID', 'test') : requireEnv('R2_ACCOUNT_ID'),
     R2_ACCESS_KEY_ID: isTest ? optionalEnv('R2_ACCESS_KEY_ID', 'test') : requireEnv('R2_ACCESS_KEY_ID'),
     R2_SECRET_ACCESS_KEY: isTest ? optionalEnv('R2_SECRET_ACCESS_KEY', 'test') : requireEnv('R2_SECRET_ACCESS_KEY'),
-    R2_BUCKET_NAME: optionalEnv('R2_BUCKET_NAME', 'arrivarangam'),
+    R2_BUCKET_NAME: optionalEnv('R2_BUCKET_NAME', 'arivarangam'),
     R2_PUBLIC_URL: optionalEnv('R2_PUBLIC_URL', ''),
 
     // App URLs

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import type { TaskStatus, UserTier, UserStatus } from '@arrivarangam/types';
+import type { TaskStatus, UserTier, UserStatus } from '@arivarangam/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

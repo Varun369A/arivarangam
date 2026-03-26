@@ -1,5 +1,5 @@
-import { prisma } from '@arrivarangam/db';
-import type { Task, TaskCategory, TaskEvent } from '@arrivarangam/types';
+import { prisma } from '@arivarangam/db';
+import type { Task, TaskCategory, TaskEvent } from '@arivarangam/types';
 import { creditService } from './CreditService';
 import { getRedis, TASK_CHANNEL } from '../redis';
 

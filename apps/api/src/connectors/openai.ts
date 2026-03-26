@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { getConfig } from '@arrivarangam/config';
+import { getConfig } from '@arivarangam/config';
 
 let _client: OpenAI | null = null;
 

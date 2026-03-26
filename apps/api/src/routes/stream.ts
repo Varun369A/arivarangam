@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { prisma } from '@arrivarangam/db';
-import { getConfig } from '@arrivarangam/config';
+import { prisma } from '@arivarangam/db';
+import { getConfig } from '@arivarangam/config';
 import { TASK_CHANNEL, createSubscriber } from '../redis';
 
 // ─── SSE Stream Routes ────────────────────────────────────────────────────────
@@ -28,7 +28,7 @@ export async function streamRoutes(fastify: FastifyInstance): Promise<void> {
     try {
       const query = request.query as Record<string, string | undefined>;
       const authHeader = request.headers.authorization;
-      const cookieToken = (request.cookies as Record<string, string | undefined>)?.arrivarangam_token;
+      const cookieToken = (request.cookies as Record<string, string | undefined>)?.arivarangam_token;
 
       const token = query.token ?? (authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined) ?? cookieToken;
 

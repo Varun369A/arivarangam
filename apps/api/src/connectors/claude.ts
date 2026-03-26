@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { getConfig } from '@arrivarangam/config';
+import { getConfig } from '@arivarangam/config';
 
 // ─── Model IDs ────────────────────────────────────────────────────────────────
 

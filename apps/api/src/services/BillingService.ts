@@ -1,9 +1,9 @@
 import crypto from 'crypto';
 import Razorpay from 'razorpay';
-import { prisma } from '@arrivarangam/db';
+import { prisma } from '@arivarangam/db';
 import { Prisma } from '@prisma/client';
-import type { CreditPack } from '@arrivarangam/types';
-import { getConfig } from '@arrivarangam/config';
+import type { CreditPack } from '@arivarangam/types';
+import { getConfig } from '@arivarangam/config';
 import { creditService } from './CreditService';
 
 // ─── Credit Packs ─────────────────────────────────────────────────────────────
@@ -77,7 +77,7 @@ export class BillingService {
       razorpayOrder = await razorpay.orders.create({
         amount: pack.price_inr * 100, // Razorpay uses paise
         currency: 'INR',
-        receipt: `arrivarangam_${userId}_${packId}_${Date.now()}`,
+        receipt: `arivarangam_${userId}_${packId}_${Date.now()}`,
         notes: {
           userId,
           packId,

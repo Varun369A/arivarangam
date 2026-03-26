@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
-import { prisma } from '@arrivarangam/db';
+import { prisma } from '@arivarangam/db';
 import { creditService } from '../../services/CreditService';
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────

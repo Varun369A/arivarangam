@@ -1,10 +1,10 @@
-import { prisma } from '@arrivarangam/db';
-import type { TaskEvent } from '@arrivarangam/types';
+import { prisma } from '@arivarangam/db';
+import type { TaskEvent } from '@arivarangam/types';
 import { callClaudeHaiku } from '../connectors/claude';
 import { textToSpeech, estimateAudioMinutes } from '../connectors/elevenlabs';
 import { uploadFile } from '../connectors/storage';
 import { taskService } from '../services/TaskService';
-import { getConfig } from '@arrivarangam/config';
+import { getConfig } from '@arivarangam/config';
 
 // ─── VoiceEngine ──────────────────────────────────────────────────────────────
 

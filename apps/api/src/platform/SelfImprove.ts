@@ -1,4 +1,4 @@
-import { prisma } from '@arrivarangam/db';
+import { prisma } from '@arivarangam/db';
 import { callClaudeSonnet } from '../connectors/claude';
 
 // ─── SelfImprove ─────────────────────────────────────────────────────────────
