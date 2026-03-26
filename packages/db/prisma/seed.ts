@@ -8,10 +8,10 @@ async function main() {
 
   const adminPassword = await bcrypt.hash('Vs9mkvxdx6%%', 12)
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@arrivarangam.com' },
+    where: { email: 'admin@arivarangam.com' },
     update: {},
     create: {
-      email: 'admin@arrivarangam.com',
+      email: 'admin@arivarangam.com',
       password: adminPassword,
       name: 'Admin',
       isAdmin: true,
@@ -26,10 +26,10 @@ async function main() {
 
   const testPassword = await bcrypt.hash('Test1234!!', 12)
   const testUser = await prisma.user.upsert({
-    where: { email: 'test@arrivarangam.com' },
+    where: { email: 'test@arivarangam.com' },
     update: {},
     create: {
-      email: 'test@arrivarangam.com',
+      email: 'test@arivarangam.com',
       password: testPassword,
       name: 'Test User',
       tier: 'PRO',
@@ -52,7 +52,8 @@ async function main() {
     },
   })
 
-  console.log('Seed complete')
+  console.log(`Seed complete`)
+  console.log(`Admin: admin@arivarangam.com / Vs9mkvxdx6%%`)
 }
 
 main()

@@ -115,7 +115,7 @@ function loadConfig(): AppConfig {
     WEB_URL: optionalEnv('WEB_URL', 'http://localhost:3000'),
 
     // Admin
-    ADMIN_EMAIL: optionalEnv('ADMIN_EMAIL', 'admin@arrivarangam.com'),
+    ADMIN_EMAIL: optionalEnv('ADMIN_EMAIL', 'admin@arivarangam.com'),
 
     // Environment
     NODE_ENV: nodeEnv,
