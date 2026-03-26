@@ -1,0 +1,344 @@
+// Arrivarangam — Prisma Schema
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum UserTier {
+  FREE
+  STARTER
+  PRO
+  BUSINESS
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum TaskCategory {
+  code
+  research
+  image
+  voice
+  content
+}
+
+enum TaskStatus {
+  pending
+  analyzing
+  running
+  completed
+  failed
+  cancelled
+}
+
+enum CreditTransactionType {
+  PURCHASE
+  USAGE
+  REFUND
+  SIGNUP_BONUS
+  ADMIN_GRANT
+}
+
+enum CreditTransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PlatformLogType {
+  ERROR
+  FIX_APPLIED
+  IMPROVEMENT
+  SECURITY
+  MODEL_ADDED
+  MONITOR
+}
+
+enum PlatformLogSeverity {
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+}
+
+enum SecurityEventType {
+  SUSPICIOUS_PURCHASE
+  CHARGEBACK
+  RATE_LIMIT
+  VPN_DETECTED
+  FAILED_AUTH
+  ACCOUNT_FROZEN
+}
+
+enum SecurityEventSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+// ─── User ─────────────────────────────────────────────────────────────────────
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  password          String
+  name              String
+  avatar            String?
+
+  tier              UserTier  @default(FREE)
+  credits           Int       @default(100)
+  totalCreditsUsed  Int       @default(0)
+
+  isAdmin           Boolean   @default(false)
+  isEmailVerified   Boolean   @default(false)
+  emailVerifyToken  String?
+
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+
+  status            UserStatus @default(ACTIVE)
+  termsAcceptedAt   DateTime?
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  tasks             Task[]
+  repos             Repo[]
+  transactions      CreditTransaction[]
+  creditLogs        CreditTransaction[]  @relation("CreditLogs")
+  securityEvents    SecurityEvent[]
+
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ─── Task ─────────────────────────────────────────────────────────────────────
+
+model Task {
+  id                    String       @id @default(cuid())
+  userId                String
+
+  category              TaskCategory
+  status                TaskStatus   @default(pending)
+  prompt                String       @db.Text
+
+  creditsEstimatedMin   Int          @default(0)
+  creditsEstimatedMax   Int          @default(0)
+  creditsActuallyUsed   Int?
+
+  startedAt             DateTime?
+  completedAt           DateTime?
+
+  errorMessage          String?      @db.Text
+  previewUrl            String?
+  repoId                String?
+
+  metadata              Json?
+
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  // Relations
+  user                  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events                TaskEvent[]
+  repo                  Repo?        @relation(fields: [repoId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([category])
+  @@index([createdAt])
+}
+
+// ─── TaskEvent ────────────────────────────────────────────────────────────────
+
+model TaskEvent {
+  id        String   @id @default(cuid())
+  taskId    String
+
+  type      String   // 'file_created' | 'command_run' | 'error' | 'error_fixed' | 'log' | 'preview_ready' | 'completed'
+  data      Json
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([createdAt])
+}
+
+// ─── Repo ─────────────────────────────────────────────────────────────────────
+
+model Repo {
+  id             String   @id @default(cuid())
+  userId         String
+
+  name           String
+  description    String?  @db.Text
+
+  taskId         String?  // originating task
+
+  files          Json     @default("[]")  // RepoFile[]
+  versions       Json     @default("[]")  // RepoVersion[]
+  currentVersion Int      @default(1)
+
+  isPublic       Boolean  @default(false)
+  deployUrl      String?
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task           Task[]
+
+  @@index([userId])
+  @@index([isPublic])
+  @@index([createdAt])
+}
+
+// ─── CreditTransaction ────────────────────────────────────────────────────────
+
+model CreditTransaction {
+  id                   String                  @id @default(cuid())
+  userId               String
+
+  type                 CreditTransactionType
+  amount               Int                     // positive = credit, negative = debit
+  balanceBefore        Int
+  balanceAfter         Int
+  description          String
+
+  razorpayOrderId      String?
+  razorpayPaymentId    String?
+  razorpaySignature    String?
+
+  packId               String?                 // which pack was purchased
+  taskId               String?                 // if usage, which task
+
+  status               CreditTransactionStatus @default(PENDING)
+
+  metadata             Json?
+
+  createdAt            DateTime                @default(now())
+
+  // Relations
+  user                 User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userCreditLog        User?                   @relation("CreditLogs", fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@index([razorpayOrderId])
+  @@index([razorpayPaymentId])
+  @@index([createdAt])
+}
+
+// ─── PlatformLog ──────────────────────────────────────────────────────────────
+
+model PlatformLog {
+  id          String              @id @default(cuid())
+
+  type        PlatformLogType
+  severity    PlatformLogSeverity
+
+  title       String
+  description String              @db.Text
+
+  filePath    String?             // what file was affected
+  oldCode     String?             @db.Text
+  newCode     String?             @db.Text
+
+  approved    Boolean             @default(false)
+  approvedAt  DateTime?
+
+  createdAt   DateTime            @default(now())
+
+  @@index([type])
+  @@index([severity])
+  @@index([approved])
+  @@index([createdAt])
+}
+
+// ─── SecurityEvent ────────────────────────────────────────────────────────────
+
+model SecurityEvent {
+  id          String                @id @default(cuid())
+  userId      String?
+
+  type        SecurityEventType
+  severity    SecurityEventSeverity
+
+  description String                @db.Text
+  ipAddress   String?
+  metadata    Json?
+
+  resolved    Boolean               @default(false)
+  resolvedAt  DateTime?
+
+  createdAt   DateTime              @default(now())
+
+  // Relations
+  user        User?                 @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([type])
+  @@index([severity])
+  @@index([resolved])
+  @@index([createdAt])
+}
+
+// ─── WebhookEvent ─────────────────────────────────────────────────────────────
+
+model WebhookEvent {
+  id          String   @id @default(cuid())
+
+  provider    String              // 'razorpay'
+  eventId     String   @unique    // idempotency key
+
+  payload     Json
+  processedAt DateTime
+
+  createdAt   DateTime @default(now())
+
+  @@index([provider])
+  @@index([eventId])
+  @@index([createdAt])
+}
+
+// ─── ModelPerformance ─────────────────────────────────────────────────────────
+
+model ModelPerformance {
+  id             String   @id @default(cuid())
+
+  model          String
+  taskCategory   String
+  promptVersion  String
+
+  successRate    Float
+  avgLatencyMs   Int
+  avgCostUsd     Float
+  sampleSize     Int
+
+  createdAt      DateTime @default(now())
+
+  @@index([model])
+  @@index([taskCategory])
+  @@index([createdAt])
+}

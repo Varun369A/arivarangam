@@ -1,0 +1,149 @@
+// ─── Environment Configuration Validator ─────────────────────────────────────
+// Validates all required environment variables at startup.
+
+function requireEnv(key: string): string {
+  const value = process.env[key];
+  if (!value || value.trim() === '') {
+    throw new Error(`[Config] Missing required environment variable: ${key}`);
+  }
+  return value.trim();
+}
+
+function optionalEnv(key: string, defaultValue: string): string {
+  const value = process.env[key];
+  return value && value.trim() !== '' ? value.trim() : defaultValue;
+}
+
+function optionalEnvBool(key: string, defaultValue: boolean): boolean {
+  const value = process.env[key];
+  if (!value) return defaultValue;
+  return value.toLowerCase() === 'true' || value === '1';
+}
+
+function optionalEnvInt(key: string, defaultValue: number): number {
+  const value = process.env[key];
+  if (!value) return defaultValue;
+  const parsed = parseInt(value, 10);
+  return isNaN(parsed) ? defaultValue : parsed;
+}
+
+// ─── Validate & Export Config ─────────────────────────────────────────────────
+
+export interface AppConfig {
+  // Database
+  DATABASE_URL: string;
+  REDIS_URL: string;
+
+  // Auth
+  JWT_SECRET: string;
+  JWT_EXPIRES_IN: string;
+
+  // AI APIs
+  ANTHROPIC_API_KEY: string;
+  OPENAI_API_KEY: string;
+  PERPLEXITY_API_KEY: string;
+  ELEVENLABS_API_KEY: string;
+
+  // Razorpay
+  RAZORPAY_KEY_ID: string;
+  RAZORPAY_KEY_SECRET: string;
+  RAZORPAY_WEBHOOK_SECRET: string;
+
+  // AWS / S3
+  AWS_ACCESS_KEY_ID: string;
+  AWS_SECRET_ACCESS_KEY: string;
+  AWS_REGION: string;
+  S3_BUCKET: string;
+
+  // App URLs
+  CORS_ORIGINS: string[];
+  API_URL: string;
+  WEB_URL: string;
+
+  // Admin
+  ADMIN_EMAIL: string;
+
+  // Environment
+  NODE_ENV: 'development' | 'production' | 'test';
+  PORT: number;
+
+  // Feature flags
+  ENABLE_SELF_IMPROVE: boolean;
+  ENABLE_PLATFORM_MONITOR: boolean;
+}
+
+function loadConfig(): AppConfig {
+  const nodeEnv = optionalEnv('NODE_ENV', 'development') as AppConfig['NODE_ENV'];
+
+  // In test mode some env vars may be mocked
+  const isTest = nodeEnv === 'test';
+
+  const corsOriginsRaw = optionalEnv('CORS_ORIGINS', 'http://localhost:3000');
+  const corsOrigins = corsOriginsRaw.split(',').map(s => s.trim()).filter(Boolean);
+
+  return {
+    // Database
+    DATABASE_URL: isTest ? optionalEnv('DATABASE_URL', 'postgresql://localhost/arrivarangam_test') : requireEnv('DATABASE_URL'),
+    REDIS_URL: optionalEnv('REDIS_URL', 'redis://localhost:6379'),
+
+    // Auth
+    JWT_SECRET: isTest ? optionalEnv('JWT_SECRET', 'test-secret-key-32-chars-minimum-!') : requireEnv('JWT_SECRET'),
+    JWT_EXPIRES_IN: optionalEnv('JWT_EXPIRES_IN', '7d'),
+
+    // AI APIs
+    ANTHROPIC_API_KEY: isTest ? optionalEnv('ANTHROPIC_API_KEY', 'test-key') : requireEnv('ANTHROPIC_API_KEY'),
+    OPENAI_API_KEY: isTest ? optionalEnv('OPENAI_API_KEY', 'test-key') : requireEnv('OPENAI_API_KEY'),
+    PERPLEXITY_API_KEY: isTest ? optionalEnv('PERPLEXITY_API_KEY', 'test-key') : requireEnv('PERPLEXITY_API_KEY'),
+    ELEVENLABS_API_KEY: isTest ? optionalEnv('ELEVENLABS_API_KEY', 'test-key') : requireEnv('ELEVENLABS_API_KEY'),
+
+    // Razorpay
+    RAZORPAY_KEY_ID: isTest ? optionalEnv('RAZORPAY_KEY_ID', 'rzp_test_key') : requireEnv('RAZORPAY_KEY_ID'),
+    RAZORPAY_KEY_SECRET: isTest ? optionalEnv('RAZORPAY_KEY_SECRET', 'test-secret') : requireEnv('RAZORPAY_KEY_SECRET'),
+    RAZORPAY_WEBHOOK_SECRET: isTest ? optionalEnv('RAZORPAY_WEBHOOK_SECRET', 'test-webhook') : requireEnv('RAZORPAY_WEBHOOK_SECRET'),
+
+    // AWS
+    AWS_ACCESS_KEY_ID: isTest ? optionalEnv('AWS_ACCESS_KEY_ID', 'test') : requireEnv('AWS_ACCESS_KEY_ID'),
+    AWS_SECRET_ACCESS_KEY: isTest ? optionalEnv('AWS_SECRET_ACCESS_KEY', 'test') : requireEnv('AWS_SECRET_ACCESS_KEY'),
+    AWS_REGION: optionalEnv('AWS_REGION', 'ap-south-1'),
+    S3_BUCKET: optionalEnv('S3_BUCKET', 'arrivarangam-assets'),
+
+    // App URLs
+    CORS_ORIGINS: corsOrigins,
+    API_URL: optionalEnv('API_URL', 'http://localhost:3001'),
+    WEB_URL: optionalEnv('WEB_URL', 'http://localhost:3000'),
+
+    // Admin
+    ADMIN_EMAIL: optionalEnv('ADMIN_EMAIL', 'admin@arrivarangam.com'),
+
+    // Environment
+    NODE_ENV: nodeEnv,
+    PORT: optionalEnvInt('PORT', 3001),
+
+    // Feature flags
+    ENABLE_SELF_IMPROVE: optionalEnvBool('ENABLE_SELF_IMPROVE', true),
+    ENABLE_PLATFORM_MONITOR: optionalEnvBool('ENABLE_PLATFORM_MONITOR', true),
+  };
+}
+
+// Singleton — load once
+let _config: AppConfig | null = null;
+
+export function getConfig(): AppConfig {
+  if (!_config) {
+    _config = loadConfig();
+  }
+  return _config;
+}
+
+// Reset for testing
+export function resetConfig(): void {
+  _config = null;
+}
+
+export const config = new Proxy({} as AppConfig, {
+  get(_target, prop: string) {
+    return getConfig()[prop as keyof AppConfig];
+  },
+});
+
+export default config;

@@ -1,0 +1,26 @@
+{
+  "name": "@arrivarangam/db",
+  "version": "1.0.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.14.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.14.0",
+    "tsx": "^4.11.0",
+    "bcryptjs": "^2.4.3",
+    "@types/bcryptjs": "^2.4.6",
+    "typescript": "^5.4.0"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}
