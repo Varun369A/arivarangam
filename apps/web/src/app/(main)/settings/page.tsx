@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, FormEvent } from 'react';
+import { useState, useEffect, useCallback, FormEvent, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import {
@@ -652,7 +652,7 @@ function ApiKeysTab() {
 }
 
 // ─── Main Settings Page ────────────────────────────────────────────────────────
-export default function SettingsPage() {
+function SettingsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const tabParam = searchParams.get('tab') as Tab | null;
@@ -707,5 +707,13 @@ export default function SettingsPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-indigo-600" /></div>}>
+      <SettingsContent />
+    </Suspense>
   );
 }
