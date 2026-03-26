@@ -357,14 +357,14 @@ function CreditConfirmModal({
   confirming,
 }: {
   task: Task;
-  balance: number | undefined;
+  balance: number | null;
   onConfirm: () => void;
   onCancel: () => void;
   confirming: boolean;
 }) {
   const estMin = (task as any).creditsEstimatedMin ?? 0;
   const estMax = (task as any).creditsEstimatedMax ?? estMin;
-  const insufficient = balance !== undefined && balance < estMin;
+  const insufficient = balance !== null && balance < estMin;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
