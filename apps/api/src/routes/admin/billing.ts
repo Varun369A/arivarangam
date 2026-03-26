@@ -104,7 +104,7 @@ export async function adminBillingRoutes(fastify: FastifyInstance): Promise<void
       .map(([date, amount]) => ({ date, amount }))
       .sort((a, b) => a.date.localeCompare(b.date));
 
-    const byPack = byPackRaw.map(row => {
+    const byPack = byPackRaw.map((row: any) => {
       const pack = CREDIT_PACKS.find(p => p.id === row.packId);
       return {
         packId: row.packId ?? 'unknown',
@@ -180,7 +180,7 @@ export async function adminBillingRoutes(fastify: FastifyInstance): Promise<void
       _sum: { amount: true },
     });
 
-    const stats = packStats.map(row => {
+    const stats = packStats.map((row: any) => {
       const pack = CREDIT_PACKS.find(p => p.id === row.packId);
       return {
         packId: row.packId,
@@ -195,7 +195,7 @@ export async function adminBillingRoutes(fastify: FastifyInstance): Promise<void
 
     // Add zero-count packs
     for (const pack of CREDIT_PACKS) {
-      if (!stats.find(s => s.packId === pack.id)) {
+      if (!stats.find((s: any) => s.packId === pack.id)) {
         stats.push({
           packId: pack.id,
           packName: pack.name,

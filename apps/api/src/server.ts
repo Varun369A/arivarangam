@@ -123,7 +123,7 @@ async function buildServer() {
 
   // ─── Global Error Handler ─────────────────────────────────────────────────────
 
-  fastify.setErrorHandler((error, request, reply) => {
+  fastify.setErrorHandler((error: any, request, reply) => {
     // Always add CORS headers to error responses
     const origin = request.headers.origin;
     if (origin) {

@@ -50,19 +50,19 @@ export class SelfImprove {
 
       // 3. Calculate success rates
       const stats = Object.entries(byCategory).map(([category, catTasks]) => {
-        const completed = catTasks.filter(t => t.status === 'completed').length;
-        const failed = catTasks.filter(t => t.status === 'failed').length;
+        const completed = catTasks.filter((t: any) => t.status === 'completed').length;
+        const failed = catTasks.filter((t: any) => t.status === 'failed').length;
         const total = catTasks.length;
         const successRate = total > 0 ? (completed / total) * 100 : 0;
 
-        const failedTasks = catTasks.filter(t => t.status === 'failed');
+        const failedTasks = catTasks.filter((t: any) => t.status === 'failed');
         const errors = failedTasks
-          .flatMap(t => t.events.map(e => (e.data as any)?.message ?? 'Unknown error'))
+          .flatMap((t: any) => t.events.map((e: any) => (e.data as any)?.message ?? 'Unknown error'))
           .slice(0, 10);
 
         const avgCredits = catTasks
-          .filter(t => t.creditsActuallyUsed !== null)
-          .reduce((sum, t, _, arr) => sum + (t.creditsActuallyUsed ?? 0) / arr.length, 0);
+          .filter((t: any) => t.creditsActuallyUsed !== null)
+          .reduce((sum: number, t: any, _: number, arr: any[]) => sum + (t.creditsActuallyUsed ?? 0) / arr.length, 0);
 
         return { category, total, completed, failed, successRate, errors, avgCredits };
       });
@@ -200,7 +200,7 @@ Be specific and technical — this will be reviewed by engineers.`;
           avgCostUsd,
           sampleSize: total,
         },
-      }).catch(err => {
+      }).catch((err: any) => {
         console.error(`[SelfImprove] Failed to store performance for ${category}:`, err.message);
       });
     }

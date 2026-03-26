@@ -83,7 +83,7 @@ export async function search(query: string): Promise<string> {
     throw new Error(`Perplexity API error ${response.status}: ${text}`);
   }
 
-  const data: PerplexityResponse = await response.json();
+  const data = await response.json() as PerplexityResponse;
 
   const content = data.choices?.[0]?.message?.content;
   if (!content) {

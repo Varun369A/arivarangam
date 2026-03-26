@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import Razorpay from 'razorpay';
 import { prisma } from '@arrivarangam/db';
+import { Prisma } from '@prisma/client';
 import type { CreditPack } from '@arrivarangam/types';
 import { getConfig } from '@arrivarangam/config';
 import { creditService } from './CreditService';
@@ -148,7 +149,7 @@ export class BillingService {
       return;
     }
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Mark webhook event as processed
       await tx.webhookEvent.create({
         data: {
@@ -288,7 +289,7 @@ export class BillingService {
       return;
     }
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const user = await tx.user.findUnique({
         where: { id: pendingTx.userId },
         select: { credits: true },
@@ -340,7 +341,7 @@ export class BillingService {
 
     if (!originalTx) return;
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Deduct refunded credits
       const user = await tx.user.findUnique({
         where: { id: originalTx.userId },

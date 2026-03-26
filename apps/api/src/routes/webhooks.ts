@@ -7,7 +7,6 @@ export async function webhookRoutes(fastify: FastifyInstance): Promise<void> {
 
   // POST /razorpay — Razorpay webhook handler
   fastify.post('/razorpay', {
-    config: { rawBody: true }, // Need raw body for signature verification
   }, async (request: FastifyRequest, reply: FastifyReply) => {
     const signature = request.headers['x-razorpay-signature'] as string;
 

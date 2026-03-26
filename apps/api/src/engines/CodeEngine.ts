@@ -248,7 +248,7 @@ Return ALL files, even unchanged ones.`;
     }
 
     try {
-      const parsed = this.parseJSON<FileEntry[]>(response, null);
+      const parsed = this.parseJSON<FileEntry[]>(response, []);
       if (!parsed || !Array.isArray(parsed)) return files;
 
       // Validate structure

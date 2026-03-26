@@ -1,4 +1,5 @@
 import { prisma } from '@arrivarangam/db';
+import { Prisma } from '@prisma/client';
 import type { CreditEstimate, TaskCategory } from '@arrivarangam/types';
 import { callClaudeHaiku } from '../connectors/claude';
 import { getRedis, PURCHASE_RATE_KEY, PURCHASE_IP_KEY } from '../redis';
@@ -78,7 +79,7 @@ Return ONLY this JSON (no markdown, no explanation):
   // ─── Reserve Credits ─────────────────────────────────────────────────────────
 
   async reserveCredits(userId: string, taskId: string, amount: number): Promise<void> {
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const user = await tx.user.findUnique({
         where: { id: userId },
         select: { credits: true },
@@ -112,7 +113,7 @@ Return ONLY this JSON (no markdown, no explanation):
   // ─── Finalize Credits ─────────────────────────────────────────────────────────
 
   async finalizeCredits(userId: string, taskId: string, actualUsed: number): Promise<void> {
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Find the pending reservation transaction
       const reservation = await tx.creditTransaction.findFirst({
         where: {
@@ -181,7 +182,7 @@ Return ONLY this JSON (no markdown, no explanation):
   // ─── Release Reservation (task failed before running) ────────────────────────
 
   async releaseReservation(userId: string, taskId: string): Promise<void> {
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const reservation = await tx.creditTransaction.findFirst({
         where: {
           userId,
@@ -235,7 +236,7 @@ Return ONLY this JSON (no markdown, no explanation):
   async grantSignupBonus(userId: string): Promise<void> {
     const BONUS = 100;
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const user = await tx.user.findUnique({
         where: { id: userId },
         select: { credits: true },
@@ -270,7 +271,7 @@ Return ONLY this JSON (no markdown, no explanation):
   // ─── Admin Grant ───────────────────────────────────────────────────────────────
 
   async adminGrantCredits(userId: string, amount: number, reason: string): Promise<void> {
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const user = await tx.user.findUnique({
         where: { id: userId },
         select: { credits: true },
