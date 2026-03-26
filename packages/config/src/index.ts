@@ -49,11 +49,12 @@ export interface AppConfig {
   RAZORPAY_KEY_SECRET: string;
   RAZORPAY_WEBHOOK_SECRET: string;
 
-  // AWS / S3
-  AWS_ACCESS_KEY_ID: string;
-  AWS_SECRET_ACCESS_KEY: string;
-  AWS_REGION: string;
-  S3_BUCKET: string;
+  // Cloudflare R2 storage
+  R2_ACCOUNT_ID: string;
+  R2_ACCESS_KEY_ID: string;
+  R2_SECRET_ACCESS_KEY: string;
+  R2_BUCKET_NAME: string;
+  R2_PUBLIC_URL: string;
 
   // App URLs
   CORS_ORIGINS: string[];
@@ -96,16 +97,17 @@ function loadConfig(): AppConfig {
     PERPLEXITY_API_KEY: isTest ? optionalEnv('PERPLEXITY_API_KEY', 'test-key') : requireEnv('PERPLEXITY_API_KEY'),
     ELEVENLABS_API_KEY: isTest ? optionalEnv('ELEVENLABS_API_KEY', 'test-key') : requireEnv('ELEVENLABS_API_KEY'),
 
-    // Razorpay
-    RAZORPAY_KEY_ID: isTest ? optionalEnv('RAZORPAY_KEY_ID', 'rzp_test_key') : requireEnv('RAZORPAY_KEY_ID'),
-    RAZORPAY_KEY_SECRET: isTest ? optionalEnv('RAZORPAY_KEY_SECRET', 'test-secret') : requireEnv('RAZORPAY_KEY_SECRET'),
-    RAZORPAY_WEBHOOK_SECRET: isTest ? optionalEnv('RAZORPAY_WEBHOOK_SECRET', 'test-webhook') : requireEnv('RAZORPAY_WEBHOOK_SECRET'),
+    // Razorpay (optional — configure before enabling billing)
+    RAZORPAY_KEY_ID: optionalEnv('RAZORPAY_KEY_ID', ''),
+    RAZORPAY_KEY_SECRET: optionalEnv('RAZORPAY_KEY_SECRET', ''),
+    RAZORPAY_WEBHOOK_SECRET: optionalEnv('RAZORPAY_WEBHOOK_SECRET', ''),
 
-    // AWS
-    AWS_ACCESS_KEY_ID: isTest ? optionalEnv('AWS_ACCESS_KEY_ID', 'test') : requireEnv('AWS_ACCESS_KEY_ID'),
-    AWS_SECRET_ACCESS_KEY: isTest ? optionalEnv('AWS_SECRET_ACCESS_KEY', 'test') : requireEnv('AWS_SECRET_ACCESS_KEY'),
-    AWS_REGION: optionalEnv('AWS_REGION', 'ap-south-1'),
-    S3_BUCKET: optionalEnv('S3_BUCKET', 'arrivarangam-assets'),
+    // Cloudflare R2 storage
+    R2_ACCOUNT_ID: isTest ? optionalEnv('R2_ACCOUNT_ID', 'test') : requireEnv('R2_ACCOUNT_ID'),
+    R2_ACCESS_KEY_ID: isTest ? optionalEnv('R2_ACCESS_KEY_ID', 'test') : requireEnv('R2_ACCESS_KEY_ID'),
+    R2_SECRET_ACCESS_KEY: isTest ? optionalEnv('R2_SECRET_ACCESS_KEY', 'test') : requireEnv('R2_SECRET_ACCESS_KEY'),
+    R2_BUCKET_NAME: optionalEnv('R2_BUCKET_NAME', 'arrivarangam'),
+    R2_PUBLIC_URL: optionalEnv('R2_PUBLIC_URL', ''),
 
     // App URLs
     CORS_ORIGINS: corsOrigins,

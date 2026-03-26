@@ -2,6 +2,7 @@ import { prisma } from '@arrivarangam/db';
 import type { TaskEvent } from '@arrivarangam/types';
 import { callClaudeHaiku } from '../connectors/claude';
 import { textToSpeech, estimateAudioMinutes } from '../connectors/elevenlabs';
+import { uploadFile } from '../connectors/storage';
 import { taskService } from '../services/TaskService';
 import { getConfig } from '@arrivarangam/config';
 
@@ -59,19 +60,19 @@ export class VoiceEngine {
         timestamp: new Date().toISOString(),
       });
 
-      // Step 4: Store audio as base64 data URL (in production, upload to S3)
-      // For now we store the buffer length and a data URI reference
-      const audioDataUri = `data:audio/mpeg;base64,${audioBuffer.toString('base64')}`;
+      // Step 4: Upload audio to Cloudflare R2
+      const r2Key = `tasks/${task.id}/audio.mp3`
+      const audioUrl = await uploadFile(r2Key, audioBuffer, 'audio/mpeg')
 
-      // Update previewUrl
+      // Update previewUrl with the R2 URL
       await prisma.task.update({
         where: { id: task.id },
-        data: { previewUrl: audioDataUri.slice(0, 2048) }, // Truncate for DB
+        data: { previewUrl: audioUrl },
       });
 
       await emit({
         type: 'preview_ready',
-        data: { audioSize: audioBuffer.length, format: 'audio/mpeg' },
+        data: { audioUrl, audioSize: audioBuffer.length, format: 'audio/mpeg' },
         timestamp: new Date().toISOString(),
       });
 
@@ -83,7 +84,7 @@ export class VoiceEngine {
         voiceId,
         audioSizeBytes: audioBuffer.length,
         estimatedMinutes,
-        audioDataUri, // Full audio stored in metadata
+        audioUrl,
       };
 
       await taskService.completeTask(task.id, creditsUsed, metadata);
