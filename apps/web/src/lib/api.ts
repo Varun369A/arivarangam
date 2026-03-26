@@ -59,12 +59,14 @@ export interface User {
   id: string
   name: string
   email: string
-  role: 'user' | 'admin'
+  tier: string
+  role?: 'user' | 'admin'
   avatarUrl?: string
   credits: number
+  isAdmin: boolean
   isEmailVerified: boolean
-  createdAt: string
-  updatedAt: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface AuthResponse {
