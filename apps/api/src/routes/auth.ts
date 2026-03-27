@@ -17,6 +17,7 @@ import {
   sendPasswordResetEmail,
   sendAdminOtpEmail,
   sendAdminNewUserNotification,
+  sendWelcomeEmail,
 } from '../email'
 
 // ─── Schemas ───────────────────────────────────────────────────────────────────
@@ -305,6 +306,9 @@ export async function authRoutes(fastify: FastifyInstance): Promise<void> {
 
     // Grant signup bonus now that email is confirmed
     await creditService.grantSignupBonus(user.id).catch(() => {})
+
+    // Send professional welcome email (non-blocking)
+    sendWelcomeEmail(user.email, user.name, config.WEB_URL).catch(() => {})
 
     return reply.send({
       success: true,

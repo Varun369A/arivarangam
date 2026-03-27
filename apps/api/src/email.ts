@@ -130,6 +130,45 @@ export async function sendAdminOtpEmail(to: string, otp: string): Promise<void> 
   await send(to, `Admin OTP: ${otp} — ${APP}`, html)
 }
 
+export async function sendWelcomeEmail(
+  to: string, name: string, webUrl: string
+): Promise<void> {
+  const dashboardUrl = `${webUrl}/dashboard`
+  const html = layout(`
+    <h2 style="margin:0 0 8px;font-size:22px;font-weight:800;color:#0A0D14;">Welcome to ${APP}! 🎉</h2>
+    <p style="margin:0 0 6px;font-size:15px;color:#6B7280;line-height:1.65;">
+      Hi <strong style="color:#374151;">${name}</strong>, your email has been verified and your account is now fully active.
+    </p>
+    <p style="margin:0 0 28px;font-size:15px;color:#6B7280;line-height:1.65;">
+      We've added <strong style="color:#1E3461;">100 free credits</strong> to your account to get you started.
+      Use them to run AI tasks — code, research, images, voice, and content.
+    </p>
+    <div style="margin-bottom:28px;">${btn(dashboardUrl, 'Go to Dashboard →')}</div>
+    <div style="background:#F7F6F3;border:1px solid #E8E5DF;border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+      <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.06em;">What you can do</p>
+      <table cellpadding="0" cellspacing="0" border="0" width="100%">
+        ${[
+          ['⌨️', 'Code', 'Build apps, scripts, and components'],
+          ['🔍', 'Research', 'Get deep summaries and analysis'],
+          ['🎨', 'Image', 'Generate visuals and artwork'],
+          ['🎙️', 'Voice', 'Create voice-overs and audio'],
+          ['✍️', 'Content', 'Write articles, emails, and copy'],
+        ].map(([icon, label, desc]) => `
+          <tr>
+            <td style="padding:6px 0;width:28px;font-size:18px;vertical-align:top;">${icon}</td>
+            <td style="padding:6px 8px 6px 0;width:80px;font-size:13px;font-weight:700;color:#1E3461;vertical-align:top;">${label}</td>
+            <td style="padding:6px 0;font-size:13px;color:#6B7280;vertical-align:top;">${desc}</td>
+          </tr>
+        `).join('')}
+      </table>
+    </div>
+    <p style="margin:0;font-size:13px;color:#9CA3AF;line-height:1.6;">
+      Need help? Reply to this email or visit our dashboard anytime.
+    </p>
+  `)
+  await send(to, `Welcome to ${APP} — you're all set! 🚀`, html)
+}
+
 export async function sendAdminNewUserNotification(
   adminEmail: string,
   user: { name: string; email: string; createdAt: Date }

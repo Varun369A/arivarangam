@@ -169,14 +169,14 @@ export default function DashboardPage() {
   // Load data
   useEffect(() => {
     tasksApi.list({ limit: 12 })
-      .then(res => setTasks(res.data ?? []))
+      .then(res => setTasks((res as any)?.data?.tasks ?? []))
       .catch(() => {})
       .finally(() => setTasksLoading(false));
   }, []);
 
   useEffect(() => {
     reposApi.list({ limit: 6 })
-      .then(res => setRepos(res.data ?? []))
+      .then(res => setRepos((res as any)?.data?.repos ?? []))
       .catch(() => {})
       .finally(() => setReposLoading(false));
   }, []);
@@ -225,9 +225,10 @@ export default function DashboardPage() {
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const task = await tasksApi.create({ category, prompt: prompt.trim() });
+      const res = await tasksApi.create({ category, prompt: prompt.trim() });
+      const taskId = (res as any)?.data?.task?.id ?? (res as any)?.id;
       refreshCredits();
-      router.push(`/task/${task.id}`);
+      router.push(`/task/${taskId}`);
     } catch (err) {
       setSubmitError(getApiError(err));
     } finally {
@@ -251,7 +252,7 @@ export default function DashboardPage() {
           </div>
           {balance !== null && (
             <Link
-              href="/credits"
+              href="/settings?tab=credits"
               className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 transition-colors"
             >
               <span className="text-xs font-semibold text-indigo-700">{formatCredits(balance)} credits</span>
@@ -270,7 +271,7 @@ export default function DashboardPage() {
               </span>
             </div>
             <Link
-              href="/credits"
+              href="/settings?tab=credits"
               className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium transition-colors whitespace-nowrap"
             >
               Buy Credits →
@@ -361,7 +362,7 @@ export default function DashboardPage() {
             <p className="text-xs text-red-600 flex items-center gap-1.5 bg-red-50 px-3 py-2 rounded-lg">
               <span>⚠</span>
               Insufficient credits — you need {minEst} but have {balance}.{' '}
-              <Link href="/credits" className="underline font-medium">Top up →</Link>
+              <Link href="/settings?tab=credits" className="underline font-medium">Top up →</Link>
             </p>
           )}
         </div>
@@ -370,7 +371,7 @@ export default function DashboardPage() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-slate-800">Recent Projects</h2>
-            <Link href="/tasks" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
+            <Link href="/task" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
               View all →
             </Link>
           </div>
