@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Shield,
+  Clock,
   TrendingUp,
   BadgeCheck,
   AlertCircle,
@@ -188,6 +189,11 @@ function SecurityTab() {
   const [form, setForm] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [autoLogoutVal, setAutoLogoutVal] = useState<number>(() => {
+    if (typeof window === 'undefined') return 0;
+    const s = localStorage.getItem('autoLogoutMinutes');
+    return s !== null ? Number(s) : 0;
+  });
 
   function update(k: keyof typeof form, v: string) {
     setForm(f => ({ ...f, [k]: v }));
@@ -263,8 +269,54 @@ function SecurityTab() {
         </form>
       </div>
 
+      {/* Auto-logout */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm max-w-md">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center">
+            <Clock className="w-4 h-4 text-amber-600" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-slate-800 text-sm">Auto-logout</h3>
+            <p className="text-xs text-slate-500">Automatically sign out after inactivity.</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            { value: 5,  label: '5 min' },
+            { value: 10, label: '10 min' },
+            { value: 30, label: '30 min' },
+            { value: 60, label: '1 hour' },
+            { value: 0,  label: 'Never' },
+          ].map(opt => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => {
+                setAutoLogoutVal(opt.value);
+                localStorage.setItem('autoLogoutMinutes', String(opt.value));
+                window.dispatchEvent(new Event('storage'));
+                toast.success(opt.value === 0 ? 'Auto-logout disabled' : `Auto-logout set to ${opt.label}`);
+              }}
+              className={cn(
+                'px-3 py-2 rounded-xl text-xs font-semibold border transition-colors',
+                autoLogoutVal === opt.value
+                  ? 'bg-indigo-600 text-white border-indigo-600'
+                  : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        {autoLogoutVal > 0 && (
+          <p className="mt-3 text-xs text-slate-500">
+            You will be logged out after <strong className="text-slate-700">{autoLogoutVal} minutes</strong> of inactivity.
+          </p>
+        )}
+      </div>
+
       {/* Active sessions */}
-      <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm max-w-md">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm max-w-md">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-9 h-9 bg-green-100 rounded-xl flex items-center justify-center">
             <Shield className="w-4 h-4 text-green-600" />

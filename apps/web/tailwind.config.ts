@@ -30,9 +30,9 @@ const config: Config = {
           pink: '#EC4899',
         },
         surface: {
-          DEFAULT: '#F8FAFC',
+          DEFAULT: '#EFF2F7',
           card: '#FFFFFF',
-          border: '#E2E8F0',
+          border: '#CBD5E1',
         },
       },
       fontFamily: {

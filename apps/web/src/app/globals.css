@@ -8,11 +8,11 @@
     --foreground: 222 84% 5%;
     --primary: 239 84% 67%;
     --primary-foreground: 0 0% 100%;
-    --surface: 210 40% 98%;
+    --surface: 210 20% 96%;
     --surface-card: 0 0% 100%;
-    --border: 214 32% 91%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --border: 214 25% 82%;
+    --muted: 210 20% 93%;
+    --muted-foreground: 215 20% 38%;
     --accent: 210 40% 96%;
     --accent-foreground: 222 47% 11%;
     --destructive: 0 84% 60%;
@@ -31,18 +31,40 @@
   }
 
   body {
-    @apply bg-surface text-slate-800 font-sans antialiased;
+    @apply bg-surface text-slate-800 font-sans;
     background-color: hsl(var(--surface));
     color: hsl(var(--foreground));
-    font-weight: 400;
+    font-weight: 450;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    font-feature-settings: 'kern' 1, 'liga' 1;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold text-slate-900;
+  h1, h2, h3 {
+    @apply text-slate-900;
+    font-weight: 700;
   }
+
+  h4, h5, h6 {
+    @apply text-slate-900;
+    font-weight: 650;
+  }
+
+  /* Ensure all paragraph/label text has enough weight to be readable */
+  p {
+    color: #1e293b; /* slate-800 */
+  }
+
+  label {
+    font-weight: 500;
+    color: #334155; /* slate-700 */
+  }
+
+  /* Muted helper text — darker than before for visibility */
+  .text-slate-400 { color: #64748b !important; font-weight: 450; }
+  .text-slate-500 { color: #475569 !important; font-weight: 450; }
+  .text-slate-600 { color: #334155 !important; }
 }
 
 @layer components {
@@ -70,35 +92,35 @@
   }
 
   .badge {
-    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-primary-600 text-white font-medium text-sm
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-primary-600 text-white font-semibold text-sm
            hover:bg-primary-700 active:bg-primary-800 transition-colors duration-150
            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-white text-slate-700 font-medium text-sm
-           border border-surface-border hover:bg-slate-50 active:bg-slate-100 transition-colors duration-150
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-white text-slate-700 font-semibold text-sm
+           border border-slate-300 hover:bg-slate-50 active:bg-slate-100 transition-colors duration-150
            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .input {
-    @apply w-full px-3 py-2 rounded-xl border border-surface-border bg-white text-slate-800 text-sm
+    @apply w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-slate-800 text-sm font-medium
            placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
            transition-shadow duration-150;
   }
 
   .label {
-    @apply block text-sm font-medium text-slate-700 mb-1.5;
+    @apply block text-sm font-semibold text-slate-700 mb-1.5;
   }
 
   .card {
-    @apply bg-white rounded-xl2 border border-surface-border shadow-card p-6;
+    @apply bg-white rounded-xl2 border border-slate-200 shadow-card p-6;
   }
 }
 
@@ -119,7 +141,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--border));
+  background: #cbd5e1;
   border-radius: 999px;
 }
 
@@ -130,7 +152,7 @@
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: hsl(var(--border)) transparent;
+  scrollbar-color: #cbd5e1 transparent;
 }
 
 /* Keyframes */

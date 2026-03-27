@@ -20,6 +20,7 @@ import * as Avatar from '@radix-ui/react-avatar'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { useCredits } from '@/hooks/useCredits'
+import { useAutoLogout } from '@/hooks/useAutoLogout'
 
 const NAV_LINKS = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -45,8 +46,9 @@ function CreditsBadge() {
 
 export function MainNavbar() {
   const pathname = usePathname()
-  const { user, logout } = useAuth()
+  const { user, logout, isLoggedIn } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
+  useAutoLogout(logout, isLoggedIn)
 
   const initials = user?.name
     ? user.name
@@ -93,6 +95,15 @@ export function MainNavbar() {
           {/* Right side */}
           <div className="flex items-center gap-3">
             <CreditsBadge />
+            {user?.isAdmin && (
+              <Link
+                href="/admin"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 text-white text-xs font-semibold hover:bg-slate-700 transition-colors"
+              >
+                <Settings className="w-3.5 h-3.5" />
+                Admin Panel
+              </Link>
+            )}
 
             {/* User menu */}
             <DropdownMenu.Root>

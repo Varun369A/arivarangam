@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { AdminSidebar } from '@/components/AdminSidebar'
+import { AutoLogoutWatcher } from '@/components/AutoLogoutWatcher'
 
 export const metadata: Metadata = {
   title: {
@@ -34,6 +35,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* Page content */}
         <main className="flex-1 p-6 overflow-auto">{children}</main>
+        <AutoLogoutWatcher />
       </div>
     </div>
   )
