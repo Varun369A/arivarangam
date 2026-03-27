@@ -419,4 +419,47 @@ export const adminApi = {
     api.get<BillingStats>('/admin/billing/stats', { params }).then((r) => r.data),
 }
 
+// ---------------------------------------------------------------------------
+// Env Vars API
+// ---------------------------------------------------------------------------
+
+export interface EnvVar {
+  id: string
+  key: string
+  maskedValue: string
+  service?: string
+  label?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ServiceCatalogEntry {
+  label: string
+  envKeys: string[]
+  docsUrl: string
+  getUrl: string
+}
+
+export const envVarsApi = {
+  list: () =>
+    api
+      .get('/env-vars')
+      .then((r) => (r.data as any).data as { vars: EnvVar[]; catalog: Record<string, ServiceCatalogEntry> }),
+
+  upsert: (payload: { key: string; value: string; service?: string; label?: string }) =>
+    api
+      .post('/env-vars', payload)
+      .then((r) => (r.data as any).data as EnvVar),
+
+  delete: (key: string) =>
+    api
+      .delete(`/env-vars/${encodeURIComponent(key)}`)
+      .then((r) => (r.data as any).data),
+
+  detect: () =>
+    api
+      .get('/env-vars/detect')
+      .then((r) => (r.data as any).data as { detected: string[]; missing: string[]; catalog: Record<string, ServiceCatalogEntry> }),
+}
+
 export default api

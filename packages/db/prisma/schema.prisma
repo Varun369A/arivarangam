@@ -121,10 +121,31 @@ model User {
   repos             Repo[]
   transactions      CreditTransaction[]
   securityEvents    SecurityEvent[]
+  envVars           UserEnvVar[]
 
   @@index([email])
   @@index([status])
   @@index([createdAt])
+}
+
+// ─── UserEnvVar ───────────────────────────────────────────────────────────────
+
+model UserEnvVar {
+  id          String   @id @default(cuid())
+  userId      String
+
+  key         String   // e.g. OPENAI_API_KEY
+  value       String   @db.Text  // AES-256-GCM encrypted
+  service     String?  // e.g. "openai", "stripe", "supabase"
+  label       String?  // human-friendly name
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+  @@index([userId])
 }
 
 // ─── Task ─────────────────────────────────────────────────────────────────────

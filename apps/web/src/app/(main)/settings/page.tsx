@@ -23,8 +23,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCredits } from '@/hooks/useCredits';
-import { authApi, creditsApi, getApiError } from '@/lib/api';
-import type { CreditPack, Transaction } from '@/lib/api';
+import { authApi, creditsApi, envVarsApi, getApiError } from '@/lib/api';
+import type { CreditPack, Transaction, EnvVar, ServiceCatalogEntry } from '@/lib/api';
 import { cn, formatDateTime } from '@/lib/utils';
 
 // ─── Razorpay types ────────────────────────────────────────────────────────────
@@ -718,27 +718,295 @@ function BillingTab() {
   );
 }
 
-// API Keys Tab (placeholder)
+// ─── Env Variables Tab ────────────────────────────────────────────────────────
 function ApiKeysTab() {
+  const [vars, setVars] = useState<EnvVar[]>([])
+  const [catalog, setCatalog] = useState<Record<string, ServiceCatalogEntry>>({})
+  const [loading, setLoading] = useState(true)
+  const [detecting, setDetecting] = useState(false)
+  const [detected, setDetected] = useState<{ missing: string[]; catalog: Record<string, ServiceCatalogEntry> } | null>(null)
+
+  const [addKey, setAddKey] = useState('')
+  const [addValue, setAddValue] = useState('')
+  const [addLabel, setAddLabel] = useState('')
+  const [addService, setAddService] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [showAdd, setShowAdd] = useState(false)
+  const [deletingKey, setDeletingKey] = useState<string | null>(null)
+  const [showValues, setShowValues] = useState<Record<string, boolean>>({})
+
+  useEffect(() => {
+    envVarsApi.list()
+      .then(d => { setVars(d.vars); setCatalog(d.catalog) })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  const handleDetect = async () => {
+    setDetecting(true)
+    try {
+      const d = await envVarsApi.detect()
+      setDetected({ missing: d.missing, catalog: d.catalog })
+    } catch { /* ignore */ }
+    finally { setDetecting(false) }
+  }
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!addKey || !addValue) return
+    setSaving(true); setSaveError(null)
+    try {
+      const saved = await envVarsApi.upsert({
+        key: addKey.trim().toUpperCase(),
+        value: addValue.trim(),
+        label: addLabel.trim() || undefined,
+        service: addService || undefined,
+      })
+      setVars(prev => {
+        const idx = prev.findIndex(v => v.key === saved.key)
+        if (idx >= 0) { const n = [...prev]; n[idx] = saved; return n }
+        return [...prev, saved]
+      })
+      setAddKey(''); setAddValue(''); setAddLabel(''); setAddService(''); setShowAdd(false)
+    } catch (err) {
+      setSaveError(getApiError(err))
+    } finally { setSaving(false) }
+  }
+
+  const handleDelete = async (key: string) => {
+    setDeletingKey(key)
+    try {
+      await envVarsApi.delete(key)
+      setVars(prev => prev.filter(v => v.key !== key))
+    } catch { /* ignore */ }
+    finally { setDeletingKey(null) }
+  }
+
+  const handleQuickAdd = (key: string) => {
+    setAddKey(key)
+    const svc = Object.entries(catalog).find(([, s]) => s.envKeys.includes(key))
+    if (svc) setAddService(svc[0])
+    setShowAdd(true)
+    setDetected(null)
+  }
+
+  const SERVICE_ICONS: Record<string, string> = {
+    openai: '🤖', anthropic: '🟣', stripe: '💳', supabase: '⚡', firebase: '🔥',
+    aws: '☁️', mongodb: '🍃', twilio: '📱', sendgrid: '📧', razorpay: '💰',
+    cloudinary: '🖼️', elevenlabs: '🎙️', github: '🐙', google: '🔍', sarvam: '🇮🇳', perplexity: '🔮',
+  }
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold text-slate-800 mb-1">API Keys</h2>
-        <p className="text-sm text-slate-500">Programmatic access to Arivarangam.</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-bold text-slate-800 mb-1">Environment Variables</h2>
+          <p className="text-sm text-slate-500">Store API keys and secrets securely. All values are encrypted at rest.</p>
+        </div>
+        <div className="flex gap-2 flex-shrink-0">
+          <button
+            onClick={handleDetect}
+            disabled={detecting}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-xl border border-indigo-200 transition-colors disabled:opacity-50"
+          >
+            {detecting
+              ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              : <Zap className="w-3.5 h-3.5" />
+            }
+            Smart Detect
+          </button>
+          <button
+            onClick={() => setShowAdd(s => !s)}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-slate-900 text-white hover:bg-slate-700 rounded-xl transition-colors"
+          >
+            <Key className="w-3.5 h-3.5" />
+            Add variable
+          </button>
+        </div>
       </div>
 
-      <div className="bg-gradient-to-br from-slate-50 to-indigo-50 border border-indigo-100 rounded-2xl p-10 text-center max-w-md">
-        <div className="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <Key className="w-7 h-7 text-indigo-500" />
+      {/* Smart Detect results */}
+      {detected && detected.missing.length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <p className="text-sm font-semibold text-amber-800 mb-2">
+            {detected.missing.length} variable{detected.missing.length !== 1 ? 's' : ''} detected in your code but not yet stored:
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {detected.missing.map(k => (
+              <button
+                key={k}
+                onClick={() => handleQuickAdd(k)}
+                className="flex items-center gap-1.5 px-2.5 py-1 bg-white border border-amber-300 rounded-lg text-xs font-mono font-medium text-amber-900 hover:bg-amber-100 transition-colors"
+              >
+                <span>+</span> {k}
+              </button>
+            ))}
+          </div>
         </div>
-        <h3 className="text-lg font-bold text-slate-700 mb-2">Coming soon</h3>
-        <p className="text-sm text-slate-500 leading-relaxed">
-          API key management will let you integrate Arivarangam into your own workflows and pipelines.
-          We&apos;re working on it — stay tuned!
+      )}
+      {detected && detected.missing.length === 0 && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-sm text-emerald-700 font-medium">
+          All detected env variables are already saved.
+        </div>
+      )}
+
+      {/* Add form */}
+      {showAdd && (
+        <form onSubmit={handleSave} className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+          <p className="text-sm font-semibold text-slate-700">Add / Update variable</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-slate-500 mb-1 block">Key (e.g. OPENAI_API_KEY) *</label>
+              <input
+                type="text"
+                value={addKey}
+                onChange={e => setAddKey(e.target.value.toUpperCase())}
+                placeholder="API_KEY_NAME"
+                className="input w-full font-mono text-sm"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 mb-1 block">Value *</label>
+              <input
+                type="password"
+                value={addValue}
+                onChange={e => setAddValue(e.target.value)}
+                placeholder="sk-••••••••"
+                className="input w-full font-mono text-sm"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 mb-1 block">Label (optional)</label>
+              <input
+                type="text"
+                value={addLabel}
+                onChange={e => setAddLabel(e.target.value)}
+                placeholder="My OpenAI key"
+                className="input w-full text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 mb-1 block">Service</label>
+              <select
+                value={addService}
+                onChange={e => setAddService(e.target.value)}
+                className="input w-full text-sm"
+              >
+                <option value="">— auto detect —</option>
+                {Object.entries(catalog).map(([id, svc]) => (
+                  <option key={id} value={id}>{svc.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          {saveError && <p className="text-xs text-red-600">{saveError}</p>}
+          <div className="flex gap-2">
+            <button type="submit" disabled={saving} className="btn-primary text-sm py-2 px-4 flex items-center gap-2">
+              {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+              {saving ? 'Saving…' : 'Save securely'}
+            </button>
+            <button type="button" onClick={() => { setShowAdd(false); setSaveError(null) }} className="btn-secondary text-sm py-2 px-4">
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Variables list */}
+      {loading ? (
+        <div className="flex items-center gap-2 text-sm text-slate-400 py-4">
+          <Loader2 className="w-4 h-4 animate-spin" /> Loading…
+        </div>
+      ) : vars.length === 0 ? (
+        <div className="text-center py-10 text-slate-400">
+          <Key className="w-10 h-10 mx-auto mb-3 opacity-30" />
+          <p className="text-sm font-medium">No variables saved yet</p>
+          <p className="text-xs mt-1">Click &quot;Smart Detect&quot; to scan your project&apos;s code for needed API keys, or add manually.</p>
+        </div>
+      ) : (
+        <div className="border border-slate-100 rounded-xl overflow-hidden divide-y divide-slate-50">
+          {vars.map(v => {
+            const svcInfo = v.service ? catalog[v.service] : null
+            return (
+              <div key={v.id} className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
+                <span className="text-xl flex-shrink-0">{v.service ? (SERVICE_ICONS[v.service] ?? '🔑') : '🔑'}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <code className="text-xs font-mono font-bold text-slate-800">{v.key}</code>
+                    {svcInfo && (
+                      <span className="text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded font-medium">
+                        {svcInfo.label}
+                      </span>
+                    )}
+                    {v.label && <span className="text-xs text-slate-400 truncate">{v.label}</span>}
+                  </div>
+                  <p className="text-xs text-slate-400 font-mono mt-0.5">
+                    {showValues[v.id] ? v.maskedValue : '••••••••••••'}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <button
+                    onClick={() => setShowValues(s => ({ ...s, [v.id]: !s[v.id] }))}
+                    className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors text-xs"
+                    title="Toggle visibility"
+                  >
+                    {showValues[v.id] ? '🙈' : '👁'}
+                  </button>
+                  {svcInfo && (
+                    <a
+                      href={svcInfo.docsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors text-xs"
+                      title="View docs"
+                    >
+                      📖
+                    </a>
+                  )}
+                  <button
+                    onClick={() => handleDelete(v.key)}
+                    disabled={deletingKey === v.key}
+                    className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                    title="Delete"
+                  >
+                    {deletingKey === v.key
+                      ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      : <AlertCircle className="w-3.5 h-3.5" />
+                    }
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Service catalog quick-start */}
+      <div>
+        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Get API Keys — Quick Links</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+          {Object.entries(catalog).map(([id, svc]) => (
+            <a
+              key={id}
+              href={svc.getUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-2 px-3 py-2.5 bg-white border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50 rounded-xl text-xs font-medium text-slate-700 hover:text-indigo-700 transition-colors"
+            >
+              <span>{SERVICE_ICONS[id] ?? '🔑'}</span>
+              {svc.label}
+            </a>
+          ))}
+        </div>
+        <p className="text-[11px] text-slate-400 mt-3">
+          All values are encrypted with AES-256-GCM before being stored. Your keys are never logged or exposed.
         </p>
       </div>
     </div>
-  );
+  )
 }
 
 // ─── Main Settings Page ────────────────────────────────────────────────────────

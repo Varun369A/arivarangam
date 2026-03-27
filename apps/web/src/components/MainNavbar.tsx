@@ -48,7 +48,7 @@ export function MainNavbar() {
   const pathname = usePathname()
   const { user, logout, isLoggedIn } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
-  useAutoLogout(logout, isLoggedIn)
+  const { showWarning, secondsLeft, staySignedIn } = useAutoLogout(logout, isLoggedIn)
 
   const initials = user?.name
     ? user.name
@@ -192,6 +192,21 @@ export function MainNavbar() {
           </div>
         </div>
       </div>
+
+      {/* Auto-logout warning banner */}
+      {showWarning && (
+        <div className="border-t border-yellow-500/30 bg-yellow-500/10 px-4 py-2 flex items-center justify-between gap-4">
+          <p className="text-xs text-yellow-100 font-medium">
+            You will be signed out in <span className="font-bold text-yellow-300">{secondsLeft}s</span> due to inactivity.
+          </p>
+          <button
+            onClick={staySignedIn}
+            className="px-3 py-1 text-xs font-semibold bg-yellow-400 text-yellow-900 rounded-lg hover:bg-yellow-300 transition-colors flex-shrink-0"
+          >
+            Stay signed in
+          </button>
+        </div>
+      )}
 
       {/* Mobile nav */}
       {mobileOpen && (

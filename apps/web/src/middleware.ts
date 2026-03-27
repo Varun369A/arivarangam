@@ -47,7 +47,13 @@ export function middleware(request: NextRequest) {
     if (accessToken && (pathname === '/login' || pathname === '/signup')) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
-    return NextResponse.next()
+    // Prevent browser from showing cached auth pages after logout (back button fix)
+    const publicRes = NextResponse.next()
+    if (pathname === '/login' || pathname === '/signup') {
+      publicRes.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+      publicRes.headers.set('Pragma', 'no-cache')
+    }
+    return publicRes
   }
 
   // Admin routes: require authentication
@@ -57,7 +63,10 @@ export function middleware(request: NextRequest) {
       loginUrl.searchParams.set('redirect', pathname)
       return NextResponse.redirect(loginUrl)
     }
-    return NextResponse.next()
+    const adminRes = NextResponse.next()
+    adminRes.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+    adminRes.headers.set('Pragma', 'no-cache')
+    return adminRes
   }
 
   // Protected routes: require authentication
@@ -67,7 +76,10 @@ export function middleware(request: NextRequest) {
       loginUrl.searchParams.set('redirect', pathname)
       return NextResponse.redirect(loginUrl)
     }
-    return NextResponse.next()
+    const protectedRes = NextResponse.next()
+    protectedRes.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+    protectedRes.headers.set('Pragma', 'no-cache')
+    return protectedRes
   }
 
   return NextResponse.next()

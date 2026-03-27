@@ -18,6 +18,7 @@ import { creditRoutes } from './routes/credits';
 import { streamRoutes } from './routes/stream';
 import { webhookRoutes } from './routes/webhooks';
 import { adminRoutes } from './routes/admin/index';
+import { envVarRoutes } from './routes/envVars';
 
 import { PlatformMonitor } from './platform/Monitor';
 import { SelfImprove } from './platform/SelfImprove';
@@ -102,6 +103,7 @@ async function buildServer() {
   await fastify.register(creditRoutes, { prefix: '/api/v1/credits' });
   await fastify.register(streamRoutes, { prefix: '/api/v1/stream' });
   await fastify.register(adminRoutes, { prefix: '/api/v1/admin' });
+  await fastify.register(envVarRoutes, { prefix: '/api/v1/env-vars' });
 
   // Webhooks (no API v1 prefix — Razorpay calls /webhooks/razorpay)
   await fastify.register(webhookRoutes, { prefix: '/webhooks' });
