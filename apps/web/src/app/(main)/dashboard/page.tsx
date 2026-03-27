@@ -177,7 +177,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     reposApi.list({ limit: 6 })
-      .then(res => setRepos((res as any)?.data?.repos ?? []))
+      .then(res => setRepos(res?.data ?? []))
       .catch(() => {})
       .finally(() => setReposLoading(false));
   }, []);

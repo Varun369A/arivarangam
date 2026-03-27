@@ -121,6 +121,7 @@ export interface Repo {
   language?: string
   isPublic: boolean
   ownerId: string
+  taskId?: string
   deployUrl?: string
   createdAt: string
   updatedAt: string
@@ -293,22 +294,32 @@ export const tasksApi = {
 
 export const reposApi = {
   list: (params?: { page?: number; limit?: number }) =>
-    api.get<PaginatedResponse<Repo>>('/repos', { params }).then((r) => r.data),
+    api.get('/repos', { params }).then((r) => {
+      const d = (r.data as any).data ?? {}
+      return {
+        data: d.repos ?? [],
+        total: d.total ?? 0,
+        page: d.page ?? 1,
+        limit: d.limit ?? 20,
+        totalPages: d.totalPages ?? 1,
+      } as PaginatedResponse<Repo>
+    }),
 
-  get: (repoId: string) => api.get<Repo>(`/repos/${repoId}`).then((r) => r.data),
+  get: (repoId: string) =>
+    api.get(`/repos/${repoId}`).then((r) => (r.data as any).data?.repo ?? r.data),
 
-  create: (payload: Pick<Repo, 'name'> & Partial<Omit<Repo, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>>) =>
-    api.post<Repo>('/repos', payload).then((r) => r.data),
+  create: (payload: Pick<Repo, 'name'> & Partial<Omit<Repo, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>> & { taskId?: string }) =>
+    api.post('/repos', payload).then((r) => (r.data as any).data?.repo ?? r.data),
 
   update: (
     repoId: string,
     payload: Partial<Pick<Repo, 'name' | 'description' | 'isPublic' | 'deployUrl'>>
-  ) => api.patch<Repo>(`/repos/${repoId}`, payload).then((r) => r.data),
+  ) => api.patch(`/repos/${repoId}`, payload).then((r) => (r.data as any).data?.repo ?? r.data),
 
-  saveVersion: (repoId: string, message: string) =>
+  saveVersion: (repoId: string, message: string, taskId?: string) =>
     api
-      .post<{ versionId: string }>(`/repos/${repoId}/save`, { message })
-      .then((r) => r.data),
+      .post(`/repos/${repoId}/save`, { message, ...(taskId ? { taskId } : {}) })
+      .then((r) => (r.data as any).data ?? r.data),
 
   delete: (repoId: string) => api.delete<void>(`/repos/${repoId}`).then((r) => r.data),
 }

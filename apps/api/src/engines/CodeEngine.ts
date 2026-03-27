@@ -294,16 +294,16 @@ Return ONLY a valid JSON object (no markdown, no comments, no prose) with this e
 }
 
 Rules:
-- Keep file count reasonable (3-15 files max)
+- Keep file count reasonable (3-20 files for code projects)
 - Use relative paths from project root
+- Always generate separate individual files — never combine everything into one file
 - Include package.json, README.md for code projects
-- For content tasks, use a single .md or .txt file
 - Return ONLY the JSON — no text before or after`;
 
     const response = await callClaudeSonnet(
       `Create a file structure plan for this ${category} task:\n\n${prompt}`,
       systemPrompt,
-      2048
+      4096
     );
 
     const parsed = this.parseJSON<FilePlan>(response, {

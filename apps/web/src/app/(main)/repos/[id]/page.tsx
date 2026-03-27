@@ -355,7 +355,7 @@ export default function RepoPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-surface">
+    <div className="h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden bg-surface">
       {/* Header */}
       <div className="bg-white border-b border-surface-border px-4 sm:px-6 py-3 flex items-center gap-3 flex-shrink-0">
         <Link

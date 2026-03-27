@@ -16,8 +16,8 @@ export default function ReposPage() {
     { keepPreviousData: true }
   )
 
-  const repos: any[] = (data as any)?.data?.repos ?? (data as any)?.repos ?? []
-  const totalPages: number = (data as any)?.data?.totalPages ?? (data as any)?.totalPages ?? 1
+  const repos: any[] = data?.data ?? []
+  const totalPages: number = data?.totalPages ?? 1
 
   return (
     <div className="space-y-6">

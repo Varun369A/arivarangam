@@ -610,9 +610,8 @@ export default function TaskPage() {
     const repoName = (task as any).prompt.split('\n')[0]
       .slice(0, 50).replace(/[^a-zA-Z0-9\s-]/g, '').trim().replace(/\s+/g, '-').toLowerCase() || 'my-project';
     try {
-      const repo = await reposApi.create({ name: repoName, isPublic: false });
-      const obj = (repo as any)?.data?.repo ?? (repo as any);
-      setSavedRepo({ id: obj.id, name: obj.name });
+      const repo = await reposApi.create({ name: repoName, isPublic: false, taskId: task.id });
+      setSavedRepo({ id: (repo as any).id, name: (repo as any).name });
     } catch { /* ignore */ }
   }, [task]);
 
@@ -667,7 +666,7 @@ export default function TaskPage() {
   const selectedFile = streamFiles.find(f => f.path === selectedFilePath) ?? null;
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-slate-50" style={{ fontFamily: 'var(--font-inter)' }}>
+    <div className="h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden bg-slate-50" style={{ fontFamily: 'var(--font-inter)' }}>
 
       {/* Delete confirm dialog */}
       {showDeleteConfirm && (
