@@ -20,7 +20,7 @@ export interface UseAuthReturn {
   isLoggedIn: boolean
   login: (payload: AuthLoginPayload) => Promise<void>
   logout: () => Promise<void>
-  signup: (payload: AuthSignupPayload) => Promise<void>
+  signup: (payload: AuthSignupPayload) => Promise<{ message: string; email: string }>
   refresh: () => void
 }
 
@@ -77,20 +77,12 @@ export function useAuth(): UseAuthReturn {
     async (payload: AuthSignupPayload) => {
       try {
         const res = await authApi.signup(payload)
-        const { token, user } = res.data
-        Cookies.set('accessToken', token, {
-          expires: 7,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'Lax',
-        })
-        queryClient.setQueryData<User>(AUTH_QUERY_KEY, user)
-        toast.success(`Account created! Welcome, ${user.name.split(' ')[0]}!`)
-        router.push('/dashboard')
+        return res.data // { message, email } — caller handles navigation
       } catch (err) {
         throw new Error(getApiError(err))
       }
     },
-    [queryClient, router]
+    []
   )
 
   const logout = useCallback(async () => {

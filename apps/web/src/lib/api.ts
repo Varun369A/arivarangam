@@ -55,6 +55,14 @@ export interface AuthSignupPayload {
   password: string
 }
 
+export interface SignupResponse {
+  success: boolean
+  data: {
+    message: string
+    email: string
+  }
+}
+
 export interface User {
   id: string
   name: string
@@ -201,7 +209,10 @@ export const authApi = {
     api.post<AuthResponse>('/auth/login', payload).then((r) => r.data),
 
   signup: (payload: AuthSignupPayload) =>
-    api.post<AuthResponse>('/auth/signup', payload).then((r) => r.data),
+    api.post<SignupResponse>('/auth/signup', payload).then((r) => r.data),
+
+  resendVerification: (email: string) =>
+    api.post<{ success: boolean; data: { message: string } }>('/auth/resend-verification', { email }).then((r) => r.data),
 
   logout: () => api.post<void>('/auth/logout').then((r) => r.data),
 

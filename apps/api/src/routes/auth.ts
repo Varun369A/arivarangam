@@ -1,11 +1,17 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import bcrypt from 'bcryptjs';
-import { z } from 'zod';
-import { prisma } from '@arivarangam/db';
-import { requireAuth } from '../middleware/auth';
-import { creditService } from '../services/CreditService';
-import { getConfig } from '@arivarangam/config';
-import { getRedis } from '../redis';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
+import bcrypt from 'bcryptjs'
+import { z } from 'zod'
+import { prisma } from '@arivarangam/db'
+import { requireAuth } from '../middleware/auth'
+import { creditService } from '../services/CreditService'
+import { getConfig } from '@arivarangam/config'
+import { getRedis } from '../redis'
+import {
+  sendVerificationEmail,
+  sendPasswordResetEmail,
+  sendAdminOtpEmail,
+  sendAdminNewUserNotification,
+} from '../email'
 
 // ─── Schemas ───────────────────────────────────────────────────────────────────
 
@@ -13,85 +19,88 @@ const signupSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(100),
   email: z.string().email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters').max(128),
-});
+})
 
 const loginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(1, 'Password is required'),
-});
-
-const forgotPasswordSchema = z.object({
-  email: z.string().email(),
-});
-
-const resetPasswordSchema = z.object({
-  token: z.string().min(1, 'Reset token is required'),
-  password: z.string().min(8, 'Password must be at least 8 characters').max(128),
-});
-
-const verifyEmailSchema = z.object({
-  token: z.string().min(1, 'Verification token is required'),
-});
+  password: z.string().min(1),
+})
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function generateToken(length = 48): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let token = '';
-  const randomBytes = require('crypto').randomBytes(length);
-  for (let i = 0; i < length; i++) {
-    token += chars[randomBytes[i] % chars.length];
-  }
-  return token;
+function randomToken(length = 48): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  const bytes = require('crypto').randomBytes(length)
+  return Array.from({ length }, (_, i) => chars[bytes[i] % chars.length]).join('')
 }
 
-function signJWT(server: FastifyInstance, user: { id: string; email: string; tier: string; isAdmin: boolean }): string {
+function signJWT(
+  server: FastifyInstance,
+  user: { id: string; email: string; tier: string; isAdmin: boolean }
+): string {
   return (server as any).jwt.sign(
     { email: user.email, tier: user.tier, isAdmin: user.isAdmin },
     { sub: user.id }
-  );
+  )
 }
 
-function setCookieToken(reply: FastifyReply, token: string): void {
+function setAuthCookie(reply: FastifyReply, token: string): void {
   reply.setCookie('arivarangam_token', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60 * 24 * 7, // 7 days
-  });
+    maxAge: 60 * 60 * 24 * 7,
+  })
 }
 
-// ─── Route Plugin ─────────────────────────────────────────────────────────────
+function safeUser(user: {
+  id: string; name: string; email: string; tier: string; credits: number;
+  isAdmin: boolean; isEmailVerified: boolean; avatar?: string | null
+}) {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    tier: user.tier,
+    credits: user.credits,
+    isAdmin: user.isAdmin,
+    isEmailVerified: user.isEmailVerified,
+    avatarUrl: user.avatar ?? undefined,
+  }
+}
+
+// ─── Plugin ───────────────────────────────────────────────────────────────────
 
 export async function authRoutes(fastify: FastifyInstance): Promise<void> {
-  // POST /signup
-  fastify.post('/signup', async (request: FastifyRequest, reply: FastifyReply) => {
-    const parseResult = signupSchema.safeParse(request.body);
-    if (!parseResult.success) {
-      const errors: Record<string, string> = {};
-      parseResult.error.errors.forEach(e => {
-        errors[e.path.join('.')] = e.message;
-      });
-      return reply.code(400).send({ success: false, error: 'Validation failed', details: errors });
+
+  // ── POST /signup ────────────────────────────────────────────────────────────
+  fastify.post('/signup', async (req: FastifyRequest, reply: FastifyReply) => {
+    const parsed = signupSchema.safeParse(req.body)
+    if (!parsed.success) {
+      const details: Record<string, string> = {}
+      parsed.error.errors.forEach(e => { details[e.path.join('.')] = e.message })
+      return reply.code(400).send({ success: false, error: 'Validation failed', details })
     }
 
-    const { name, email, password } = parseResult.data;
-    const normalizedEmail = email.toLowerCase().trim();
+    const { name, email, password } = parsed.data
+    const normalizedEmail = email.toLowerCase().trim()
+    const config = getConfig()
 
-    // Check if email already exists
-    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    // Duplicate email check
+    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } })
     if (existing) {
-      return reply.code(409).send({ success: false, error: 'An account with this email already exists', code: 'EMAIL_EXISTS' });
+      return reply.code(409).send({
+        success: false,
+        error: 'An account with this email already exists.',
+        code: 'EMAIL_EXISTS',
+      })
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = await bcrypt.hash(password, 12)
+    const emailVerifyToken = randomToken()
 
-    // Generate email verification token
-    const emailVerifyToken = generateToken();
-
-    // Create user
+    // Create user — NOT verified yet, no credits until verification
     const user = await prisma.user.create({
       data: {
         name: name.trim(),
@@ -101,159 +110,269 @@ export async function authRoutes(fastify: FastifyInstance): Promise<void> {
         termsAcceptedAt: new Date(),
         status: 'ACTIVE',
         tier: 'FREE',
-        credits: 0, // Will be set by signup bonus
+        credits: 0,
+        isEmailVerified: false,
       },
-    });
+    })
 
-    // Grant signup bonus
-    await creditService.grantSignupBonus(user.id);
+    // Send verification email (non-blocking)
+    sendVerificationEmail(normalizedEmail, user.name, emailVerifyToken, config.WEB_URL).catch(() => {})
 
-    // Log verification token (email sending is stubbed — log for dev purposes)
-    console.log(`[Auth] Email verification token for ${normalizedEmail}: ${emailVerifyToken}`);
-    console.log(`[Auth] Verification URL: ${getConfig().WEB_URL}/verify-email?token=${emailVerifyToken}`);
+    // Notify admin (non-blocking)
+    sendAdminNewUserNotification(config.ADMIN_EMAIL, {
+      name: user.name,
+      email: user.email,
+      createdAt: user.createdAt,
+    }).catch(() => {})
 
-    // Sign JWT
-    const token = signJWT(fastify, user);
-    setCookieToken(reply, token);
+    // Dev fallback — log token so you can verify without email
+    console.log(`[Auth] Verification token for ${normalizedEmail}: ${emailVerifyToken}`)
+    console.log(`[Auth] Verification URL: ${config.WEB_URL}/verify-email?token=${emailVerifyToken}`)
 
     return reply.code(201).send({
       success: true,
       data: {
-        token,
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          tier: user.tier,
-          credits: 100, // Just granted
-          isAdmin: user.isAdmin,
-          isEmailVerified: user.isEmailVerified,
-        },
-        message: 'Account created successfully. 100 welcome credits added!',
+        message: 'Account created! Please check your email to verify your address before signing in.',
+        email: normalizedEmail,
       },
-    });
-  });
+    })
+  })
 
-  // POST /login
-  fastify.post('/login', async (request: FastifyRequest, reply: FastifyReply) => {
-    const parseResult = loginSchema.safeParse(request.body);
-    if (!parseResult.success) {
-      return reply.code(400).send({ success: false, error: 'Invalid email or password format' });
+  // ── POST /login ─────────────────────────────────────────────────────────────
+  fastify.post('/login', async (req: FastifyRequest, reply: FastifyReply) => {
+    const parsed = loginSchema.safeParse(req.body)
+    if (!parsed.success) {
+      return reply.code(400).send({ success: false, error: 'Invalid email or password format' })
     }
 
-    const { email, password } = parseResult.data;
-    const normalizedEmail = email.toLowerCase().trim();
+    const { email, password } = parsed.data
+    const normalizedEmail = email.toLowerCase().trim()
 
-    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } })
+    const genericError = { success: false, error: 'Invalid email or password', code: 'INVALID_CREDENTIALS' }
 
-    // Generic error to prevent user enumeration
-    const authError = { success: false, error: 'Invalid email or password', code: 'INVALID_CREDENTIALS' };
-
-    if (!user) {
-      return reply.code(401).send(authError);
-    }
-
-    if (user.status === 'DELETED') {
-      return reply.code(401).send(authError);
+    if (!user || user.status === 'DELETED') {
+      return reply.code(401).send(genericError)
     }
 
     if (user.status === 'SUSPENDED') {
-      return reply.code(401).send({
+      return reply.code(403).send({
         success: false,
-        error: 'Your account has been suspended. Contact support for assistance.',
+        error: 'Your account has been suspended. Contact support.',
         code: 'ACCOUNT_SUSPENDED',
-      });
+      })
     }
 
-    const passwordValid = await bcrypt.compare(password, user.password);
+    const passwordValid = await bcrypt.compare(password, user.password)
     if (!passwordValid) {
-      // Log failed auth attempt
       await prisma.securityEvent.create({
         data: {
           userId: user.id,
           type: 'FAILED_AUTH',
           severity: 'LOW',
-          description: `Failed login attempt for ${normalizedEmail}`,
-          ipAddress: request.ip,
+          description: `Failed login for ${normalizedEmail}`,
+          ipAddress: req.ip,
         },
-      }).catch(() => {}); // Non-fatal
-
-      return reply.code(401).send(authError);
+      }).catch(() => {})
+      return reply.code(401).send(genericError)
     }
 
-    const token = signJWT(fastify, user);
-    setCookieToken(reply, token);
+    // Block unverified accounts
+    if (!user.isEmailVerified) {
+      return reply.code(403).send({
+        success: false,
+        error: 'Please verify your email address before signing in. Check your inbox for the verification link.',
+        code: 'EMAIL_NOT_VERIFIED',
+        email: normalizedEmail,
+      })
+    }
+
+    const token = signJWT(fastify, user)
+    setAuthCookie(reply, token)
 
     return reply.send({
       success: true,
-      data: {
-        token,
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          tier: user.tier,
-          credits: user.credits,
-          isAdmin: user.isAdmin,
-          isEmailVerified: user.isEmailVerified,
-          status: user.status,
-        },
+      data: { token, user: safeUser(user) },
+    })
+  })
+
+  // ── POST /logout ────────────────────────────────────────────────────────────
+  fastify.post('/logout', async (_req: FastifyRequest, reply: FastifyReply) => {
+    reply.clearCookie('arivarangam_token', { path: '/' })
+    return reply.send({ success: true, data: { message: 'Logged out successfully' } })
+  })
+
+  // ── GET /me ─────────────────────────────────────────────────────────────────
+  fastify.get('/me', { preHandler: requireAuth }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const jwtUser = (req as any).user
+
+    const user = await prisma.user.findUnique({
+      where: { id: jwtUser.id },
+      select: {
+        id: true, name: true, email: true, avatar: true,
+        tier: true, credits: true, totalCreditsUsed: true,
+        isAdmin: true, isEmailVerified: true, status: true,
+        termsAcceptedAt: true, createdAt: true, updatedAt: true,
       },
-    });
-  });
+    })
 
-  // POST /logout
-  fastify.post('/logout', async (request: FastifyRequest, reply: FastifyReply) => {
-    reply.clearCookie('arivarangam_token', { path: '/' });
-    return reply.send({ success: true, data: { message: 'Logged out successfully' } });
-  });
+    if (!user) return reply.code(404).send({ success: false, error: 'User not found' })
 
-  // POST /forgot-password
-  fastify.post('/forgot-password', async (request: FastifyRequest, reply: FastifyReply) => {
-    const parseResult = forgotPasswordSchema.safeParse(request.body);
-    if (!parseResult.success) {
-      return reply.code(400).send({ success: false, error: 'Invalid email address' });
+    return reply.send({ success: true, data: { user } })
+  })
+
+  // ── PATCH /me ───────────────────────────────────────────────────────────────
+  fastify.patch('/me', { preHandler: requireAuth }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const jwtUser = (req as any).user
+    const schema = z.object({ name: z.string().min(2).max(100).optional() })
+    const parsed = schema.safeParse(req.body)
+    if (!parsed.success) {
+      return reply.code(400).send({ success: false, error: 'Validation failed' })
     }
 
-    const { email } = parseResult.data;
-    const normalizedEmail = email.toLowerCase().trim();
+    const updated = await prisma.user.update({
+      where: { id: jwtUser.id },
+      data: parsed.data,
+      select: {
+        id: true, name: true, email: true, avatar: true,
+        tier: true, credits: true, isAdmin: true, isEmailVerified: true,
+      },
+    })
 
-    // Always return success to prevent email enumeration
-    const genericResponse = {
-      success: true,
-      data: { message: 'If an account with that email exists, we\'ve sent a password reset link.' },
-    };
+    return reply.send({ success: true, data: { user: updated } })
+  })
 
-    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
-    if (!user || user.status !== 'ACTIVE') {
-      return reply.send(genericResponse);
+  // ── POST /me/change-password ─────────────────────────────────────────────────
+  fastify.post('/me/change-password', { preHandler: requireAuth }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const jwtUser = (req as any).user
+    const schema = z.object({
+      oldPassword: z.string().min(1),
+      newPassword: z.string().min(8).max(128),
+    })
+    const parsed = schema.safeParse(req.body)
+    if (!parsed.success) {
+      return reply.code(400).send({ success: false, error: 'Validation failed' })
     }
 
-    const resetToken = generateToken();
-    const resetTokenExpiry = new Date(Date.now() + 3600 * 1000); // 1 hour
+    const { oldPassword, newPassword } = parsed.data
+    const user = await prisma.user.findUnique({ where: { id: jwtUser.id } })
+    if (!user) return reply.code(404).send({ success: false, error: 'User not found' })
+
+    const valid = await bcrypt.compare(oldPassword, user.password)
+    if (!valid) return reply.code(401).send({ success: false, error: 'Current password is incorrect' })
 
     await prisma.user.update({
-      where: { id: user.id },
-      data: { resetToken, resetTokenExpiry },
-    });
+      where: { id: jwtUser.id },
+      data: { password: await bcrypt.hash(newPassword, 12) },
+    })
 
-    // Log reset token (email sending stubbed)
-    console.log(`[Auth] Password reset token for ${normalizedEmail}: ${resetToken}`);
-    console.log(`[Auth] Reset URL: ${getConfig().WEB_URL}/reset-password?token=${resetToken}`);
+    return reply.send({ success: true, data: { message: 'Password changed successfully.' } })
+  })
 
-    return reply.send(genericResponse);
-  });
-
-  // POST /reset-password
-  fastify.post('/reset-password', async (request: FastifyRequest, reply: FastifyReply) => {
-    const parseResult = resetPasswordSchema.safeParse(request.body);
-    if (!parseResult.success) {
-      const errors: Record<string, string> = {};
-      parseResult.error.errors.forEach(e => { errors[e.path.join('.')] = e.message; });
-      return reply.code(400).send({ success: false, error: 'Validation failed', details: errors });
+  // ── POST /verify-email ───────────────────────────────────────────────────────
+  fastify.post('/verify-email', async (req: FastifyRequest, reply: FastifyReply) => {
+    const schema = z.object({ token: z.string().min(1) })
+    const parsed = schema.safeParse(req.body)
+    if (!parsed.success) {
+      return reply.code(400).send({ success: false, error: 'Verification token is required' })
     }
 
-    const { token, password } = parseResult.data;
+    const user = await prisma.user.findFirst({ where: { emailVerifyToken: parsed.data.token } })
+
+    if (!user) {
+      return reply.code(400).send({
+        success: false,
+        error: 'Invalid or expired verification link. Please request a new one.',
+        code: 'INVALID_TOKEN',
+      })
+    }
+
+    if (user.isEmailVerified) {
+      return reply.send({ success: true, data: { message: 'Email already verified. You can sign in.' } })
+    }
+
+    // Activate account
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { isEmailVerified: true, emailVerifyToken: null },
+    })
+
+    // Grant signup bonus now that email is confirmed
+    await creditService.grantSignupBonus(user.id).catch(() => {})
+
+    return reply.send({
+      success: true,
+      data: { message: 'Email verified! Your account is now active. You can sign in.' },
+    })
+  })
+
+  // ── POST /resend-verification ────────────────────────────────────────────────
+  fastify.post('/resend-verification', async (req: FastifyRequest, reply: FastifyReply) => {
+    const schema = z.object({ email: z.string().email() })
+    const parsed = schema.safeParse(req.body)
+    if (!parsed.success) {
+      return reply.code(400).send({ success: false, error: 'Valid email is required' })
+    }
+
+    const normalizedEmail = parsed.data.email.toLowerCase().trim()
+    const config = getConfig()
+    // Generic response — don't leak whether email exists
+    const ok = { success: true, data: { message: 'If this email is registered and unverified, we\'ve resent the verification link.' } }
+
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } })
+    if (!user || user.isEmailVerified) return reply.send(ok)
+
+    // Generate fresh token
+    const token = randomToken()
+    await prisma.user.update({ where: { id: user.id }, data: { emailVerifyToken: token } })
+
+    sendVerificationEmail(normalizedEmail, user.name, token, config.WEB_URL).catch(() => {})
+    console.log(`[Auth] Resent verification token for ${normalizedEmail}: ${token}`)
+
+    return reply.send(ok)
+  })
+
+  // ── POST /forgot-password ────────────────────────────────────────────────────
+  fastify.post('/forgot-password', async (req: FastifyRequest, reply: FastifyReply) => {
+    const schema = z.object({ email: z.string().email() })
+    const parsed = schema.safeParse(req.body)
+    if (!parsed.success) {
+      return reply.code(400).send({ success: false, error: 'Valid email is required' })
+    }
+
+    const normalizedEmail = parsed.data.email.toLowerCase().trim()
+    const config = getConfig()
+    const ok = { success: true, data: { message: 'If an account with that email exists, we\'ve sent a reset link.' } }
+
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } })
+    if (!user || user.status !== 'ACTIVE') return reply.send(ok)
+
+    const resetToken = randomToken()
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { resetToken, resetTokenExpiry: new Date(Date.now() + 3600 * 1000) },
+    })
+
+    sendPasswordResetEmail(normalizedEmail, user.name, resetToken, config.WEB_URL).catch(() => {})
+    console.log(`[Auth] Password reset token for ${normalizedEmail}: ${resetToken}`)
+
+    return reply.send(ok)
+  })
+
+  // ── POST /reset-password ─────────────────────────────────────────────────────
+  fastify.post('/reset-password', async (req: FastifyRequest, reply: FastifyReply) => {
+    const schema = z.object({
+      token: z.string().min(1),
+      password: z.string().min(8).max(128),
+    })
+    const parsed = schema.safeParse(req.body)
+    if (!parsed.success) {
+      const details: Record<string, string> = {}
+      parsed.error.errors.forEach(e => { details[e.path.join('.')] = e.message })
+      return reply.code(400).send({ success: false, error: 'Validation failed', details })
+    }
+
+    const { token, password } = parsed.data
 
     const user = await prisma.user.findFirst({
       where: {
@@ -261,249 +380,108 @@ export async function authRoutes(fastify: FastifyInstance): Promise<void> {
         resetTokenExpiry: { gt: new Date() },
         status: 'ACTIVE',
       },
-    });
+    })
 
     if (!user) {
       return reply.code(400).send({
         success: false,
-        error: 'Invalid or expired reset token. Please request a new password reset.',
+        error: 'Invalid or expired reset link. Please request a new one.',
         code: 'INVALID_RESET_TOKEN',
-      });
+      })
     }
-
-    const hashedPassword = await bcrypt.hash(password, 12);
 
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        password: hashedPassword,
+        password: await bcrypt.hash(password, 12),
         resetToken: null,
         resetTokenExpiry: null,
       },
-    });
+    })
 
-    return reply.send({
-      success: true,
-      data: { message: 'Password reset successfully. You can now log in with your new password.' },
-    });
-  });
+    return reply.send({ success: true, data: { message: 'Password reset successfully. You can now sign in.' } })
+  })
 
-  // GET /me
-  fastify.get('/me', { preHandler: requireAuth }, async (request: FastifyRequest, reply: FastifyReply) => {
-    const user = (request as any).user;
-
-    const fullUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        avatar: true,
-        tier: true,
-        credits: true,
-        totalCreditsUsed: true,
-        isAdmin: true,
-        isEmailVerified: true,
-        status: true,
-        termsAcceptedAt: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    if (!fullUser) {
-      return reply.code(404).send({ success: false, error: 'User not found' });
+  // ── POST /admin-otp-send ─────────────────────────────────────────────────────
+  // Step 1: validate admin credentials → send OTP to admin email
+  fastify.post('/admin-otp-send', async (req: FastifyRequest, reply: FastifyReply) => {
+    const parsed = loginSchema.safeParse(req.body)
+    if (!parsed.success) {
+      return reply.code(400).send({ success: false, error: 'Invalid email or password' })
     }
 
-    return reply.send({ success: true, data: { user: fullUser } });
-  });
+    const { email, password } = parsed.data
+    const normalizedEmail = email.toLowerCase().trim()
+    const authError = { success: false, error: 'Invalid credentials', code: 'INVALID_CREDENTIALS' }
 
-  // POST /verify-email
-  fastify.post('/verify-email', async (request: FastifyRequest, reply: FastifyReply) => {
-    const parseResult = verifyEmailSchema.safeParse(request.body);
-    if (!parseResult.success) {
-      return reply.code(400).send({ success: false, error: 'Verification token is required' });
-    }
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } })
+    if (!user || user.status !== 'ACTIVE') return reply.code(401).send(authError)
+    if (!user.isAdmin) return reply.code(403).send({ success: false, error: 'Admin access required', code: 'NOT_ADMIN' })
 
-    const { token } = parseResult.data;
+    const passwordValid = await bcrypt.compare(password, user.password)
+    if (!passwordValid) return reply.code(401).send(authError)
 
-    const user = await prisma.user.findFirst({
-      where: { emailVerifyToken: token },
-    });
+    // Generate OTP
+    const otp = String(Math.floor(100000 + Math.random() * 900000))
+    const redis = getRedis()
+    await redis.set(`admin:otp:${normalizedEmail}`, otp, 'EX', 300)
 
-    if (!user) {
-      return reply.code(400).send({
-        success: false,
-        error: 'Invalid verification token',
-        code: 'INVALID_VERIFY_TOKEN',
-      });
-    }
-
-    if (user.isEmailVerified) {
-      return reply.send({
-        success: true,
-        data: { message: 'Email already verified' },
-      });
-    }
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        isEmailVerified: true,
-        emailVerifyToken: null,
-      },
-    });
-
-    return reply.send({
-      success: true,
-      data: { message: 'Email verified successfully!' },
-    });
-  });
-
-  // PATCH /me
-  fastify.patch('/me', { preHandler: requireAuth }, async (request: FastifyRequest, reply: FastifyReply) => {
-    const user = (request as any).user;
-    const schema = z.object({
-      name: z.string().min(2).max(100).optional(),
-    });
-
-    const parseResult = schema.safeParse(request.body);
-    if (!parseResult.success) {
-      return reply.code(400).send({ success: false, error: 'Validation failed' });
-    }
-
-    const updated = await prisma.user.update({
-      where: { id: user.id },
-      data: parseResult.data,
-      select: {
-        id: true, name: true, email: true, tier: true, credits: true,
-        isAdmin: true, isEmailVerified: true, avatar: true,
-      },
-    });
-
-    return reply.send({ success: true, data: { user: updated } });
-  });
-
-  // POST /me/change-password
-  fastify.post('/me/change-password', { preHandler: requireAuth }, async (request: FastifyRequest, reply: FastifyReply) => {
-    const user = (request as any).user;
-    const schema = z.object({
-      oldPassword: z.string().min(1),
-      newPassword: z.string().min(8).max(128),
-    });
-
-    const parseResult = schema.safeParse(request.body);
-    if (!parseResult.success) {
-      return reply.code(400).send({ success: false, error: 'Validation failed' });
-    }
-
-    const { oldPassword, newPassword } = parseResult.data;
-
-    const fullUser = await prisma.user.findUnique({ where: { id: user.id } });
-    if (!fullUser) return reply.code(404).send({ success: false, error: 'User not found' });
-
-    const valid = await bcrypt.compare(oldPassword, fullUser.password);
-    if (!valid) return reply.code(401).send({ success: false, error: 'Current password is incorrect' });
-
-    const hashed = await bcrypt.hash(newPassword, 12);
-    await prisma.user.update({ where: { id: user.id }, data: { password: hashed } });
-
-    return reply.send({ success: true, data: { message: 'Password changed successfully.' } });
-  });
-
-  // ─── POST /admin-otp-send ──────────────────────────────────────────────────
-  // Step 1 of admin 2FA: validate credentials, generate & store OTP
-
-  fastify.post('/admin-otp-send', async (request: FastifyRequest, reply: FastifyReply) => {
-    const parseResult = loginSchema.safeParse(request.body);
-    if (!parseResult.success) {
-      return reply.code(400).send({ success: false, error: 'Invalid email or password' });
-    }
-
-    const { email, password } = parseResult.data;
-    const normalizedEmail = email.toLowerCase().trim();
-
-    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
-    const authError = { success: false, error: 'Invalid credentials', code: 'INVALID_CREDENTIALS' };
-
-    if (!user || user.status !== 'ACTIVE') return reply.code(401).send(authError);
-    if (!user.isAdmin) return reply.code(403).send({ success: false, error: 'Admin access required', code: 'NOT_ADMIN' });
-
-    const passwordValid = await bcrypt.compare(password, user.password);
-    if (!passwordValid) return reply.code(401).send(authError);
-
-    // Generate 6-digit OTP
-    const otp = String(Math.floor(100000 + Math.random() * 900000));
-    const redis = getRedis();
-    const otpKey = `admin:otp:${normalizedEmail}`;
-
-    // Store OTP with 5-minute TTL
-    await redis.set(otpKey, otp, 'EX', 300);
-
-    // Stub: log OTP (replace with real email sending)
-    console.log(`[Admin 2FA] OTP for ${normalizedEmail}: ${otp}`);
-    console.log(`[Admin 2FA] OTP expires in 5 minutes`);
+    // Send OTP via email
+    await sendAdminOtpEmail(normalizedEmail, otp)
+    console.log(`[Admin 2FA] OTP for ${normalizedEmail}: ${otp}`)
 
     return reply.send({
       success: true,
       data: { message: `OTP sent to ${normalizedEmail.replace(/(.{2}).*@/, '$1***@')}` },
-    });
-  });
+    })
+  })
 
-  // ─── POST /admin-otp-verify ────────────────────────────────────────────────
-  // Step 2 of admin 2FA: verify OTP and return JWT
-
-  fastify.post('/admin-otp-verify', async (request: FastifyRequest, reply: FastifyReply) => {
+  // ── POST /admin-otp-verify ───────────────────────────────────────────────────
+  // Step 2: verify OTP → return JWT
+  fastify.post('/admin-otp-verify', async (req: FastifyRequest, reply: FastifyReply) => {
     const schema = z.object({
       email: z.string().email(),
       otp: z.string().length(6, 'OTP must be 6 digits'),
-    });
-
-    const parseResult = schema.safeParse(request.body);
-    if (!parseResult.success) {
-      return reply.code(400).send({ success: false, error: 'Invalid request' });
+    })
+    const parsed = schema.safeParse(req.body)
+    if (!parsed.success) {
+      return reply.code(400).send({ success: false, error: 'Invalid request' })
     }
 
-    const { email, otp } = parseResult.data;
-    const normalizedEmail = email.toLowerCase().trim();
-    const redis = getRedis();
-    const otpKey = `admin:otp:${normalizedEmail}`;
+    const { email, otp } = parsed.data
+    const normalizedEmail = email.toLowerCase().trim()
+    const redis = getRedis()
+    const key = `admin:otp:${normalizedEmail}`
 
-    const storedOtp = await redis.get(otpKey);
-
-    if (!storedOtp) {
-      return reply.code(400).send({ success: false, error: 'OTP expired or not requested. Please start again.', code: 'OTP_EXPIRED' });
+    const stored = await redis.get(key)
+    if (!stored) {
+      return reply.code(400).send({
+        success: false,
+        error: 'OTP expired or not requested. Please start again.',
+        code: 'OTP_EXPIRED',
+      })
+    }
+    if (stored !== otp) {
+      return reply.code(401).send({
+        success: false,
+        error: 'Incorrect OTP. Please check and try again.',
+        code: 'INVALID_OTP',
+      })
     }
 
-    if (storedOtp !== otp) {
-      return reply.code(401).send({ success: false, error: 'Invalid OTP. Please check and try again.', code: 'INVALID_OTP' });
-    }
+    await redis.del(key) // single use
 
-    // OTP valid — delete it (single use)
-    await redis.del(otpKey);
-
-    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } })
     if (!user || !user.isAdmin) {
-      return reply.code(403).send({ success: false, error: 'Admin access required' });
+      return reply.code(403).send({ success: false, error: 'Admin access required' })
     }
 
-    const token = signJWT(fastify, user);
-    setCookieToken(reply, token);
+    const token = signJWT(fastify, user)
+    setAuthCookie(reply, token)
 
     return reply.send({
       success: true,
-      data: {
-        token,
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          tier: user.tier,
-          credits: user.credits,
-          isAdmin: user.isAdmin,
-          isEmailVerified: user.isEmailVerified,
-        },
-      },
-    });
-  });
+      data: { token, user: safeUser(user) },
+    })
+  })
 }

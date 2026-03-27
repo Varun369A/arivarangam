@@ -1,126 +1,153 @@
-'use client';
+'use client'
 
-import { useEffect, useState, Suspense } from 'react';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { CheckCircle2, XCircle, Loader2, Mail } from 'lucide-react';
-import { authApi, getApiError } from '@/lib/api';
+import { useEffect, useState, Suspense } from 'react'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { CheckCircle2, XCircle, Loader2, Mail } from 'lucide-react'
+import { authApi, getApiError } from '@/lib/api'
 
-type State = 'idle' | 'loading' | 'success' | 'error' | 'no-token';
+type State = 'loading' | 'success' | 'error' | 'no-token'
 
 function VerifyEmailContent() {
-  const searchParams = useSearchParams();
-  const token = searchParams.get('token');
-  const [state, setState] = useState<State>('idle');
-  const [message, setMessage] = useState('');
+  const searchParams = useSearchParams()
+  const token = searchParams.get('token')
+  const [state, setState] = useState<State>(token ? 'loading' : 'no-token')
+  const [message, setMessage] = useState('')
 
   useEffect(() => {
-    if (!token) {
-      setState('no-token');
-      return;
-    }
+    if (!token) return
 
-    setState('loading');
     authApi.verifyEmail(token)
-      .then((res) => {
-        setState('success');
-        setMessage(res.message || 'Your email has been verified!');
+      .then(res => {
+        setState('success')
+        setMessage(res.message || 'Your email has been verified!')
       })
-      .catch((err) => {
-        setState('error');
-        setMessage(getApiError(err));
-      });
-  }, [token]);
+      .catch(err => {
+        setState('error')
+        setMessage(getApiError(err))
+      })
+  }, [token])
 
+  if (state === 'loading') {
+    return (
+      <div style={{ textAlign: 'center', padding: '24px 0' }}>
+        <div style={{
+          width: '56px', height: '56px', borderRadius: '16px',
+          background: 'linear-gradient(135deg, #1E3461 0%, #C4882A 100%)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px',
+        }}>
+          <Loader2 style={{ width: '28px', height: '28px', color: '#fff' }} className="animate-spin" />
+        </div>
+        <h1 style={{ fontSize: '20px', fontWeight: 800, color: '#0A0D14', margin: '0 0 8px' }}>
+          Verifying your email…
+        </h1>
+        <p style={{ fontSize: '14px', color: '#9CA3AF', margin: 0 }}>
+          Please wait a moment.
+        </p>
+      </div>
+    )
+  }
+
+  if (state === 'success') {
+    return (
+      <div style={{ textAlign: 'center', padding: '24px 0' }}>
+        <div style={{
+          width: '56px', height: '56px', borderRadius: '16px', background: '#F0FDF4',
+          border: '1.5px solid #BBF7D0',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px',
+        }}>
+          <CheckCircle2 style={{ width: '28px', height: '28px', color: '#16A34A' }} />
+        </div>
+        <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#0A0D14', margin: '0 0 8px', letterSpacing: '-0.3px' }}>
+          Email verified!
+        </h1>
+        <p style={{ fontSize: '14px', color: '#6B7280', margin: '0 0 8px', lineHeight: 1.6 }}>
+          {message}
+        </p>
+        <p style={{ fontSize: '14px', color: '#6B7280', margin: '0 0 28px', lineHeight: 1.6 }}>
+          Your <strong>100 welcome credits</strong> have been added to your account.
+        </p>
+        <Link href="/login" style={{
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          padding: '12px 32px', borderRadius: '10px', background: '#1E3461',
+          color: '#fff', fontSize: '14px', fontWeight: 700, textDecoration: 'none',
+        }}>
+          Sign in to your account →
+        </Link>
+      </div>
+    )
+  }
+
+  if (state === 'error') {
+    return (
+      <div style={{ textAlign: 'center', padding: '24px 0' }}>
+        <div style={{
+          width: '56px', height: '56px', borderRadius: '16px', background: '#FEF2F2',
+          border: '1.5px solid #FECACA',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px',
+        }}>
+          <XCircle style={{ width: '28px', height: '28px', color: '#DC2626' }} />
+        </div>
+        <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#0A0D14', margin: '0 0 8px', letterSpacing: '-0.3px' }}>
+          Verification failed
+        </h1>
+        <p style={{ fontSize: '14px', color: '#DC2626', fontWeight: 500, margin: '0 0 6px' }}>{message}</p>
+        <p style={{ fontSize: '13px', color: '#9CA3AF', margin: '0 0 28px', lineHeight: 1.6 }}>
+          The link may have expired (valid 24 hours) or already been used.
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
+          <Link href="/signup" style={{
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            padding: '12px 28px', borderRadius: '10px', background: '#1E3461',
+            color: '#fff', fontSize: '14px', fontWeight: 700, textDecoration: 'none',
+          }}>
+            Try signing up again
+          </Link>
+          <Link href="/login" style={{ fontSize: '14px', color: '#6B7280', textDecoration: 'none', fontWeight: 500 }}>
+            Back to sign in
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  // no-token
   return (
-    <>
-      {/* Loading */}
-      {(state === 'idle' || state === 'loading') && (
-        <div className="text-center py-6">
-          <div className="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
-            <Loader2 className="w-7 h-7 text-indigo-600 animate-spin" />
-          </div>
-          <h1 className="text-2xl font-bold text-slate-800 mb-2">Verifying your email…</h1>
-          <p className="text-sm text-slate-500">Please wait while we confirm your address.</p>
-        </div>
-      )}
-
-      {/* No token */}
-      {state === 'no-token' && (
-        <div className="text-center py-6">
-          <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
-            <Mail className="w-7 h-7 text-amber-600" />
-          </div>
-          <h1 className="text-2xl font-bold text-slate-800 mb-2">Check your email</h1>
-          <p className="text-sm text-slate-500 mb-6 leading-relaxed">
-            We sent a verification link to your email address when you signed up.
-            Click the link in that email to verify your account.
-          </p>
-          <p className="text-xs text-slate-400 mb-8">
-            Didn&apos;t get it? Check your spam folder or contact support.
-          </p>
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold
-              text-sm px-5 py-2.5 rounded-xl transition-colors"
-          >
-            Go to dashboard
-          </Link>
-        </div>
-      )}
-
-      {/* Success */}
-      {state === 'success' && (
-        <div className="text-center py-6">
-          <div className="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
-            <CheckCircle2 className="w-7 h-7 text-green-600" />
-          </div>
-          <h1 className="text-2xl font-bold text-slate-800 mb-2">Email verified!</h1>
-          <p className="text-sm text-slate-500 mb-8">{message}</p>
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700
-              hover:to-indigo-800 text-white font-semibold text-sm px-6 py-2.5 rounded-xl transition-all shadow-md
-              shadow-indigo-100"
-          >
-            Continue to dashboard
-          </Link>
-        </div>
-      )}
-
-      {/* Error */}
-      {state === 'error' && (
-        <div className="text-center py-6">
-          <div className="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
-            <XCircle className="w-7 h-7 text-red-600" />
-          </div>
-          <h1 className="text-2xl font-bold text-slate-800 mb-2">Verification failed</h1>
-          <p className="text-sm text-red-600 mb-2 font-medium">{message}</p>
-          <p className="text-xs text-slate-400 mb-8">
-            The link may have expired (valid for 24 hours) or already been used.
-          </p>
-          <div className="flex flex-col gap-3 items-center">
-            <Link
-              href="/signup"
-              className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold
-                text-sm px-5 py-2.5 rounded-xl transition-colors"
-            >
-              Try signing up again
-            </Link>
-            <Link href="/login" className="text-sm text-slate-500 hover:text-slate-700 transition-colors">
-              Back to sign in
-            </Link>
-          </div>
-        </div>
-      )}
-    </>
-  );
+    <div style={{ textAlign: 'center', padding: '24px 0' }}>
+      <div style={{
+        width: '56px', height: '56px', borderRadius: '16px', background: '#FFFBEB',
+        border: '1.5px solid rgba(196,136,42,0.35)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px',
+      }}>
+        <Mail style={{ width: '28px', height: '28px', color: '#C4882A' }} />
+      </div>
+      <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#0A0D14', margin: '0 0 8px', letterSpacing: '-0.3px' }}>
+        Check your inbox
+      </h1>
+      <p style={{ fontSize: '14px', color: '#6B7280', margin: '0 0 6px', lineHeight: 1.6 }}>
+        We sent a verification link to your email when you signed up.
+      </p>
+      <p style={{ fontSize: '13px', color: '#9CA3AF', margin: '0 0 28px', lineHeight: 1.6 }}>
+        Didn&apos;t get it? Check your spam folder or{' '}
+        <Link href="/signup" style={{ color: '#1E3461', fontWeight: 600, textDecoration: 'underline' }}>
+          sign up again
+        </Link>.
+      </p>
+      <Link href="/login" style={{ fontSize: '14px', color: '#6B7280', textDecoration: 'none', fontWeight: 500 }}>
+        Back to sign in
+      </Link>
+    </div>
+  )
 }
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={<div className="text-center py-6"><Loader2 className="w-7 h-7 animate-spin mx-auto text-indigo-600" /></div>}>
+    <Suspense fallback={
+      <div style={{ textAlign: 'center', padding: '40px 0' }}>
+        <Loader2 style={{ width: '28px', height: '28px', margin: '0 auto' }} className="animate-spin text-slate-400" />
+      </div>
+    }>
       <VerifyEmailContent />
     </Suspense>
-  );
+  )
 }
