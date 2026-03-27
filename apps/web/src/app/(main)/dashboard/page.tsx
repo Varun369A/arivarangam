@@ -231,9 +231,16 @@ export default function DashboardPage() {
         : undefined;
       const res = await tasksApi.create({ category, prompt: prompt.trim(), context });
       const taskId = (res as any)?.data?.task?.id ?? (res as any)?.id;
+      // If backend returned activeTaskId, redirect to that running task instead
+      const activeTaskId = (res as any)?.data?.activeTaskId
       refreshCredits();
-      router.push(`/task/${taskId}`);
-    } catch (err) {
+      router.push(`/task/${activeTaskId ?? taskId}`);
+    } catch (err: any) {
+      const errData = err?.response?.data
+      if (errData?.code === 'TASK_ALREADY_RUNNING' && errData?.data?.activeTaskId) {
+        router.push(`/task/${errData.data.activeTaskId}`)
+        return
+      }
       setSubmitError(getApiError(err));
     } finally {
       setSubmitting(false);

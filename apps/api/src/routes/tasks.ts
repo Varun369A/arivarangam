@@ -49,6 +49,20 @@ export async function taskRoutes(fastify: FastifyInstance): Promise<void> {
     }
 
     try {
+      // Enforce 1 active task per user — prevents rate limit cascade and resource exhaustion
+      const activeTask = await prisma.task.findFirst({
+        where: { userId: user.id, status: { in: ['pending', 'analyzing', 'running'] } },
+        select: { id: true, status: true },
+      });
+      if (activeTask) {
+        return reply.code(429).send({
+          success: false,
+          error: 'You already have a task in progress. Please wait for it to complete before starting a new one.',
+          code: 'TASK_ALREADY_RUNNING',
+          data: { activeTaskId: activeTask.id },
+        });
+      }
+
       const { task, estimate } = await taskService.createTask(user.id, category, prompt, context);
 
       // Start task asynchronously
