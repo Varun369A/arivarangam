@@ -3,11 +3,14 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "tsx watch --env-file=.env src/server.ts",
+    "dev:worker": "tsx watch --env-file=.env src/worker.ts",
     "build": "NODE_OPTIONS='--max-old-space-size=4096' tsc || true",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "start:worker": "node dist/worker.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.24.0",
+    "bullmq": "^5.0.0",
     "@arivarangam/config": "*",
     "@arivarangam/db": "*",
     "@arivarangam/types": "*",

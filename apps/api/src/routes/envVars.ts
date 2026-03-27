@@ -63,6 +63,10 @@ const SERVICE_CATALOG: Record<string, { label: string; envKeys: string[]; docsUr
   google:      { label: 'Google',       envKeys: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_API_KEY'], docsUrl: 'https://developers.google.com', getUrl: 'https://console.developers.google.com/apis/credentials' },
   sarvam:      { label: 'Sarvam AI',    envKeys: ['SARVAM_API_KEY'],               docsUrl: 'https://docs.sarvam.ai',           getUrl: 'https://app.sarvam.ai/dashboard' },
   perplexity:  { label: 'Perplexity',   envKeys: ['PERPLEXITY_API_KEY'],           docsUrl: 'https://docs.perplexity.ai',       getUrl: 'https://www.perplexity.ai/api' },
+  vercel:      { label: 'Vercel',       envKeys: ['VERCEL_TOKEN'],                 docsUrl: 'https://vercel.com/docs/rest-api',  getUrl: 'https://vercel.com/account/tokens' },
+  railway:     { label: 'Railway',      envKeys: ['RAILWAY_TOKEN'],                docsUrl: 'https://docs.railway.app/reference/public-api', getUrl: 'https://railway.app/account/tokens' },
+  cloudflare:  { label: 'Cloudflare',   envKeys: ['CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_ACCOUNT_ID'], docsUrl: 'https://developers.cloudflare.com/workers', getUrl: 'https://dash.cloudflare.com/profile/api-tokens' },
+  expo:        { label: 'Expo',         envKeys: ['EXPO_TOKEN'],                   docsUrl: 'https://docs.expo.dev',            getUrl: 'https://expo.dev/accounts/[account]/settings/access-tokens' },
 };
 
 function detectService(key: string): string | null {

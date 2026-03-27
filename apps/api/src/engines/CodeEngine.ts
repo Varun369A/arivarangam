@@ -282,6 +282,20 @@ ${existing?.content ?? '(new file)'}`;
   // ─── Plan File Structure ──────────────────────────────────────────────────────
 
   private async planStructure(prompt: string, category: string): Promise<FilePlan> {
+    const categoryGuidance: Record<string, string> = {
+      code: `Generate a complete web application. Include: package.json, src/ folder with components, index.html or main entry, README.md. Use React + Vite or Next.js for web apps. Always include a working index.html so the app can be previewed in a browser.`,
+      research: `Generate a structured research report. Include: README.md (executive summary), report.md (full report with sections), sources.md (citations/links), data/ folder with any JSON data files.`,
+      image: `Generate SVG artwork or an HTML canvas animation. Include: index.html (with embedded SVG or canvas), style.css, and a README.md.`,
+      voice: `Generate a voice script and TTS configuration. Include: script.md (voice script with SSML markup), config.json (TTS settings), README.md.`,
+      content: `Generate content files. Include: content.md (main content), outline.md, style-guide.md, README.md.`,
+      mobile: `Generate a React Native (Expo) mobile app. Include: App.tsx, package.json (with expo dependencies), app.json (Expo config), src/screens/ folder with screen components, src/components/ folder, README.md with Expo Snack link instructions. Use TypeScript.`,
+      presentation: `Generate a Reveal.js HTML presentation. Include: index.html (complete Reveal.js presentation with CDN links), slides.md (slide content in Markdown), style.css (custom theme), README.md. The index.html must be fully self-contained and work when opened in a browser.`,
+      agent: `Generate an AI agent using Python with LangChain or CrewAI. Include: agent.py (main agent), tools.py (custom tools), requirements.txt, .env.example, README.md with setup and run instructions. Use clear docstrings and type hints.`,
+      workflow: `Generate an n8n workflow. Include: workflow.json (complete n8n workflow export), README.md (setup and trigger instructions), nodes/ folder with any custom node configs.`,
+    };
+
+    const guidance = categoryGuidance[category] ?? categoryGuidance.code;
+
     const systemPrompt = `You are an expert software architect. Analyze the user's request and create a file structure plan.
 
 Return ONLY a valid JSON object (no markdown, no comments, no prose) with this exact structure:
@@ -292,6 +306,9 @@ Return ONLY a valid JSON object (no markdown, no comments, no prose) with this e
   "techStack": ["list", "of", "technologies"],
   "notes": "any important architectural notes"
 }
+
+Category-specific guidance for "${category}":
+${guidance}
 
 Rules:
 - Keep file count reasonable (3-20 files for code projects)

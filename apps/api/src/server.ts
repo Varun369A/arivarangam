@@ -19,10 +19,13 @@ import { streamRoutes } from './routes/stream';
 import { webhookRoutes } from './routes/webhooks';
 import { adminRoutes } from './routes/admin/index';
 import { envVarRoutes } from './routes/envVars';
+import { deployRoutes } from './routes/deploy';
+import { galleryRoutes } from './routes/gallery';
 
 import { PlatformMonitor } from './platform/Monitor';
 import { SelfImprove } from './platform/SelfImprove';
 import { closeRedis } from './redis';
+import { closeTaskQueue } from './queue/taskQueue';
 import { prisma } from '@arivarangam/db';
 
 // ─── Build Server ─────────────────────────────────────────────────────────────
@@ -104,6 +107,8 @@ async function buildServer() {
   await fastify.register(streamRoutes, { prefix: '/api/v1/stream' });
   await fastify.register(adminRoutes, { prefix: '/api/v1/admin' });
   await fastify.register(envVarRoutes, { prefix: '/api/v1/env-vars' });
+  await fastify.register(deployRoutes, { prefix: '/api/v1/deploy' });
+  await fastify.register(galleryRoutes, { prefix: '/api/v1/gallery' });
 
   // Webhooks (no API v1 prefix — Razorpay calls /webhooks/razorpay)
   await fastify.register(webhookRoutes, { prefix: '/webhooks' });
@@ -222,6 +227,7 @@ async function main(): Promise<void> {
 
     try {
       await server.close();
+      await closeTaskQueue();
       await closeRedis();
       await prisma.$disconnect();
       console.log('[Server] Shutdown complete');

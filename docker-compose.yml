@@ -1,0 +1,117 @@
+version: '3.9'
+
+# ─── Local Full-Stack Development ─────────────────────────────────────────────
+# Starts: PostgreSQL, Redis, API server, Task worker, Web frontend
+#
+# Usage:
+#   docker-compose up -d          # Start all services
+#   docker-compose logs -f api    # Follow API logs
+#   docker-compose logs -f worker # Follow worker logs
+#   docker-compose down -v        # Stop + remove volumes
+
+services:
+
+  # ─── PostgreSQL (local dev — replace with Neon URL in production) ─────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: arivarangam
+      POSTGRES_USER: arivarangam
+      POSTGRES_PASSWORD: arivarangam
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U arivarangam"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Redis (local dev — replace with Upstash URL in production) ──────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── API Server ────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://arivarangam:arivarangam@postgres:5432/arivarangam
+      DIRECT_URL: postgresql://arivarangam:arivarangam@postgres:5432/arivarangam
+      REDIS_URL: redis://redis:6379
+      PORT: "3001"
+      # Add your API keys here or use .env file
+      # ANTHROPIC_API_KEY: sk-ant-...
+      # JWT_SECRET: your-secret-here
+    env_file:
+      - apps/api/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', r => r.statusCode === 200 ? process.exit(0) : process.exit(1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ─── Task Worker ──────────────────────────────────────────────────────────
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://arivarangam:arivarangam@postgres:5432/arivarangam
+      DIRECT_URL: postgresql://arivarangam:arivarangam@postgres:5432/arivarangam
+      REDIS_URL: redis://redis:6379
+      WORKER_CONCURRENCY: "3"
+    env_file:
+      - apps/api/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # Workers can scale horizontally — run multiple worker replicas
+    # deploy:
+    #   replicas: 3
+
+  # ─── Web Frontend ─────────────────────────────────────────────────────────
+  web:
+    build:
+      context: apps/web
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:3001
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  redis_data:

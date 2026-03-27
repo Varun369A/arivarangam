@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { useCredits } from '@/hooks/useCredits';
 import { useTaskStream, type TaskEvent, type TaskStreamFile } from '@/hooks/useTaskStream';
-import { tasksApi, reposApi, getApiError, type Task } from '@/lib/api';
+import { tasksApi, reposApi, deployApi, getApiError, type Task } from '@/lib/api';
 import { cn, formatDate } from '@/lib/utils';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -377,6 +377,31 @@ function CodeViewer({ file }: { file: TaskStreamFile | null }) {
   );
 }
 
+// ─── Build live HTML blob URL from project files ──────────────────────────────
+
+function buildHtmlPreview(files: TaskStreamFile[]): string | null {
+  // Find HTML entry file
+  const htmlFile = files.find(f => f.path === 'index.html' || f.path.endsWith('/index.html'));
+  if (!htmlFile?.content) return null;
+
+  let html = htmlFile.content;
+
+  // Inline CSS files
+  const cssFile = files.find(f => f.path === 'style.css' || f.path.endsWith('/style.css') || f.path === 'styles.css');
+  if (cssFile?.content) {
+    html = html.replace(/<link[^>]+rel=["']stylesheet["'][^>]*>/gi, `<style>${cssFile.content}</style>`);
+  }
+
+  // Inline JS files (only if not using module bundlers)
+  const jsFile = files.find(f => (f.path === 'script.js' || f.path === 'app.js' || f.path === 'main.js') && !f.path.includes('node_modules'));
+  if (jsFile?.content && !html.includes('import ') && !html.includes('require(')) {
+    html = html.replace(/<script[^>]+src=["']\.\/?(script|app|main)\.js["'][^>]*><\/script>/gi, `<script>${jsFile.content}</script>`);
+  }
+
+  const blob = new Blob([html], { type: 'text/html' });
+  return URL.createObjectURL(blob);
+}
+
 // ─── Preview Panel ────────────────────────────────────────────────────────────
 
 function PreviewContent({
@@ -388,7 +413,27 @@ function PreviewContent({
   previewUrl: string | null;
   streamFiles: TaskStreamFile[];
 }) {
-  if (previewUrl) {
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [iframeKey, setIframeKey] = useState(0);
+
+  // Build blob preview when files are ready
+  useEffect(() => {
+    if (streamFiles.length === 0) return;
+    const url = buildHtmlPreview(streamFiles);
+    if (url) {
+      setBlobUrl(prev => {
+        if (prev) URL.revokeObjectURL(prev);
+        return url;
+      });
+      setIframeKey(k => k + 1);
+    }
+    return () => { if (url) URL.revokeObjectURL(url); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [streamFiles.length]);
+
+  const activeUrl = previewUrl ?? (task?.deployUrl) ?? null;
+
+  if (activeUrl) {
     return (
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 border-b border-slate-200 flex-shrink-0">
@@ -398,14 +443,41 @@ function PreviewContent({
             <div className="w-3 h-3 rounded-full bg-green-400" />
           </div>
           <div className="flex-1 bg-white rounded-lg px-3 py-1 text-xs text-slate-500 font-mono truncate border border-slate-200">
-            {previewUrl}
+            {activeUrl}
           </div>
-          <a href={previewUrl} target="_blank" rel="noreferrer"
+          <a href={activeUrl} target="_blank" rel="noreferrer"
             className="text-xs text-indigo-600 hover:text-indigo-700 font-medium shrink-0">
             Open ↗
           </a>
         </div>
-        <iframe src={previewUrl} className="flex-1 w-full border-0" title="Preview" />
+        <iframe src={activeUrl} className="flex-1 w-full border-0" title="Live Preview" />
+      </div>
+    );
+  }
+
+  // Live local HTML preview via blob URL
+  if (blobUrl) {
+    return (
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-2 bg-slate-800 border-b border-slate-700 flex-shrink-0">
+          <div className="flex gap-1.5">
+            <div className="w-3 h-3 rounded-full bg-red-500" />
+            <div className="w-3 h-3 rounded-full bg-yellow-500" />
+            <div className="w-3 h-3 rounded-full bg-green-500" />
+          </div>
+          <div className="flex-1 bg-slate-700 rounded-lg px-3 py-1 text-xs text-slate-400 font-mono truncate">
+            🔴 Live preview (local)
+          </div>
+          <button
+            type="button"
+            onClick={() => setIframeKey(k => k + 1)}
+            className="text-xs text-slate-400 hover:text-white transition-colors px-2"
+            title="Refresh preview"
+          >
+            ↺
+          </button>
+        </div>
+        <iframe key={iframeKey} src={blobUrl} className="flex-1 w-full border-0 bg-white" title="Live Preview" sandbox="allow-scripts allow-same-origin" />
       </div>
     );
   }
@@ -419,6 +491,56 @@ function PreviewContent({
     );
   }
 
+  // Presentation preview — look for Reveal.js index.html
+  if (task?.category === 'presentation' && streamFiles.length > 0) {
+    const htmlF = streamFiles.find(f => f.path === 'index.html');
+    if (htmlF?.content) {
+      const blob = new Blob([htmlF.content], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      return (
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex items-center gap-2 px-4 py-2 bg-slate-800 border-b border-slate-700 flex-shrink-0">
+            <span className="text-xs text-slate-400">🎯 Presentation preview</span>
+            <a href={url} target="_blank" rel="noreferrer" className="text-xs text-indigo-400 hover:text-indigo-300 ml-auto">
+              Open fullscreen ↗
+            </a>
+          </div>
+          <iframe src={url} className="flex-1 w-full border-0 bg-white" title="Presentation" />
+        </div>
+      );
+    }
+  }
+
+  // Mobile preview — show QR link to Expo Snack
+  if (task?.category === 'mobile' && streamFiles.length > 0) {
+    const appFile = streamFiles.find(f => f.path === 'App.tsx' || f.path === 'App.js');
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-8 gap-5">
+        <div className="text-5xl">📱</div>
+        <div className="text-center space-y-2">
+          <p className="text-sm font-bold text-slate-700">React Native / Expo App</p>
+          <p className="text-xs text-slate-500">Preview on your phone with Expo Go, or open in Expo Snack</p>
+        </div>
+        {appFile && (
+          <a
+            href={`https://snack.expo.dev/?code=${encodeURIComponent(appFile.content ?? '')}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 transition-colors"
+          >
+            Open in Expo Snack ↗
+          </a>
+        )}
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-600 space-y-1.5 max-w-sm w-full">
+          <p className="font-semibold text-slate-700">To run locally:</p>
+          <code className="block bg-slate-800 text-green-400 px-3 py-2 rounded-lg font-mono">npm install -g expo-cli</code>
+          <code className="block bg-slate-800 text-green-400 px-3 py-2 rounded-lg font-mono">npx expo start</code>
+          <p className="text-slate-400">Scan the QR code with Expo Go on your phone</p>
+        </div>
+      </div>
+    );
+  }
+
   if (streamFiles.length > 0) {
     return (
       <div className="flex-1 overflow-auto p-6">
@@ -427,7 +549,7 @@ function PreviewContent({
             <div className="text-3xl mb-3">📦</div>
             <h3 className="text-base font-bold text-slate-800 mb-1">Project ready</h3>
             <p className="text-sm text-slate-500 mb-4">
-              {streamFiles.length} file{streamFiles.length !== 1 ? 's' : ''} generated. Select a file on the left to view its code, or download everything below.
+              {streamFiles.length} file{streamFiles.length !== 1 ? 's' : ''} generated. Select a file on the left to view its code.
             </p>
             <button
               type="button"
@@ -522,6 +644,12 @@ export default function TaskPage() {
   const [cancelling, setCancelling] = useState(false);
   const [savedRepo, setSavedRepo] = useState<{ id: string; name: string } | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeployMenu, setShowDeployMenu] = useState(false);
+  const [deploying, setDeploying] = useState<string | null>(null); // 'vercel' | 'github' | 'railway' | 'cloudflare'
+  const [deployResult, setDeployResult] = useState<{ url: string; label: string } | null>(null);
+  const [deployError, setDeployError] = useState<string | null>(null);
+  const [publishing, setPublishing] = useState(false);
+  const [isPublished, setIsPublished] = useState(false);
 
   const isTerminal = (s: string) => ['done', 'completed', 'failed', 'cancelled'].includes(s);
   const streamActive = task !== null && confirmed;
@@ -635,6 +763,57 @@ export default function TaskPage() {
     } catch { /* ignore */ }
   }, [task, router]);
 
+  const handleDeploy = useCallback(async (target: string) => {
+    if (!task) return;
+    setDeploying(target);
+    setDeployError(null);
+    setShowDeployMenu(false);
+    try {
+      let result: { url: string; label: string };
+      if (target === 'vercel') {
+        const r = await deployApi.vercel(task.id);
+        result = { url: r.deployUrl, label: 'Vercel' };
+      } else if (target === 'github') {
+        const r = await deployApi.github(task.id);
+        result = { url: r.repoUrl, label: 'GitHub' };
+      } else if (target === 'railway') {
+        const r = await deployApi.railway(task.id);
+        result = { url: r.railwayUrl, label: 'Railway' };
+      } else if (target === 'cloudflare') {
+        const r = await deployApi.cloudflare(task.id);
+        result = { url: r.workerUrl, label: 'Cloudflare' };
+      } else {
+        return;
+      }
+      setDeployResult(result);
+      setTask(prev => prev ? { ...prev, deployUrl: result.url } as any : prev);
+    } catch (err) {
+      setDeployError(getApiError(err));
+    } finally {
+      setDeploying(null);
+    }
+  }, [task]);
+
+  const handlePublishToGallery = useCallback(async () => {
+    if (!task) return;
+    setPublishing(true);
+    try {
+      // POST to gallery publish endpoint (auth via cookie interceptor)
+      const res = await fetch(`/api/v1/gallery/${task.id}/publish`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(typeof document !== 'undefined' && document.cookie.includes('accessToken')
+            ? { Authorization: `Bearer ${document.cookie.match(/accessToken=([^;]+)/)?.[1] ?? ''}` }
+            : {}),
+        },
+      });
+      if (res.ok) setIsPublished(true);
+    } catch { /* ignore */ }
+    finally { setPublishing(false); }
+  }, [task]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -667,6 +846,19 @@ export default function TaskPage() {
 
   return (
     <div className="h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden bg-slate-50" style={{ fontFamily: 'var(--font-inter)' }}>
+
+      {/* Deploy error banner */}
+      {deployError && (
+        <div className="fixed bottom-4 right-4 z-50 max-w-sm bg-red-50 border border-red-200 rounded-xl shadow-lg p-4 flex items-start gap-3">
+          <span className="text-red-500 mt-0.5">✗</span>
+          <div className="flex-1">
+            <p className="text-xs font-semibold text-red-800">Deploy failed</p>
+            <p className="text-xs text-red-600 mt-0.5">{deployError}</p>
+            <a href="/settings" className="text-xs text-indigo-600 underline mt-1 block">Add API keys in Settings →</a>
+          </div>
+          <button type="button" onClick={() => setDeployError(null)} className="text-red-400 hover:text-red-600 text-sm">✕</button>
+        </div>
+      )}
 
       {/* Delete confirm dialog */}
       {showDeleteConfirm && (
@@ -717,16 +909,78 @@ export default function TaskPage() {
               {cancelling ? '…' : 'Cancel'}
             </button>
           )}
+          {isCompleted && streamFiles.length > 0 && (
+            <>
+              {/* Deploy dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowDeployMenu(m => !m)}
+                  disabled={!!deploying}
+                  className="px-3 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-colors flex items-center gap-1.5 disabled:opacity-60"
+                >
+                  {deploying ? (
+                    <><span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Deploying…</>
+                  ) : (
+                    <>🚀 Deploy</>
+                  )}
+                </button>
+                {showDeployMenu && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowDeployMenu(false)} />
+                    <div className="absolute right-0 top-full mt-1 w-52 bg-white rounded-xl shadow-lg border border-slate-200 z-50 overflow-hidden">
+                    {[
+                      { id: 'vercel', label: '▲ Vercel', desc: 'Web apps (free tier)', cats: ['code', 'presentation'] },
+                      { id: 'github', label: '🐙 GitHub', desc: 'Push to repo', cats: ['code', 'mobile', 'agent', 'workflow', 'research'] },
+                      { id: 'railway', label: '🚂 Railway', desc: 'Node/Python backend', cats: ['agent', 'code'] },
+                      { id: 'cloudflare', label: '🌐 Cloudflare', desc: 'Edge Workers', cats: ['agent', 'workflow'] },
+                    ].map(opt => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => handleDeploy(opt.id)}
+                        className="w-full flex flex-col px-4 py-3 hover:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0"
+                      >
+                        <span className="text-xs font-semibold text-slate-800">{opt.label}</span>
+                        <span className="text-[10px] text-slate-400">{opt.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+                  </>
+                )}
+              </div>
+              {deployResult && (
+                <a href={deployResult.url} target="_blank" rel="noreferrer"
+                  className="px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 rounded-xl border border-emerald-200 flex items-center gap-1">
+                  ✓ {deployResult.label} ↗
+                </a>
+              )}
+            </>
+          )}
           {isCodeTask && isCompleted && !savedRepo && streamFiles.length > 0 && (
             <button onClick={handleSaveRepo}
               className="px-3 py-1.5 text-xs font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-xl transition-colors border border-indigo-200">
-              💾 Save to Repos
+              💾 Save
             </button>
           )}
           {savedRepo && (
             <Link href={`/repos/${savedRepo.id}`}
               className="px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 rounded-xl border border-emerald-200">
               ✓ Saved
+            </Link>
+          )}
+          {isCompleted && !isPublished && (
+            <button
+              onClick={handlePublishToGallery}
+              disabled={publishing}
+              className="px-3 py-1.5 text-xs font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-xl transition-colors border border-violet-200 disabled:opacity-50"
+              title="Publish to public gallery"
+            >
+              {publishing ? '…' : '🌐 Publish'}
+            </button>
+          )}
+          {isPublished && (
+            <Link href="/gallery" className="px-3 py-1.5 text-xs font-semibold text-violet-700 bg-violet-50 rounded-xl border border-violet-200">
+              ✓ In Gallery
             </Link>
           )}
           {streamFiles.length > 0 && (
@@ -822,13 +1076,33 @@ export default function TaskPage() {
 
           {/* Follow-up input */}
           <div className="border-t border-slate-100 p-3 flex-shrink-0 space-y-2">
+            {/* Fix mode quick buttons */}
+            {isCompleted && (
+              <div className="flex gap-1.5 flex-wrap">
+                {[
+                  { label: '🔧 Fix errors', prompt: 'Fix all errors, bugs, and issues in the code. Make sure everything works correctly.' },
+                  { label: '📱 Make responsive', prompt: 'Make the UI fully responsive for mobile, tablet, and desktop screens.' },
+                  { label: '🎨 Improve UI', prompt: 'Improve the visual design — make it more polished, modern, and professional.' },
+                  { label: '📝 Add comments', prompt: 'Add clear comments and documentation to all code files.' },
+                ].map(q => (
+                  <button
+                    key={q.label}
+                    type="button"
+                    onClick={() => setFollowUp(q.prompt)}
+                    className="px-2 py-1 text-[10px] font-medium bg-slate-50 border border-slate-200 text-slate-600 rounded-lg hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 transition-colors"
+                  >
+                    {q.label}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="flex gap-2">
               <input
                 type="text"
                 value={followUp}
                 onChange={e => setFollowUp(e.target.value)}
                 placeholder={
-                  isCompleted ? 'Ask for changes…' :
+                  isCompleted ? 'Ask for changes or paste an error…' :
                   isRunning ? 'Working on it…' :
                   taskStatus === 'failed' ? 'Task failed' : 'Waiting…'
                 }

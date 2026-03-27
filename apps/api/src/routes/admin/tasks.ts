@@ -9,7 +9,7 @@ const listTasksSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   status: z.enum(['pending', 'analyzing', 'running', 'completed', 'failed', 'cancelled']).optional(),
-  category: z.enum(['code', 'research', 'image', 'voice', 'content']).optional(),
+  category: z.enum(['code', 'research', 'image', 'voice', 'content', 'mobile', 'presentation', 'agent', 'workflow']).optional(),
   userId: z.string().optional(),
 });
 

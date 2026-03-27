@@ -8,7 +8,7 @@ import { useCredits } from '@/hooks/useCredits';
 import { tasksApi, reposApi, creditsApi, getApiError } from '@/lib/api';
 import { cn, formatDate, formatCredits } from '@/lib/utils';
 
-type TaskCategory = 'code' | 'research' | 'image' | 'voice' | 'content';
+type TaskCategory = 'code' | 'research' | 'image' | 'voice' | 'content' | 'mobile' | 'presentation' | 'agent' | 'workflow';
 
 // ─── Category Config ──────────────────────────────────────────────────────────
 
@@ -26,22 +26,62 @@ interface CategoryConfig {
 const CATEGORIES: CategoryConfig[] = [
   {
     key: 'code',
-    label: 'Code',
+    label: 'Web App',
     icon: '⌨️',
     colorText: 'text-indigo-700',
     colorBg: 'bg-indigo-50',
     activeRing: 'ring-2 ring-indigo-500 ring-offset-1',
     btnBg: 'bg-indigo-600 hover:bg-indigo-700',
-    placeholder: 'Build a React todo app with local storage and drag-and-drop...',
+    placeholder: 'Build a React todo app with local storage and drag-and-drop sorting...',
+  },
+  {
+    key: 'mobile',
+    label: 'Mobile',
+    icon: '📱',
+    colorText: 'text-cyan-700',
+    colorBg: 'bg-cyan-50',
+    activeRing: 'ring-2 ring-cyan-500 ring-offset-1',
+    btnBg: 'bg-cyan-600 hover:bg-cyan-700',
+    placeholder: 'Build a React Native expense tracker app with categories and charts...',
+  },
+  {
+    key: 'presentation',
+    label: 'Slides',
+    icon: '🎯',
+    colorText: 'text-violet-700',
+    colorBg: 'bg-violet-50',
+    activeRing: 'ring-2 ring-violet-500 ring-offset-1',
+    btnBg: 'bg-violet-600 hover:bg-violet-700',
+    placeholder: 'Create a startup pitch deck for an AI-powered food delivery platform...',
+  },
+  {
+    key: 'agent',
+    label: 'AI Agent',
+    icon: '🤖',
+    colorText: 'text-emerald-700',
+    colorBg: 'bg-emerald-50',
+    activeRing: 'ring-2 ring-emerald-500 ring-offset-1',
+    btnBg: 'bg-emerald-600 hover:bg-emerald-700',
+    placeholder: 'Build a Python AI agent that searches the web and summarises news daily...',
+  },
+  {
+    key: 'workflow',
+    label: 'Workflow',
+    icon: '⚡',
+    colorText: 'text-amber-700',
+    colorBg: 'bg-amber-50',
+    activeRing: 'ring-2 ring-amber-500 ring-offset-1',
+    btnBg: 'bg-amber-500 hover:bg-amber-600',
+    placeholder: 'Create an n8n workflow that monitors Twitter mentions and sends Slack alerts...',
   },
   {
     key: 'research',
     label: 'Research',
     icon: '🔍',
-    colorText: 'text-emerald-700',
-    colorBg: 'bg-emerald-50',
-    activeRing: 'ring-2 ring-emerald-500 ring-offset-1',
-    btnBg: 'bg-emerald-600 hover:bg-emerald-700',
+    colorText: 'text-teal-700',
+    colorBg: 'bg-teal-50',
+    activeRing: 'ring-2 ring-teal-500 ring-offset-1',
+    btnBg: 'bg-teal-600 hover:bg-teal-700',
     placeholder: 'Research the latest trends in large language models and summarise key findings...',
   },
   {
@@ -63,6 +103,16 @@ const CATEGORIES: CategoryConfig[] = [
     activeRing: 'ring-2 ring-pink-500 ring-offset-1',
     btnBg: 'bg-pink-500 hover:bg-pink-600',
     placeholder: 'Create a warm, professional voice-over for a product launch video...',
+  },
+  {
+    key: 'content',
+    label: 'Content',
+    icon: '📝',
+    colorText: 'text-rose-700',
+    colorBg: 'bg-rose-50',
+    activeRing: 'ring-2 ring-rose-500 ring-offset-1',
+    btnBg: 'bg-rose-500 hover:bg-rose-600',
+    placeholder: 'Write a compelling blog post about the future of AI in Indian healthcare...',
   },
 ];
 
@@ -98,11 +148,23 @@ function StatusBadge({ status }: { status: string }) {
 
 // ─── Category Icon ────────────────────────────────────────────────────────────
 
+const CATEGORY_ICON_MAP: Record<string, { icon: string; bg: string }> = {
+  code:         { icon: '⌨️', bg: 'bg-indigo-50' },
+  mobile:       { icon: '📱', bg: 'bg-cyan-50' },
+  presentation: { icon: '🎯', bg: 'bg-violet-50' },
+  agent:        { icon: '🤖', bg: 'bg-emerald-50' },
+  workflow:     { icon: '⚡', bg: 'bg-amber-50' },
+  research:     { icon: '🔍', bg: 'bg-teal-50' },
+  image:        { icon: '🎨', bg: 'bg-orange-50' },
+  voice:        { icon: '🎙️', bg: 'bg-pink-50' },
+  content:      { icon: '📝', bg: 'bg-rose-50' },
+};
+
 function CategoryIcon({ category }: { category: string }) {
-  const cfg = CATEGORIES.find(c => c.key === category);
+  const cfg = CATEGORY_ICON_MAP[category] ?? { icon: '📋', bg: 'bg-slate-100' };
   return (
-    <div className={cn('w-8 h-8 rounded-xl flex items-center justify-center text-base', cfg?.colorBg ?? 'bg-slate-100')}>
-      <span>{cfg?.icon ?? '📋'}</span>
+    <div className={cn('w-8 h-8 rounded-xl flex items-center justify-center text-base', cfg.bg)}>
+      <span>{cfg.icon}</span>
     </div>
   );
 }
@@ -417,6 +479,15 @@ export default function DashboardPage() {
           )}
         </div>
 
+        {/* India Templates */}
+        <TemplateGallery onSelect={(tmpl) => {
+          setCategory(tmpl.category as TaskCategory);
+          setPrompt(tmpl.prompt);
+          if (debounceRef.current) clearTimeout(debounceRef.current);
+          debounceRef.current = setTimeout(() => runEstimate(tmpl.prompt, tmpl.category), 400);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }} />
+
         {/* Recent Projects */}
         <section>
           <div className="flex items-center justify-between mb-4">
@@ -550,5 +621,114 @@ function RepoRow({ repo }: { repo: any }) {
         <Link href={`/repos/${repo.id}?edit=1`} className="btn-secondary text-xs py-1.5 px-3 text-indigo-600">Edit</Link>
       </div>
     </div>
+  );
+}
+
+// ─── India Templates ──────────────────────────────────────────────────────────
+
+interface Template {
+  icon: string;
+  title: string;
+  prompt: string;
+  category: string;
+  tag: string;
+}
+
+const INDIA_TEMPLATES: Template[] = [
+  // Web Apps
+  { icon: '🏪', title: 'Kirana Store App', prompt: 'Build a web app for a small kirana (grocery) store to manage inventory, track daily sales, generate GST bills, and send WhatsApp reminders to customers for pending dues.', category: 'code', tag: '🇮🇳 Retail' },
+  { icon: '🎓', title: 'EdTech Platform', prompt: 'Build a React e-learning platform for Indian students with video lessons, quiz engine, progress tracking, certificate generation, and support for Hindi + English content.', category: 'code', tag: '📚 Education' },
+  { icon: '🚜', title: 'Farmer Dashboard', prompt: 'Build a web dashboard for Indian farmers to track crop cycles, get weather alerts for their district, log harvest data, view mandi price trends, and connect with FPOs.', category: 'code', tag: '🌾 AgriTech' },
+  { icon: '🏥', title: 'Clinic Management', prompt: 'Build a clinic management system for Indian doctors with patient registration (Aadhar-linked), appointment booking, prescription writer, OPD billing with GST, and medicine inventory.', category: 'code', tag: '💊 HealthTech' },
+  { icon: '📦', title: 'Delivery Tracker', prompt: 'Build a last-mile delivery tracking web app for Indian logistics with order management, rider assignment, real-time map tracking, COD reconciliation, and customer SMS notifications via Twilio.', category: 'code', tag: '🚚 Logistics' },
+  { icon: '🏠', title: 'PG/Rental Portal', prompt: 'Build a paying guest and rental property listing portal for Indian cities with property search by locality/BHK/budget, landlord verification badge, rent receipt generator, and tenant application form.', category: 'code', tag: '🏙️ PropTech' },
+  { icon: '💰', title: 'Chit Fund Manager', prompt: 'Build a chit fund management app for Indian groups (chitty/committee) with member registration, monthly contribution tracking, auction winner selection, payment receipts, and default alerts.', category: 'code', tag: '💸 FinTech' },
+  { icon: '🎭', title: 'Event Ticketing', prompt: 'Build an event ticketing platform for Indian concerts, poojas, and cultural events with QR code tickets, Razorpay payments, seat selection, and organiser dashboard.', category: 'code', tag: '🎪 Events' },
+  { icon: '🍽️', title: 'Restaurant POS', prompt: 'Build a restaurant POS system for Indian restaurants with table management, digital menu (veg/non-veg toggle), KOT printing, GST billing, and daily sales report.', category: 'code', tag: '🍛 FoodTech' },
+  { icon: '🛕', title: 'Temple Management', prompt: 'Build a temple management system with darshan slot booking, online prasad/donations (Razorpay), event calendar, priest schedule, and devotee database.', category: 'code', tag: '🙏 Community' },
+
+  // Mobile
+  { icon: '📱', title: 'UPI Expense Tracker', prompt: 'Build a React Native mobile app to track UPI/cash expenses with categories, monthly budget limits, spending charts, EMI reminders, and Bharat Bill Pay integration for utility bills.', category: 'mobile', tag: '📱 Mobile' },
+  { icon: '🚌', title: 'KSRTC Bus Tracker', prompt: 'Build a React Native app to track state transport bus routes, show live bus location on map, schedule departure alerts, and support offline timetable browsing.', category: 'mobile', tag: '📱 Mobile' },
+
+  // Agents
+  { icon: '🤖', title: 'GST Filing Agent', prompt: 'Build a Python AI agent that reads GST invoices from a folder, extracts GSTIN/amounts/dates, categorises input tax credit vs output tax, and generates GSTR-1/GSTR-3B summary reports.', category: 'agent', tag: '🤖 Agent' },
+  { icon: '📰', title: 'Hindi News Summariser', prompt: 'Build a Python agent that fetches top Hindi news from multiple sources (Dainik Bhaskar, Amar Ujala), summarises each article in 3 bullet points, translates to English, and emails a daily digest.', category: 'agent', tag: '🤖 Agent' },
+  { icon: '🌾', title: 'Mandi Price Agent', prompt: 'Build a Python agent that fetches daily vegetable mandi prices from Agmarknet API, compares with previous week, identifies price spikes, and sends WhatsApp alerts via Twilio to farmers.', category: 'agent', tag: '🤖 Agent' },
+
+  // Presentations
+  { icon: '🎯', title: 'Startup Pitch Deck', prompt: 'Create a 12-slide Reveal.js investor pitch deck for an Indian agritech startup that uses AI to help farmers predict crop disease and connect with bulk buyers — include problem, solution, market size (India), business model, traction, and team slides.', category: 'presentation', tag: '🎯 Slides' },
+  { icon: '📊', title: 'India Market Report', prompt: 'Create a professional Reveal.js presentation on the Indian D2C e-commerce market — trends, top players (Boat, Mamaearth, Sugar Cosmetics), growth drivers, challenges, and 2025 outlook with charts.', category: 'presentation', tag: '🎯 Slides' },
+  { icon: '🏢', title: 'Company OKR Review', prompt: 'Create a quarterly OKR review presentation for a 50-person Indian SaaS startup with department-wise goal completion, key wins, missed targets, learnings, and Q3 planning slides.', category: 'presentation', tag: '🎯 Slides' },
+
+  // Workflows
+  { icon: '⚡', title: 'GST Invoice Workflow', prompt: 'Create an n8n workflow that monitors a Gmail inbox for invoice emails, extracts invoice data using regex, validates GSTIN format, creates a Google Sheet entry, and sends a Slack notification to the finance team.', category: 'workflow', tag: '⚡ Workflow' },
+  { icon: '🔔', title: 'Customer Onboarding', prompt: 'Create an n8n workflow for customer onboarding: trigger on new Razorpay payment, create contact in CRM, send welcome email in the user\'s language (Hindi/Tamil/English), add to WhatsApp group via Twilio, and log in Notion.', category: 'workflow', tag: '⚡ Workflow' },
+
+  // Research
+  { icon: '🔍', title: 'India Startup Ecosystem', prompt: 'Research the Indian startup ecosystem in 2024-2025: funding trends by sector, top VC firms investing in India, unicorn pipeline, government initiatives (Startup India, PLI scheme), and comparison with China/Southeast Asia.', category: 'research', tag: '🔍 Research' },
+  { icon: '📈', title: 'UPI Growth Analysis', prompt: 'Research UPI transaction growth from 2020-2025, monthly volume trends, top apps (PhonePe, GPay, Paytm), merchant adoption stats, cross-border UPI expansion, and RBI policy impact analysis.', category: 'research', tag: '🔍 Research' },
+  { icon: '🌱', title: 'Green Energy India', prompt: 'Research India\'s renewable energy progress: solar/wind capacity milestones, state-wise targets, PM Surya Ghar scheme, EV adoption trends, and comparison with 2030 climate commitments.', category: 'research', tag: '🔍 Research' },
+
+  // Content
+  { icon: '📝', title: 'Diwali Marketing Blog', prompt: 'Write 5 engaging blog posts for a D2C brand\'s Diwali marketing campaign targeting urban Indian millennials — include gift guide, sustainability angle, regional traditions, discounting psychology, and social media tips.', category: 'content', tag: '✍️ Content' },
+  { icon: '📧', title: 'LinkedIn Posts Pack', prompt: 'Write 10 LinkedIn posts for an Indian founder sharing startup journey, lessons from building in India, hiring challenges, fundraising experiences, and product launch stories — casual, authentic, insight-driven tone.', category: 'content', tag: '✍️ Content' },
+];
+
+const TEMPLATE_FILTER_CATS = ['all', 'code', 'mobile', 'agent', 'presentation', 'workflow', 'research', 'content'];
+
+function TemplateGallery({ onSelect }: { onSelect: (t: Template) => void }) {
+  const [filter, setFilter] = useState('all');
+  const [expanded, setExpanded] = useState(false);
+  const filtered = INDIA_TEMPLATES.filter(t => filter === 'all' || t.category === filter);
+  const shown = expanded ? filtered : filtered.slice(0, 6);
+
+  return (
+    <section>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">🇮🇳 India Templates</h2>
+        <div className="flex gap-1.5 flex-wrap justify-end">
+          {TEMPLATE_FILTER_CATS.map(c => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => setFilter(c)}
+              className={cn(
+                'px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all',
+                filter === c ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              )}
+            >
+              {c === 'all' ? 'All' : c.charAt(0).toUpperCase() + c.slice(1)}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {shown.map(tmpl => (
+          <button
+            key={tmpl.title}
+            type="button"
+            onClick={() => onSelect(tmpl)}
+            className="text-left bg-white border border-slate-200 rounded-xl p-4 hover:border-indigo-300 hover:shadow-sm transition-all group"
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl">{tmpl.icon}</span>
+              <span className="text-[10px] font-semibold text-slate-400">{tmpl.tag}</span>
+            </div>
+            <p className="text-sm font-semibold text-slate-800 mb-1 group-hover:text-indigo-700 transition-colors">{tmpl.title}</p>
+            <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">{tmpl.prompt}</p>
+          </button>
+        ))}
+      </div>
+      {filtered.length > 6 && (
+        <button
+          type="button"
+          onClick={() => setExpanded(e => !e)}
+          className="mt-3 w-full py-2.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-colors"
+        >
+          {expanded ? 'Show less ↑' : `Show all ${filtered.length} templates ↓`}
+        </button>
+      )}
+    </section>
   );
 }

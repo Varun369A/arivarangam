@@ -32,6 +32,9 @@ function optionalEnvInt(key: string, defaultValue: number): number {
 export interface AppConfig {
   // Database
   DATABASE_URL: string;
+  // DIRECT_URL: direct (non-pooled) Neon connection — used by Prisma for migrations
+  // Falls back to DATABASE_URL when not set (fine for local/non-Neon setups)
+  DIRECT_URL: string;
   REDIS_URL: string;
 
   // Auth
@@ -85,6 +88,8 @@ function loadConfig(): AppConfig {
   return {
     // Database
     DATABASE_URL: isTest ? optionalEnv('DATABASE_URL', 'postgresql://localhost/arivarangam_test') : requireEnv('DATABASE_URL'),
+    // DIRECT_URL falls back to DATABASE_URL — only needed for Neon pooled setups
+    DIRECT_URL: optionalEnv('DIRECT_URL', isTest ? 'postgresql://localhost/arivarangam_test' : ''),
     REDIS_URL: optionalEnv('REDIS_URL', 'redis://localhost:6379'),
 
     // Auth

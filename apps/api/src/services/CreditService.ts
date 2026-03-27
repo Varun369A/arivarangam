@@ -25,7 +25,11 @@ export class CreditService {
     const systemPrompt = `You are a credit cost estimator for an AI platform. Analyze the given task and return ONLY a JSON object with credit estimates.
 
 Credit costs by category:
-- code: 20-60 credits (simple scripts = 20, full apps = 60)
+- code: 20-60 credits (simple scripts = 20, full React/Next.js apps = 60)
+- mobile: 25-60 credits (simple screens = 25, full Expo app = 60)
+- presentation: 15-30 credits (short deck = 15, detailed 20+ slides = 30)
+- agent: 20-50 credits (simple script = 20, multi-tool LangChain agent = 50)
+- workflow: 10-30 credits (simple n8n workflow = 10, complex multi-node = 30)
 - research: 10-15 credits (simple = 10, deep = 15)
 - image: 25 credits (fixed)
 - voice: 8 credits per minute of estimated audio
@@ -59,6 +63,10 @@ Return ONLY this JSON (no markdown, no explanation):
       // Fallback estimates if Claude fails
       const fallbacks: Record<TaskCategory, { min: number; max: number; typical: number }> = {
         code: { min: 20, max: 60, typical: 35 },
+        mobile: { min: 25, max: 60, typical: 40 },
+        presentation: { min: 15, max: 30, typical: 20 },
+        agent: { min: 20, max: 50, typical: 30 },
+        workflow: { min: 10, max: 30, typical: 18 },
         research: { min: 10, max: 15, typical: 12 },
         image: { min: 25, max: 25, typical: 25 },
         voice: { min: 8, max: 40, typical: 16 },

@@ -13,6 +13,11 @@ import {
   Zap,
   Brain,
   Play,
+  Globe,
+  Smartphone,
+  Monitor,
+  Bot,
+  GitMerge,
 } from 'lucide-react';
 import { Logo } from '@/components/Logo';
 
@@ -30,15 +35,63 @@ const fadeUp = {
 const CATEGORIES = [
   {
     icon: <Code2 className="w-6 h-6" />,
-    label: 'Code',
+    label: 'Web App',
     color: 'indigo',
     bg: 'bg-indigo-50',
     border: 'border-indigo-100',
     iconBg: 'bg-indigo-100',
     iconColor: 'text-indigo-600',
     tag: 'bg-indigo-100 text-indigo-700',
-    desc: 'Full-stack apps, scripts, debugging, code review — powered by Claude & GPT-4o.',
-    example: 'Build a REST API with auth',
+    desc: 'Full-stack React/Next.js apps with live preview — deployed to Vercel in one click.',
+    example: 'Kirana store inventory tracker',
+  },
+  {
+    icon: <Smartphone className="w-6 h-6" />,
+    label: 'Mobile App',
+    color: 'cyan',
+    bg: 'bg-cyan-50',
+    border: 'border-cyan-100',
+    iconBg: 'bg-cyan-100',
+    iconColor: 'text-cyan-600',
+    tag: 'bg-cyan-100 text-cyan-700',
+    desc: 'React Native / Expo mobile apps with QR code preview on your phone instantly.',
+    example: 'UPI expense tracker app',
+  },
+  {
+    icon: <Bot className="w-6 h-6" />,
+    label: 'AI Agent',
+    color: 'emerald',
+    bg: 'bg-emerald-50',
+    border: 'border-emerald-100',
+    iconBg: 'bg-emerald-100',
+    iconColor: 'text-emerald-600',
+    tag: 'bg-emerald-100 text-emerald-700',
+    desc: 'Python LangChain/CrewAI agents with tools, deployed to Cloudflare Workers.',
+    example: 'GST invoice filing agent',
+  },
+  {
+    icon: <Monitor className="w-6 h-6" />,
+    label: 'Presentation',
+    color: 'violet',
+    bg: 'bg-violet-50',
+    border: 'border-violet-100',
+    iconBg: 'bg-violet-100',
+    iconColor: 'text-violet-600',
+    tag: 'bg-violet-100 text-violet-700',
+    desc: 'Beautiful Reveal.js slideshows rendered and previewed right in your browser.',
+    example: 'Startup pitch deck in 10 slides',
+  },
+  {
+    icon: <GitMerge className="w-6 h-6" />,
+    label: 'Workflow',
+    color: 'amber',
+    bg: 'bg-amber-50',
+    border: 'border-amber-100',
+    iconBg: 'bg-amber-100',
+    iconColor: 'text-amber-600',
+    tag: 'bg-amber-100 text-amber-700',
+    desc: 'n8n automation workflows exported as JSON — import and run with one click.',
+    example: 'GST invoice → Slack workflow',
   },
   {
     icon: <Search className="w-6 h-6" />,
@@ -50,7 +103,7 @@ const CATEGORIES = [
     iconColor: 'text-green-600',
     tag: 'bg-green-100 text-green-700',
     desc: 'Deep-dive research, competitive analysis, and real-time web search with citations.',
-    example: 'Compare top 5 CRM tools',
+    example: 'India startup ecosystem 2025',
   },
   {
     icon: <Image className="w-6 h-6" />,
@@ -73,8 +126,8 @@ const CATEGORIES = [
     iconBg: 'bg-pink-100',
     iconColor: 'text-pink-600',
     tag: 'bg-pink-100 text-pink-700',
-    desc: 'Studio-quality text-to-speech in 30+ voices and languages via ElevenLabs.',
-    example: 'Narrate a product explainer',
+    desc: 'Studio-quality text-to-speech in Indian languages via Sarvam AI + ElevenLabs.',
+    example: 'Hindi product explainer narration',
   },
 ];
 
@@ -94,8 +147,8 @@ const STEPS = [
   {
     num: '03',
     icon: <Sparkles className="w-6 h-6" style={{ color: '#059669' }} />,
-    title: 'Get results instantly',
-    desc: 'Download code, read reports, preview images, or play audio. All results are yours to use.',
+    title: 'Deploy with one click',
+    desc: 'Preview live in browser, deploy to Vercel/Railway/Cloudflare, push to GitHub — all from one button.',
   },
 ];
 
@@ -253,6 +306,9 @@ export default function LandingPage() {
             <Link href="#how" className="hover:text-[#1E3461] transition-colors">How it works</Link>
             <Link href="#pricing" className="hover:text-[#1E3461] transition-colors">Pricing</Link>
             <Link href="#why" className="hover:text-[#1E3461] transition-colors">Why us</Link>
+            <Link href="/gallery" className="hover:text-[#1E3461] transition-colors flex items-center gap-1">
+              <Globe className="w-3.5 h-3.5" />Gallery
+            </Link>
           </div>
 
           <div className="flex items-center gap-3">

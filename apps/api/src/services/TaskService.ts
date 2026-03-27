@@ -2,6 +2,7 @@ import { prisma } from '@arivarangam/db';
 import type { Task, TaskCategory, TaskEvent } from '@arivarangam/types';
 import { creditService } from './CreditService';
 import { getRedis, TASK_CHANNEL } from '../redis';
+import { enqueueTask } from '../queue/taskQueue';
 
 // ─── TaskService ──────────────────────────────────────────────────────────────
 
@@ -45,7 +46,7 @@ export class TaskService {
     return { task, estimate };
   }
 
-  // ─── Start Task (dispatch to engine) ─────────────────────────────────────────
+  // ─── Start Task (enqueue to BullMQ) ──────────────────────────────────────────
 
   async startTask(taskId: string): Promise<void> {
     const task = await prisma.task.findUnique({
@@ -56,17 +57,15 @@ export class TaskService {
       throw new Error(`Task ${taskId} is not in pending state (status: ${task.status})`);
     }
 
-    // Update status to analyzing
+    // Update status to analyzing — worker will move to 'running' when it picks up the job
     await prisma.task.update({
       where: { id: taskId },
       data: { status: 'analyzing', startedAt: new Date() },
     });
 
-    // Dispatch asynchronously (fire and forget — caller handles SSE)
-    this.dispatchToEngine(task as any).catch(async (err) => {
-      console.error(`[TaskService] Engine error for task ${taskId}:`, err);
-      await this.failTask(taskId, err.message ?? 'Unknown engine error');
-    });
+    // Enqueue to BullMQ — worker pod picks this up and runs the engine
+    // This is durable: if the API pod crashes, the job stays in Redis until a worker picks it
+    await enqueueTask(taskId, task.category, task.userId);
   }
 
   private async dispatchToEngine(task: any): Promise<void> {
@@ -98,6 +97,30 @@ export class TaskService {
       }
       case 'content': {
         // Content reuses code engine with different prompting
+        const { CodeEngine } = await import('../engines/CodeEngine');
+        await new CodeEngine().execute(task, onEvent);
+        break;
+      }
+      case 'mobile': {
+        // Mobile (React Native/Expo) uses CodeEngine with mobile-specific system prompts
+        const { CodeEngine } = await import('../engines/CodeEngine');
+        await new CodeEngine().execute(task, onEvent);
+        break;
+      }
+      case 'presentation': {
+        // Reveal.js presentation uses CodeEngine with presentation-specific prompts
+        const { CodeEngine } = await import('../engines/CodeEngine');
+        await new CodeEngine().execute(task, onEvent);
+        break;
+      }
+      case 'agent': {
+        // AI Agent (Python/LangChain/CrewAI) uses CodeEngine with agent-specific prompts
+        const { CodeEngine } = await import('../engines/CodeEngine');
+        await new CodeEngine().execute(task, onEvent);
+        break;
+      }
+      case 'workflow': {
+        // n8n workflow uses CodeEngine with workflow-specific prompts
         const { CodeEngine } = await import('../engines/CodeEngine');
         await new CodeEngine().execute(task, onEvent);
         break;

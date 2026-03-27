@@ -94,14 +94,17 @@ export interface TaskCreatePayload {
 
 
 export type TaskStatus = 'queued' | 'running' | 'done' | 'failed' | 'cancelled'
+export type TaskCategory = 'code' | 'research' | 'image' | 'voice' | 'content' | 'mobile' | 'presentation' | 'agent' | 'workflow'
 
 export interface Task {
   id: string
   status: TaskStatus
   prompt: string
-  category: string
+  category: TaskCategory
   creditsUsed: number
   previewUrl?: string
+  deployUrl?: string
+  isPublic?: boolean
   repoId?: string
   userId: string
   createdAt: string
@@ -276,7 +279,7 @@ export const tasksApi = {
   get: (taskId: string) => api.get<Task>(`/tasks/${taskId}`).then((r) => r.data),
 
   cancel: (taskId: string) =>
-    api.post<Task>(`/tasks/${taskId}/cancel`).then((r) => r.data),
+    api.delete<Task>(`/tasks/${taskId}`).then((r) => r.data),
 
   followUp: (taskId: string, prompt: string) =>
     api.post<Task>(`/tasks/${taskId}/follow-up`, { prompt }).then((r) => r.data),
@@ -460,6 +463,85 @@ export const envVarsApi = {
     api
       .get('/env-vars/detect')
       .then((r) => (r.data as any).data as { detected: string[]; missing: string[]; catalog: Record<string, ServiceCatalogEntry> }),
+}
+
+// ---------------------------------------------------------------------------
+// Deploy API
+// ---------------------------------------------------------------------------
+
+export interface DeployVercelResult {
+  deployUrl: string
+  deploymentId: string
+  status: string
+}
+
+export interface DeployGitHubResult {
+  repoUrl: string
+  cloneUrl: string
+  owner: string
+  repoName: string
+  filesPushed: number
+}
+
+export interface DeployRailwayResult {
+  projectId: string
+  railwayUrl: string
+  message: string
+}
+
+export interface DeployCloudflareResult {
+  workerUrl: string
+  workerName: string
+  message: string
+}
+
+export interface DeploySupabaseResult {
+  projectId: string
+  projectUrl: string
+  projectName: string
+  region: string
+  message: string
+}
+
+export const deployApi = {
+  vercel: (taskId: string) =>
+    api.post<{ success: boolean; data: DeployVercelResult }>('/deploy/vercel', { taskId })
+      .then(r => r.data.data),
+
+  github: (taskId: string, repoName?: string, isPrivate?: boolean) =>
+    api.post<{ success: boolean; data: DeployGitHubResult }>('/deploy/github', { taskId, repoName, isPrivate })
+      .then(r => r.data.data),
+
+  railway: (taskId: string) =>
+    api.post<{ success: boolean; data: DeployRailwayResult }>('/deploy/railway', { taskId })
+      .then(r => r.data.data),
+
+  cloudflare: (taskId: string, workerName?: string) =>
+    api.post<{ success: boolean; data: DeployCloudflareResult }>('/deploy/cloudflare', { taskId, workerName })
+      .then(r => r.data.data),
+
+  supabase: (taskId: string, orgId?: string) =>
+    api.post<{ success: boolean; data: DeploySupabaseResult }>('/deploy/supabase', { taskId, orgId })
+      .then(r => r.data.data),
+
+  getStatus: (taskId: string) =>
+    api.get<{ success: boolean; data: { deployUrl?: string; previewUrl?: string; status: string } }>(`/deploy/status/${taskId}`)
+      .then(r => r.data.data),
+}
+
+// ---------------------------------------------------------------------------
+// Gallery API
+// ---------------------------------------------------------------------------
+
+export const galleryApi = {
+  list: (params?: { page?: number; limit?: number; category?: string }) =>
+    api.get('/gallery', { params }).then(r => (r.data as any).data as {
+      tasks: Task[]
+      total: number
+      page: number
+      limit: number
+      totalPages: number
+    }),
 }
 
 export default api

@@ -14,6 +14,7 @@ import {
   CreditCard,
   Menu,
   X,
+  Globe,
 } from 'lucide-react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import * as Avatar from '@radix-ui/react-avatar'
@@ -26,6 +27,7 @@ const NAV_LINKS = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/repos', label: 'Repos', icon: GitBranch },
   { href: '/task', label: 'Tasks', icon: Zap },
+  { href: '/gallery', label: 'Gallery', icon: Globe },
 ]
 
 function CreditsBadge() {
