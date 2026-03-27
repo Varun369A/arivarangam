@@ -243,6 +243,11 @@ export const authApi = {
       .patch<{ success: boolean; data: { user: User } }>('/auth/me', data)
       .then((r) => r.data.data.user),
 
+  uploadAvatar: (data: string, mimeType: string) =>
+    api
+      .post<{ success: boolean; data: { user: User } }>('/auth/me/avatar', { data, mimeType })
+      .then((r) => r.data.data.user),
+
   changePassword: (oldPassword: string, newPassword: string) =>
     api
       .post<{ message: string }>('/auth/me/change-password', { oldPassword, newPassword })

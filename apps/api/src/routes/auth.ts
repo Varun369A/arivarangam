@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { prisma } from '@arivarangam/db'
 import { requireAuth } from '../middleware/auth'
+import { uploadFile } from '../connectors/storage'
 import {
   LOGIN_RATE_LIMIT,
   SIGNUP_RATE_LIMIT,
@@ -247,6 +248,35 @@ export async function authRoutes(fastify: FastifyInstance): Promise<void> {
     })
 
     return reply.send({ success: true, data: { user: updated } })
+  })
+
+  // ── POST /me/avatar ──────────────────────────────────────────────────────────
+  fastify.post('/me/avatar', { preHandler: requireAuth }, async (req: FastifyRequest, reply: FastifyReply) => {
+    const jwtUser = (req as any).user
+    const schema = z.object({
+      data: z.string().max(4_000_000), // base64 string, ~3MB limit
+      mimeType: z.enum(['image/jpeg', 'image/png', 'image/webp', 'image/gif']),
+    })
+    const parsed = schema.safeParse(req.body)
+    if (!parsed.success) return reply.code(400).send({ success: false, error: 'Invalid image data' })
+
+    const { data: base64, mimeType } = parsed.data
+    const buffer = Buffer.from(base64, 'base64')
+    if (buffer.length > 2 * 1024 * 1024) {
+      return reply.code(400).send({ success: false, error: 'Image must be under 2MB' })
+    }
+
+    const ext = mimeType === 'image/jpeg' ? 'jpg' : mimeType.split('/')[1]
+    const key = `avatars/${jwtUser.id}.${ext}`
+    const avatarUrl = await uploadFile(key, buffer, mimeType)
+
+    const updated = await prisma.user.update({
+      where: { id: jwtUser.id },
+      data: { avatar: avatarUrl },
+      select: { id: true, name: true, email: true, avatar: true, tier: true, credits: true, isAdmin: true, isEmailVerified: true },
+    })
+
+    return reply.send({ success: true, data: { user: safeUser(updated) } })
   })
 
   // ── POST /me/change-password ─────────────────────────────────────────────────

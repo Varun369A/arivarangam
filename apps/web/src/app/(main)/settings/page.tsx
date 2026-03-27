@@ -74,6 +74,8 @@ function ProfileTab() {
   const [name, setName] = useState(user?.name ?? '');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (user?.name) setName(user.name);
@@ -96,9 +98,43 @@ function ProfileTab() {
     }
   }
 
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { toast.error('Image must be under 2MB'); return; }
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
+      toast.error('Only JPEG, PNG, WebP or GIF allowed'); return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        const dataUrl = ev.target?.result as string;
+        const base64 = dataUrl.split(',')[1];
+        setAvatarPreview(dataUrl);
+        try {
+          await authApi.uploadAvatar(base64, file.type);
+          refresh();
+          toast.success('Profile photo updated!');
+        } catch (err) {
+          toast.error(getApiError(err));
+          setAvatarPreview(null);
+        } finally {
+          setUploadingAvatar(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch {
+      setUploadingAvatar(false);
+    }
+  }
+
   const initials = user?.name
     ? user.name.trim().split(/\s+/).map((p: string) => p[0]).slice(0, 2).join('').toUpperCase()
     : '?';
+
+  const avatarSrc = avatarPreview ?? user?.avatarUrl;
 
   return (
     <div className="space-y-8">
@@ -112,18 +148,21 @@ function ProfileTab() {
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-3">Profile picture</label>
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
-              {initials}
+            <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white text-xl font-bold">
+              {avatarSrc
+                ? <img src={avatarSrc} alt="avatar" className="w-full h-full object-cover" />
+                : initials}
             </div>
             <div>
-              <button
-                type="button"
-                className="flex items-center gap-2 text-sm font-medium text-indigo-600 hover:text-indigo-800 border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-xl transition-colors"
-              >
-                <Upload className="w-4 h-4" />
-                Upload photo
-              </button>
-              <p className="mt-1.5 text-xs text-slate-400">PNG, JPG up to 2MB. Coming soon.</p>
+              <label className={`flex items-center gap-2 text-sm font-semibold cursor-pointer
+                text-indigo-600 hover:text-indigo-800 border border-indigo-200 bg-indigo-50 hover:bg-indigo-100
+                px-3 py-1.5 rounded-xl transition-colors ${uploadingAvatar ? 'opacity-60 pointer-events-none' : ''}`}>
+                {uploadingAvatar
+                  ? <><Loader2 className="w-4 h-4 animate-spin" /> Uploading…</>
+                  : <><Upload className="w-4 h-4" /> Upload photo</>}
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleAvatarChange} />
+              </label>
+              <p className="mt-1.5 text-xs text-slate-400">PNG, JPG, WebP up to 2MB</p>
             </div>
           </div>
         </div>
