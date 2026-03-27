@@ -300,12 +300,13 @@ function CodeViewer({ file }: { file: TaskStreamFile | null }) {
     });
   }
 
+  const filePath = file.path;
   function downloadFile() {
     const blob = new Blob([fileContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = file.path.split('/').pop() ?? 'file.txt';
+    a.download = filePath.split('/').pop() ?? 'file.txt';
     a.click();
     URL.revokeObjectURL(url);
   }
