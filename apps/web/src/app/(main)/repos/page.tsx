@@ -16,8 +16,8 @@ export default function ReposPage() {
     { keepPreviousData: true }
   )
 
-  const repos = (data as any)?.data ?? (Array.isArray(data) ? data : [])
-  const totalPages = (data as any)?.totalPages ?? 1
+  const repos = (data as any)?.data?.repos ?? (data as any)?.repos ?? []
+  const totalPages = (data as any)?.data?.totalPages ?? (data as any)?.totalPages ?? 1
 
   return (
     <div className="space-y-6">

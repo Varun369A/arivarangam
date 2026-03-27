@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { prisma } from '@arivarangam/db';
 import { requireAuth } from '../middleware/auth';
+import { sanitizePrompt, TASK_CREATE_RATE_LIMIT } from '../middleware/security';
 import { taskService } from '../services/TaskService';
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
@@ -29,7 +30,7 @@ export async function taskRoutes(fastify: FastifyInstance): Promise<void> {
   fastify.addHook('preHandler', requireAuth);
 
   // POST / — create task
-  fastify.post('/', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.post('/', { config: { rateLimit: TASK_CREATE_RATE_LIMIT } }, async (request: FastifyRequest, reply: FastifyReply) => {
     const user = (request as any).user;
 
     const parseResult = createTaskSchema.safeParse(request.body);
@@ -39,7 +40,12 @@ export async function taskRoutes(fastify: FastifyInstance): Promise<void> {
       return reply.code(400).send({ success: false, error: 'Validation failed', details: errors });
     }
 
-    const { category, prompt } = parseResult.data;
+    const { category } = parseResult.data;
+    // Sanitize prompt to prevent injection attacks against the AI agent
+    const { sanitized: prompt, wasModified } = sanitizePrompt(parseResult.data.prompt);
+    if (wasModified) {
+      console.warn(`[Security] Prompt injection attempt detected from user ${user.id}`);
+    }
 
     try {
       const { task, estimate } = await taskService.createTask(user.id, category, prompt);
@@ -168,7 +174,7 @@ export async function taskRoutes(fastify: FastifyInstance): Promise<void> {
       return reply.code(400).send({ success: false, error: 'Follow-up prompt is required' });
     }
 
-    const { prompt } = parseResult.data;
+    const { sanitized: prompt } = sanitizePrompt(parseResult.data.prompt);
 
     const task = await prisma.task.findFirst({
       where: { id, userId: user.id },

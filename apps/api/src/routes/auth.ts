@@ -3,6 +3,12 @@ import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { prisma } from '@arivarangam/db'
 import { requireAuth } from '../middleware/auth'
+import {
+  LOGIN_RATE_LIMIT,
+  SIGNUP_RATE_LIMIT,
+  OTP_RATE_LIMIT,
+  FORGOT_PASSWORD_RATE_LIMIT,
+} from '../middleware/security'
 import { creditService } from '../services/CreditService'
 import { getConfig } from '@arivarangam/config'
 import { getRedis } from '../redis'
@@ -75,7 +81,7 @@ function safeUser(user: {
 export async function authRoutes(fastify: FastifyInstance): Promise<void> {
 
   // ── POST /signup ────────────────────────────────────────────────────────────
-  fastify.post('/signup', async (req: FastifyRequest, reply: FastifyReply) => {
+  fastify.post('/signup', { config: { rateLimit: SIGNUP_RATE_LIMIT } }, async (req: FastifyRequest, reply: FastifyReply) => {
     const parsed = signupSchema.safeParse(req.body)
     if (!parsed.success) {
       const details: Record<string, string> = {}
@@ -139,7 +145,7 @@ export async function authRoutes(fastify: FastifyInstance): Promise<void> {
   })
 
   // ── POST /login ─────────────────────────────────────────────────────────────
-  fastify.post('/login', async (req: FastifyRequest, reply: FastifyReply) => {
+  fastify.post('/login', { config: { rateLimit: LOGIN_RATE_LIMIT } }, async (req: FastifyRequest, reply: FastifyReply) => {
     const parsed = loginSchema.safeParse(req.body)
     if (!parsed.success) {
       return reply.code(400).send({ success: false, error: 'Invalid email or password format' })
@@ -333,7 +339,7 @@ export async function authRoutes(fastify: FastifyInstance): Promise<void> {
   })
 
   // ── POST /forgot-password ────────────────────────────────────────────────────
-  fastify.post('/forgot-password', async (req: FastifyRequest, reply: FastifyReply) => {
+  fastify.post('/forgot-password', { config: { rateLimit: FORGOT_PASSWORD_RATE_LIMIT } }, async (req: FastifyRequest, reply: FastifyReply) => {
     const schema = z.object({ email: z.string().email() })
     const parsed = schema.safeParse(req.body)
     if (!parsed.success) {
@@ -404,7 +410,7 @@ export async function authRoutes(fastify: FastifyInstance): Promise<void> {
 
   // ── POST /admin-otp-send ─────────────────────────────────────────────────────
   // Step 1: validate admin credentials → send OTP to admin email
-  fastify.post('/admin-otp-send', async (req: FastifyRequest, reply: FastifyReply) => {
+  fastify.post('/admin-otp-send', { config: { rateLimit: OTP_RATE_LIMIT } }, async (req: FastifyRequest, reply: FastifyReply) => {
     const parsed = loginSchema.safeParse(req.body)
     if (!parsed.success) {
       return reply.code(400).send({ success: false, error: 'Invalid email or password' })
@@ -438,7 +444,7 @@ export async function authRoutes(fastify: FastifyInstance): Promise<void> {
 
   // ── POST /admin-otp-verify ───────────────────────────────────────────────────
   // Step 2: verify OTP → return JWT
-  fastify.post('/admin-otp-verify', async (req: FastifyRequest, reply: FastifyReply) => {
+  fastify.post('/admin-otp-verify', { config: { rateLimit: OTP_RATE_LIMIT } }, async (req: FastifyRequest, reply: FastifyReply) => {
     const schema = z.object({
       email: z.string().email(),
       otp: z.string().length(6, 'OTP must be 6 digits'),
