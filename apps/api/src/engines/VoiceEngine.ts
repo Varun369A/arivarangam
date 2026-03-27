@@ -15,8 +15,9 @@ export class VoiceEngine {
     await prisma.task.update({ where: { id: task.id }, data: { status: 'running' } });
 
     try {
-      // Detect language from task context
-      const language = this.detectLanguage(task.prompt, task.context);
+      // Detect language from task context (stored in metadata.context or task.context)
+      const taskContext = (task.metadata as any)?.context ?? task.context;
+      const language = this.detectLanguage(task.prompt, taskContext);
       const useIndianLang = isIndianLanguage(language) && isSarvamConfigured();
 
       await emit({

@@ -196,7 +196,7 @@ export default function DashboardPage() {
     setEstimating(true);
     try {
       const data = await creditsApi.estimateTask(text.trim(), cat);
-      setEstimate({ min: data.min ?? data.estimate ?? 0, max: data.max ?? data.estimate ?? 0 });
+      setEstimate({ min: data.min ?? 0, max: data.max ?? 0 });
     } catch {
       setEstimate(null);
     } finally {
@@ -261,7 +261,7 @@ export default function DashboardPage() {
               style={{background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', boxShadow: '0 2px 8px rgba(99,102,241,0.3)'}}
             >
               <span>⚡</span>
-              <span>{formatCredits(balance)} credits</span>
+              <span>{formatCredits(balance)}</span>
             </Link>
           )}
         </div>

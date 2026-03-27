@@ -586,7 +586,6 @@ function BillingTab() {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
-              packId: pack.id,
             });
             toast.success(`${pack.credits.toLocaleString('en-IN')} credits added to your account!`);
             refreshCredits();

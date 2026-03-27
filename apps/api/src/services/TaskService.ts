@@ -11,7 +11,8 @@ export class TaskService {
   async createTask(
     userId: string,
     category: TaskCategory,
-    prompt: string
+    prompt: string,
+    context?: string
   ): Promise<{ task: any; estimate: any }> {
     // 1. Estimate credits
     const estimate = await creditService.estimateTask(prompt, category);
@@ -34,6 +35,7 @@ export class TaskService {
         status: 'pending',
         creditsEstimatedMin: estimate.min,
         creditsEstimatedMax: estimate.max,
+        metadata: context ? { context } : undefined,
       },
     });
 

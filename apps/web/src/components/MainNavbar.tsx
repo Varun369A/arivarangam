@@ -31,7 +31,7 @@ const NAV_LINKS = [
 function CreditsBadge() {
   const { balance } = useCredits()
 
-  if (balance === undefined) return null
+  if (balance === null) return null
 
   return (
     <Link

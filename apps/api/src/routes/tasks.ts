@@ -10,6 +10,7 @@ import { taskService } from '../services/TaskService';
 const createTaskSchema = z.object({
   category: z.enum(['code', 'research', 'image', 'voice', 'content']),
   prompt: z.string().min(5, 'Prompt must be at least 5 characters').max(10000),
+  context: z.string().max(2000).optional(),
 });
 
 const listTasksSchema = z.object({
@@ -40,7 +41,7 @@ export async function taskRoutes(fastify: FastifyInstance): Promise<void> {
       return reply.code(400).send({ success: false, error: 'Validation failed', details: errors });
     }
 
-    const { category } = parseResult.data;
+    const { category, context } = parseResult.data;
     // Sanitize prompt to prevent injection attacks against the AI agent
     const { sanitized: prompt, wasModified } = sanitizePrompt(parseResult.data.prompt);
     if (wasModified) {
@@ -48,7 +49,7 @@ export async function taskRoutes(fastify: FastifyInstance): Promise<void> {
     }
 
     try {
-      const { task, estimate } = await taskService.createTask(user.id, category, prompt);
+      const { task, estimate } = await taskService.createTask(user.id, category, prompt, context);
 
       // Start task asynchronously
       taskService.startTask(task.id).catch(err => {

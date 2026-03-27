@@ -92,6 +92,7 @@ export interface TaskCreatePayload {
   context?: string
 }
 
+
 export type TaskStatus = 'queued' | 'running' | 'done' | 'failed' | 'cancelled'
 
 export interface Task {
@@ -123,6 +124,12 @@ export interface Repo {
   deployUrl?: string
   createdAt: string
   updatedAt: string
+}
+
+export interface CreditEstimate {
+  min: number
+  max: number
+  typical: number
 }
 
 export interface CreditPack {
@@ -312,35 +319,51 @@ export const reposApi = {
 
 export const creditsApi = {
   getBalance: () =>
-    api.get<{ balance: number; recentTransactions: Transaction[] }>('/credits/balance').then((r) => r.data),
+    api
+      .get('/credits/balance')
+      .then((r) => (r.data as any).data as { balance: number; recentTransactions: Transaction[] }),
 
   estimateTask: (prompt: string, category: string) =>
     api
-      .post<{ estimate: number; min: number; max: number }>('/credits/estimate', {
-        prompt,
-        category,
-      })
-      .then((r) => r.data),
+      .post('/credits/estimate', { prompt, category })
+      .then((r) => (r.data as any).data.estimate as CreditEstimate),
 
-  getPacks: () => api.get<CreditPack[]>('/credits/packs').then((r) => r.data),
+  getPacks: () =>
+    api
+      .get('/credits/packs')
+      .then((r) => ((r.data as any).data?.packs ?? []) as CreditPack[]),
 
   createOrder: (packId: string) =>
-    api.post<CreditOrder>('/credits/purchase/create-order', { packId }).then((r) => r.data),
+    api
+      .post('/credits/purchase/create-order', { packId })
+      .then((r) => (r.data as any).data as CreditOrder),
 
   verifyPayment: (payload: {
     razorpay_order_id: string
     razorpay_payment_id: string
     razorpay_signature: string
-    packId: string
   }) =>
     api
-      .post<{ success: boolean; credits: number; balance: number }>('/credits/purchase/verify', payload)
-      .then((r) => r.data),
+      .post('/credits/purchase/verify', {
+        orderId: payload.razorpay_order_id,
+        paymentId: payload.razorpay_payment_id,
+        signature: payload.razorpay_signature,
+      })
+      .then((r) => (r.data as any).data),
 
   getTransactions: (params?: { page?: number; limit?: number }) =>
     api
-      .get<PaginatedResponse<Transaction>>('/credits/transactions', { params })
-      .then((r) => r.data),
+      .get('/credits/transactions', { params })
+      .then((r) => {
+        const d = (r.data as any).data ?? {}
+        return {
+          data: (d.transactions ?? []) as Transaction[],
+          total: d.total ?? 0,
+          page: d.page ?? 1,
+          limit: d.limit ?? 20,
+          totalPages: d.totalPages ?? 1,
+        } as PaginatedResponse<Transaction>
+      }),
 }
 
 // ---------------------------------------------------------------------------
