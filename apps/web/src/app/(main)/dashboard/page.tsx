@@ -239,7 +239,7 @@ export default function DashboardPage() {
   const activeCfg = CATEGORIES.find(c => c.key === category)!;
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-10">
 
         {/* Header */}
@@ -253,26 +253,27 @@ export default function DashboardPage() {
           {balance !== null && (
             <Link
               href="/settings?tab=credits"
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors font-semibold text-sm text-white"
+              style={{background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', boxShadow: '0 2px 8px rgba(99,102,241,0.3)'}}
             >
-              <span className="text-xs font-semibold text-indigo-700">{formatCredits(balance)} credits</span>
-              <span className="text-indigo-400 text-sm">⚡</span>
+              <span>⚡</span>
+              <span>{formatCredits(balance)} credits</span>
             </Link>
           )}
         </div>
 
         {/* Low credits banner */}
         {balance !== null && balance < 50 && (
-          <div className="flex items-center justify-between gap-4 px-4 py-3 rounded-xl2 bg-amber-50 border border-amber-200">
+          <div className="flex items-center justify-between gap-4 px-4 py-3 rounded-xl2" style={{background: 'linear-gradient(135deg, #fffbeb, #fef3c7)', border: '1.5px solid #fcd34d'}}>
             <div className="flex items-center gap-2">
               <span className="text-amber-500">⚡</span>
-              <span className="text-sm font-medium text-amber-800">
+              <span className="text-sm font-semibold text-amber-800">
                 Running low on credits. Top up to keep building.
               </span>
             </div>
             <Link
               href="/settings?tab=credits"
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium transition-colors whitespace-nowrap"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-colors whitespace-nowrap"
             >
               Buy Credits →
             </Link>
@@ -280,8 +281,8 @@ export default function DashboardPage() {
         )}
 
         {/* Create Task Card */}
-        <div className="bg-white rounded-xl2 border border-surface-border shadow-card p-6 space-y-5">
-          <p className="text-base font-semibold text-slate-800">What do you want to build?</p>
+        <div className="bg-white rounded-2xl shadow-card p-6 space-y-5" style={{border: '1.5px solid #c7d2fe', boxShadow: '0 4px 20px rgba(99,102,241,0.10)'}}>
+          <p className="text-base font-bold text-indigo-800">What do you want to build?</p>
 
           {/* Category tabs */}
           <div className="flex gap-2 flex-wrap">
@@ -370,8 +371,8 @@ export default function DashboardPage() {
         {/* Recent Projects */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-slate-800">Recent Projects</h2>
-            <Link href="/task" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
+            <h2 className="text-lg font-bold text-indigo-700 flex items-center gap-2">⚡ Recent Projects</h2>
+            <Link href="/task" className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">
               View all →
             </Link>
           </div>
@@ -409,8 +410,8 @@ export default function DashboardPage() {
         {/* Repos Section */}
         <section className="pb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-slate-800">Saved Repos</h2>
-            <Link href="/repos" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
+            <h2 className="text-lg font-bold text-violet-700 flex items-center gap-2">📦 Saved Repos</h2>
+            <Link href="/repos" className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">
               View all →
             </Link>
           </div>
@@ -457,21 +458,21 @@ function TaskCard({ task }: { task: any }) {
   const credits = task.creditsActuallyUsed ?? task.creditsUsed ?? task.creditsEstimatedMax ?? '—';
 
   return (
-    <div className="bg-white rounded-xl2 border border-surface-border shadow-card p-5 card-hover flex flex-col gap-3 group">
+    <div className="bg-white rounded-2xl shadow-card p-5 card-hover flex flex-col gap-3" style={{border: '1.5px solid #e0e7ff'}}>
       <div className="flex items-start justify-between gap-2">
         <CategoryIcon category={task.category} />
         <StatusBadge status={task.status} />
       </div>
-      <p className="text-sm font-medium text-slate-800 line-clamp-2 flex-1 leading-snug">{title}</p>
-      <div className="flex items-center justify-between text-xs text-slate-400">
+      <p className="text-sm font-semibold text-slate-800 line-clamp-2 flex-1 leading-snug">{title}</p>
+      <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
         <span>{task.createdAt ? formatDate(task.createdAt) : '—'}</span>
-        <span>{credits !== '—' ? `${credits} cr` : '—'}</span>
+        <span className="text-indigo-600 font-semibold">{credits !== '—' ? `${credits} cr` : '—'}</span>
       </div>
       <Link
         href={`/task/${task.id}`}
-        className="btn-secondary text-xs py-1.5 text-center w-full"
+        className="btn-primary text-xs py-1.5 text-center w-full"
       >
-        Open
+        Open →
       </Link>
     </div>
   );
@@ -482,8 +483,8 @@ function TaskCard({ task }: { task: any }) {
 function RepoRow({ repo }: { repo: any }) {
   const fileCount = Array.isArray(repo.files) ? repo.files.length : 0;
   return (
-    <div className="bg-white rounded-xl2 border border-surface-border shadow-card px-5 py-4 flex items-center gap-4 card-hover">
-      <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center text-lg flex-shrink-0">
+    <div className="bg-white rounded-2xl shadow-card px-5 py-4 flex items-center gap-4 card-hover" style={{border: '1.5px solid #ede9fe'}}>
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0" style={{background: 'linear-gradient(135deg, #ede9fe, #ddd6fe)'}}>
         📦
       </div>
       <div className="flex-1 min-w-0">

@@ -299,13 +299,13 @@ export default function AdminOverviewPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Live Tasks */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-surface-border shadow-card overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-indigo-200 shadow-card overflow-hidden">
+          <div className="px-5 py-4 border-b border-indigo-100 flex items-center justify-between" style={{background: 'linear-gradient(135deg, #eef2ff, #ede9fe)'}}>
+            <h2 className="text-sm font-bold text-indigo-800 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse-soft inline-block" />
               LIVE TASKS
             </h2>
-            <Link href="/admin/tasks" className="text-xs text-indigo-600 hover:text-indigo-800">
+            <Link href="/admin/tasks" className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold">
               View all →
             </Link>
           </div>
@@ -492,12 +492,26 @@ function StatCard({
   icon: React.ReactNode;
   accent: 'indigo' | 'violet' | 'purple' | 'amber' | 'emerald';
 }) {
+  const gradMap = {
+    indigo: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)',
+    violet: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)',
+    purple: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
+    amber: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
+    emerald: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)',
+  };
+  const borderMap = {
+    indigo: '#a5b4fc',
+    violet: '#c4b5fd',
+    purple: '#d8b4fe',
+    amber: '#fcd34d',
+    emerald: '#6ee7b7',
+  };
   const iconMap = {
-    indigo: 'text-indigo-600 bg-indigo-50',
-    violet: 'text-violet-600 bg-violet-50',
-    purple: 'text-purple-600 bg-purple-50',
-    amber: 'text-amber-600 bg-amber-50',
-    emerald: 'text-emerald-600 bg-emerald-50',
+    indigo: 'text-indigo-600 bg-indigo-100',
+    violet: 'text-violet-600 bg-violet-100',
+    purple: 'text-purple-600 bg-purple-100',
+    amber: 'text-amber-600 bg-amber-100',
+    emerald: 'text-emerald-600 bg-emerald-100',
   };
   const valueMap = {
     indigo: 'text-indigo-700',
@@ -507,13 +521,13 @@ function StatCard({
     emerald: 'text-emerald-700',
   };
   return (
-    <div className="bg-white rounded-2xl border border-surface-border shadow-card p-4">
+    <div className="rounded-2xl shadow-card p-4" style={{ background: gradMap[accent], border: `1.5px solid ${borderMap[accent]}` }}>
       <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center mb-3', iconMap[accent])}>
         {icon}
       </div>
       <p className={cn('text-2xl font-bold', valueMap[accent])}>{value}</p>
-      <p className="text-xs text-slate-500 mt-0.5 font-medium">{label}</p>
-      <p className="text-xs text-slate-400">{sub}</p>
+      <p className="text-xs text-slate-600 mt-0.5 font-semibold">{label}</p>
+      <p className="text-xs text-slate-500">{sub}</p>
     </div>
   );
 }

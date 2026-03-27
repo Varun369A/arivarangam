@@ -36,9 +36,9 @@ function CreditsBadge() {
   return (
     <Link
       href="/settings/billing"
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-primary-50 to-purple-50 border border-primary-100 text-primary-700 text-sm font-medium hover:from-primary-100 hover:to-purple-100 transition-colors"
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/20 border border-white/30 text-white text-sm font-semibold hover:bg-white/30 transition-colors"
     >
-      <Zap className="w-3.5 h-3.5 text-brand-purple" />
+      <Zap className="w-3.5 h-3.5 text-yellow-300" />
       <span>{(balance ?? 0).toLocaleString('en-IN')} cr</span>
     </Link>
   )
@@ -60,15 +60,15 @@ export function MainNavbar() {
     : '?'
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-sm border-b border-surface-border shadow-sm">
+    <header className="sticky top-0 z-40 w-full border-b border-indigo-200 shadow-sm" style={{background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #2563eb 100%)'}}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-14 items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center gap-2 shrink-0 group">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary-500 to-brand-purple flex items-center justify-center shadow-glow">
+            <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
               <span className="text-white font-bold text-sm leading-none">A</span>
             </div>
-            <span className="text-lg font-bold text-slate-800 hidden sm:block group-hover:text-primary-600 transition-colors">
+            <span className="text-lg font-bold text-white hidden sm:block group-hover:text-indigo-100 transition-colors">
               arivarangam
             </span>
           </Link>
@@ -80,10 +80,10 @@ export function MainNavbar() {
                 key={href}
                 href={href}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors',
                   pathname.startsWith(href)
-                    ? 'bg-primary-50 text-primary-700'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    ? 'bg-white/25 text-white'
+                    : 'text-indigo-100 hover:text-white hover:bg-white/15'
                 )}
               >
                 <Icon className="w-4 h-4" />
@@ -98,7 +98,7 @@ export function MainNavbar() {
             {user?.isAdmin && (
               <Link
                 href="/admin"
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 text-white text-xs font-semibold hover:bg-slate-700 transition-colors"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/20 text-white text-xs font-semibold hover:bg-white/30 transition-colors border border-white/30"
               >
                 <Settings className="w-3.5 h-3.5" />
                 Admin Panel
@@ -109,10 +109,10 @@ export function MainNavbar() {
             <DropdownMenu.Root>
               <DropdownMenu.Trigger asChild>
                 <button
-                  className="flex items-center gap-2 rounded-xl px-2 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                  className="flex items-center gap-2 rounded-xl px-2 py-1.5 text-sm font-medium text-white hover:bg-white/15 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-indigo-600"
                   aria-label="User menu"
                 >
-                  <Avatar.Root className="w-7 h-7 rounded-full overflow-hidden bg-gradient-to-br from-primary-400 to-brand-purple">
+                  <Avatar.Root className="w-7 h-7 rounded-full overflow-hidden bg-white/20 border border-white/40">
                     <Avatar.Image
                       src={user?.avatarUrl}
                       alt={user?.name || 'User'}
@@ -122,8 +122,8 @@ export function MainNavbar() {
                       {initials}
                     </Avatar.Fallback>
                   </Avatar.Root>
-                  <span className="hidden sm:block max-w-[100px] truncate">{user?.name || 'Account'}</span>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden sm:block" />
+                  <span className="hidden sm:block max-w-[100px] truncate text-white">{user?.name || 'Account'}</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-indigo-200 hidden sm:block" />
                 </button>
               </DropdownMenu.Trigger>
 
@@ -195,7 +195,7 @@ export function MainNavbar() {
 
       {/* Mobile nav */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-surface-border bg-white px-4 py-3">
+        <div className="md:hidden border-t border-white/20 bg-indigo-700 px-4 py-3">
           <nav className="flex flex-col gap-1">
             {NAV_LINKS.map(({ href, label, icon: Icon }) => (
               <Link
@@ -203,10 +203,10 @@ export function MainNavbar() {
                 href={href}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  'flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors',
+                  'flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-semibold transition-colors',
                   pathname.startsWith(href)
-                    ? 'bg-primary-50 text-primary-700'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    ? 'bg-white/25 text-white'
+                    : 'text-indigo-100 hover:text-white hover:bg-white/15'
                 )}
               >
                 <Icon className="w-4 h-4" />

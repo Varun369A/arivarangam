@@ -44,7 +44,7 @@ function langLabel(path: string): string {
     md: 'Markdown', py: 'Python', rs: 'Rust', go: 'Go',
     sh: 'Shell', txt: 'Text', svg: 'SVG',
   };
-  return map[ext] ?? ext.toUpperCase() || 'Text';
+  return (map[ext] ?? ext.toUpperCase()) || 'Text';
 }
 
 // Simple syntax highlight (escape HTML first, then wrap tokens in spans)
