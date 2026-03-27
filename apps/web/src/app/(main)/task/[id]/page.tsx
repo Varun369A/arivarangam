@@ -289,18 +289,19 @@ function CodeViewer({ file }: { file: TaskStreamFile | null }) {
     );
   }
 
-  const lines = (file.content ?? '').split('\n');
-  const highlighted = syntaxHighlight(file.content ?? '', file.path);
+  const fileContent = file.content ?? '';
+  const lines = fileContent.split('\n');
+  const highlighted = syntaxHighlight(fileContent, file.path);
 
   function copyToClipboard() {
-    navigator.clipboard.writeText(file.content ?? '').then(() => {
+    navigator.clipboard.writeText(fileContent).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     });
   }
 
   function downloadFile() {
-    const blob = new Blob([file.content ?? ''], { type: 'text/plain' });
+    const blob = new Blob([fileContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
