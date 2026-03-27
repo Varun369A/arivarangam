@@ -1,46 +1,11 @@
 # ─── Railway Deployment Configuration ────────────────────────────────────────
-# Arrivarangam — Pay-as-you-go serverless platform on Railway
-#
-# SETUP: Create 2 services in Railway dashboard from this same repo:
-#   Service 1 (api):    uses Dockerfile.api,    starts CMD node apps/api/dist/server.js
-#   Service 2 (worker): uses Dockerfile.worker,  starts CMD node apps/api/dist/worker.js
-#
-# This toml configures the DEFAULT service (API).
-# For the worker service, override in Railway dashboard:
-#   - Dockerfile path: Dockerfile.worker
-#   - Sleep when inactive: enabled (workers auto-sleep when queue is empty)
+# Arrivarangam — minimal config, settings managed in Railway dashboard
 
 [build]
 dockerfilePath = "Dockerfile.api"
 
 [deploy]
-# Auto-restart on crash
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 5
-
-# Health check
 healthcheckPath = "/health"
 healthcheckTimeout = 30
-
-# Sleep when no traffic (pay-as-you-go: $0 idle cost)
-# Railway auto-wakes on incoming request (< 500ms cold start for Node.js)
-sleepApplication = false  # Keep API always-on (cheap); set true for dev
-
-[[services]]
-name = "api"
-dockerfilePath = "Dockerfile.api"
-
-  [services.deploy]
-  sleepApplication = false  # API stays warm for instant response
-
-[[services]]
-name = "worker"
-dockerfilePath = "Dockerfile.worker"
-
-  [services.deploy]
-  # Worker auto-sleeps when BullMQ queue is empty — Railway wakes it when jobs arrive
-  # This is the key to $0 idle worker cost
-  sleepApplication = true
-
-  [services.variables]
-  WORKER_CONCURRENCY = "5"  # Scale up concurrency per worker pod
