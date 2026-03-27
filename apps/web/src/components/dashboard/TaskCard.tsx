@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { Zap, Code2, Search, Image, Mic, FileText } from 'lucide-react';
+import { Zap, Code2, Search, Image, Mic, FileText, Smartphone, Monitor, Bot, GitMerge } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TaskStatusBadge } from '@/components/ui/Badge';
 import type { Task, TaskCategory } from '@arivarangam/types';
@@ -52,6 +52,30 @@ const categoryConfig: Record<TaskCategory, {
     iconBg: 'bg-purple-100',
     iconColor: 'text-purple-600',
     accent: 'group-hover:border-purple-200',
+  },
+  mobile: {
+    icon: <Smartphone className="h-4 w-4" />,
+    iconBg: 'bg-blue-100',
+    iconColor: 'text-blue-600',
+    accent: 'group-hover:border-blue-200',
+  },
+  presentation: {
+    icon: <Monitor className="h-4 w-4" />,
+    iconBg: 'bg-yellow-100',
+    iconColor: 'text-yellow-600',
+    accent: 'group-hover:border-yellow-200',
+  },
+  agent: {
+    icon: <Bot className="h-4 w-4" />,
+    iconBg: 'bg-violet-100',
+    iconColor: 'text-violet-600',
+    accent: 'group-hover:border-violet-200',
+  },
+  workflow: {
+    icon: <GitMerge className="h-4 w-4" />,
+    iconBg: 'bg-teal-100',
+    iconColor: 'text-teal-600',
+    accent: 'group-hover:border-teal-200',
   },
 };
 
