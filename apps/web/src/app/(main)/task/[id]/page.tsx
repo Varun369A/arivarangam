@@ -424,7 +424,7 @@ function CreditConfirmModal({
         {insufficient && (
           <p className="text-xs text-red-600 text-center">
             Insufficient credits.{' '}
-            <Link href="/credits" className="underline font-medium">Top up →</Link>
+            <Link href="/settings?tab=credits" className="underline font-medium">Top up →</Link>
           </p>
         )}
       </div>
@@ -518,8 +518,9 @@ export default function TaskPage() {
     setLoading(true);
     tasksApi.get(taskId)
       .then(t => {
-        setTask(t as any);
-        const status = (t as any).status ?? '';
+        const taskObj = (t as any)?.data?.task ?? (t as any);
+        setTask(taskObj);
+        const status = (taskObj as any).status ?? '';
         if (['running', 'analyzing', 'done', 'completed', 'failed', 'cancelled'].includes(status)) {
           setConfirmed(true);
         } else if (status === 'pending' || status === 'queued') {
@@ -542,7 +543,7 @@ export default function TaskPage() {
   useEffect(() => {
     if (!isComplete || !taskId) return;
     tasksApi.get(taskId)
-      .then(t => setTask(t as any))
+      .then(t => setTask((t as any)?.data?.task ?? (t as any)))
       .catch(() => {});
   }, [isComplete, taskId]);
 
@@ -594,7 +595,8 @@ export default function TaskPage() {
     setFollowUpError(null);
     try {
       const newTask = await tasksApi.followUp(task.id, followUp.trim());
-      router.push(`/task/${(newTask as any).id}`);
+      const newTaskId = (newTask as any)?.data?.task?.id ?? (newTask as any)?.id;
+      router.push(`/task/${newTaskId}`);
     } catch (err) {
       setFollowUpError(getApiError(err));
     } finally {
@@ -613,7 +615,8 @@ export default function TaskPage() {
     setSaving(true);
     try {
       const repo = await reposApi.create({ name: repoName, isPublic: false });
-      setSavedRepo({ id: (repo as any).id, name: (repo as any).name });
+      const repoObj = (repo as any)?.data?.repo ?? (repo as any);
+      setSavedRepo({ id: repoObj.id, name: repoObj.name });
     } catch {
       // ignore
     } finally {

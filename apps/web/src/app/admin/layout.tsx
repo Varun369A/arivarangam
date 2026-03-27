@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { AdminSidebar } from '@/components/AdminSidebar'
 
 export const metadata: Metadata = {
@@ -20,6 +21,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <span className="text-sm font-semibold text-slate-700">Admin Panel</span>
           </div>
           <div className="flex-1" />
+          <Link
+            href="/dashboard"
+            className="text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5"
+          >
+            ← Back to App
+          </Link>
           <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-lg font-medium">
             Restricted Access
           </span>
