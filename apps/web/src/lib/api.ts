@@ -357,7 +357,10 @@ export const creditsApi = {
       .then((r) => {
         const d = (r.data as any).data ?? {}
         return {
-          data: (d.transactions ?? []) as Transaction[],
+          data: (d.transactions ?? []).map((tx: any) => ({
+          ...tx,
+          credits: tx.credits ?? tx.amount ?? 0,
+        })) as Transaction[],
           total: d.total ?? 0,
           page: d.page ?? 1,
           limit: d.limit ?? 20,
