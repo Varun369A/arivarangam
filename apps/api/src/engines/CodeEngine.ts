@@ -249,7 +249,7 @@ Return ALL files, even unchanged ones.`;
 
     try {
       const parsed = this.parseJSON<FileEntry[]>(response, []);
-      if (!parsed || !Array.isArray(parsed)) return files;
+      if (!parsed || !Array.isArray(parsed) || parsed.length === 0) return files;
 
       // Validate structure
       const valid = parsed.every(f => typeof f.path === 'string' && typeof f.content === 'string');

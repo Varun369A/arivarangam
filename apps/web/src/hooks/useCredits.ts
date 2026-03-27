@@ -41,7 +41,7 @@ export function useCredits(): UseCreditsReturn {
   )
 
   return {
-    balance: data?.balance ?? null,
+    balance: (data as any)?.data?.balance ?? (data as any)?.balance ?? null,
     isLoading,
     error: error ? 'Failed to load credits' : null,
     refresh: () => {

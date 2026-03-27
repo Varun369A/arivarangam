@@ -34,6 +34,10 @@
     @apply bg-surface text-slate-800 font-sans antialiased;
     background-color: hsl(var(--surface));
     color: hsl(var(--foreground));
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   h1, h2, h3, h4, h5, h6 {
