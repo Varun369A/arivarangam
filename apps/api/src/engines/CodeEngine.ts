@@ -442,37 +442,37 @@ Return ALL files, even unchanged ones.`;
   }
 
   private parseJSON<T>(text: string, fallback: T): T {
-    // Strip markdown fences
-    let cleaned = text
+    const expectArray = Array.isArray(fallback);
+
+    // Strip markdown fences only (NOT comments yet — comment regex corrupts URLs in strings)
+    const cleaned = text
       .replace(/^```[\w]*\n?/gm, '')
       .replace(/```\s*$/gm, '')
       .trim();
 
-    // Remove JS-style comments
-    cleaned = cleaned
-      .replace(/\/\/.*$/gm, '')
-      .replace(/\/\*[\s\S]*?\*\//g, '');
+    // 1. Try direct parse (Claude returned clean JSON)
+    try { return JSON.parse(cleaned) as T; } catch { /* continue */ }
 
-    // Try direct parse first
-    try {
-      return JSON.parse(cleaned) as T;
-    } catch {
-      // Try to extract a JSON object or array from surrounding prose
-      const expectArray = Array.isArray(fallback);
-      const block = this.extractJsonBlock(cleaned, expectArray)
-        ?? this.extractJsonBlock(cleaned, !expectArray);
-
-      if (block) {
-        try {
-          return JSON.parse(block) as T;
-        } catch {
-          // fall through
-        }
-      }
-
-      console.warn('[CodeEngine] JSON parse failed, using fallback. Raw:', text.slice(0, 300));
-      return fallback;
+    // 2. Extract JSON block from surrounding prose (most common case)
+    const block = this.extractJsonBlock(cleaned, expectArray)
+      ?? this.extractJsonBlock(cleaned, !expectArray);
+    if (block) {
+      try { return JSON.parse(block) as T; } catch { /* continue */ }
     }
+
+    // 3. Strip JS comments then try again (Claude added comments to JSON)
+    const stripped = cleaned
+      .replace(/\/\/(?![^\n]*"[^\n]*(?:"[^\n]*"[^\n]*)*$)[^\n]*/gm, '') // single-line, not inside strings
+      .replace(/\/\*[\s\S]*?\*\//g, '');
+    try { return JSON.parse(stripped) as T; } catch { /* continue */ }
+    const blockStripped = this.extractJsonBlock(stripped, expectArray)
+      ?? this.extractJsonBlock(stripped, !expectArray);
+    if (blockStripped) {
+      try { return JSON.parse(blockStripped) as T; } catch { /* continue */ }
+    }
+
+    console.warn('[CodeEngine] JSON parse failed. Raw:', text.slice(0, 400));
+    return fallback;
   }
 
   private stripMarkdownFences(content: string, language: string): string {
