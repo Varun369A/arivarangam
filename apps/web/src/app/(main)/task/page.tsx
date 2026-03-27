@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useQuery } from 'react-query'
-import { Zap, ChevronLeft, ChevronRight, Filter } from 'lucide-react'
+import { useQuery, useQueryClient } from 'react-query'
+import { Zap, ChevronLeft, ChevronRight, Filter, Trash2 } from 'lucide-react'
 import { tasksApi } from '@/lib/api'
 import { cn, formatDate } from '@/lib/utils'
 
@@ -35,6 +35,23 @@ function StatusBadge({ status }: { status: string }) {
 export default function TasksPage() {
   const [page, setPage] = useState(1)
   const [status, setStatus] = useState<StatusFilter>('')
+  const [deleting, setDeleting] = useState<string | null>(null)
+  const queryClient = useQueryClient()
+
+  async function handleDelete(e: React.MouseEvent, taskId: string) {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!window.confirm('Delete this task permanently?')) return
+    setDeleting(taskId)
+    try {
+      await tasksApi.deletePermanent(taskId)
+      queryClient.invalidateQueries(['tasks-list'])
+    } catch {
+      // ignore
+    } finally {
+      setDeleting(null)
+    }
+  }
 
   const { data, isLoading } = useQuery(
     ['tasks-list', page, status],
@@ -89,30 +106,46 @@ export default function TasksPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-[2rem_1fr_6rem_6rem_7rem_5rem] gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+            <div className="grid grid-cols-[2rem_1fr_6rem_6rem_7rem_5rem_2rem] gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wide">
               <span />
               <span>Prompt</span>
               <span>Category</span>
               <span>Status</span>
               <span>Created</span>
               <span>Credits</span>
+              <span />
             </div>
             <div className="divide-y divide-slate-50">
-              {tasks.map(task => (
-                <Link
-                  key={task.id}
-                  href={`/task/${task.id}`}
-                  className="grid grid-cols-[2rem_1fr_6rem_6rem_7rem_5rem] gap-4 px-5 py-3.5 items-center hover:bg-slate-50 transition-colors"
-                >
-                  <span className="text-lg">{CATEGORY_ICONS[task.category] ?? '📋'}</span>
-                  <p className="text-sm text-slate-800 truncate">{task.prompt}</p>
-                  <span className="text-xs text-slate-500 capitalize">{task.category}</span>
-                  <StatusBadge status={task.status} />
-                  <span className="text-xs text-slate-400">{formatDate(task.createdAt)}</span>
-                  <span className="text-xs text-slate-500 font-mono">
-                    {(task as any).creditsActuallyUsed ?? (task as any).creditsUsed ?? '—'}
-                  </span>
-                </Link>
+              {tasks.map((task: any) => (
+                <div key={task.id} className="relative group">
+                  <Link
+                    href={`/task/${task.id}`}
+                    className="grid grid-cols-[2rem_1fr_6rem_6rem_7rem_5rem_2rem] gap-4 px-5 py-3.5 items-center hover:bg-slate-50 transition-colors"
+                  >
+                    <span className="text-lg">{CATEGORY_ICONS[task.category] ?? '📋'}</span>
+                    <p className="text-sm text-slate-800 truncate font-medium">
+                      {task.prompt.split('\n')[0].slice(0, 60)}
+                    </p>
+                    <span className="text-xs text-slate-500 capitalize">{task.category}</span>
+                    <StatusBadge status={task.status} />
+                    <span className="text-xs text-slate-400">{formatDate(task.createdAt)}</span>
+                    <span className="text-xs text-slate-500 font-mono">
+                      {task.creditsActuallyUsed ?? task.creditsUsed ?? '—'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => handleDelete(e, task.id)}
+                      disabled={deleting === task.id}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-300 hover:text-red-500 transition-all"
+                      title="Delete task"
+                    >
+                      {deleting === task.id
+                        ? <span className="inline-block w-3 h-3 border border-slate-300 border-t-red-400 rounded-full animate-spin" />
+                        : <Trash2 className="w-3.5 h-3.5" />
+                      }
+                    </button>
+                  </Link>
+                </div>
               ))}
             </div>
           </>

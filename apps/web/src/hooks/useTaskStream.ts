@@ -20,6 +20,7 @@ export type TaskEventType =
   | 'completed'
   | 'cancelled'
   | 'stream_end'
+  | 'user_message'
 
 export interface TaskEvent {
   type: TaskEventType
@@ -49,6 +50,7 @@ export interface TaskStreamState {
 
 export interface UseTaskStreamReturn extends TaskStreamState {
   disconnect: () => void
+  forceReconnect: () => void
 }
 
 const TERMINAL_STATUSES: TaskStatus[] = ['done', 'failed', 'cancelled']
@@ -290,12 +292,22 @@ export function useTaskStream(taskId: string | null): UseTaskStreamReturn {
 
   const disconnect = useCallback(() => {
     closeConnection()
+    setState((prev) => ({ ...prev, isConnected: false, isComplete: true }))
+  }, [closeConnection])
+
+  const forceReconnect = useCallback(() => {
+    if (!taskId) return
+    closeConnection()
     setState((prev) => ({
       ...prev,
       isConnected: false,
-      isComplete: true,
+      isComplete: false,
+      error: null,
+      status: null,
     }))
-  }, [closeConnection])
+    reconnectCountRef.current = 0
+    connect(taskId)
+  }, [taskId, connect, closeConnection])
 
-  return { ...state, disconnect }
+  return { ...state, disconnect, forceReconnect }
 }

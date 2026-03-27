@@ -164,7 +164,7 @@ export async function taskRoutes(fastify: FastifyInstance): Promise<void> {
     }
   });
 
-  // POST /:id/follow-up — add follow-up prompt
+  // POST /:id/follow-up — refine project in place (same task, no new task created)
   fastify.post('/:id/follow-up', async (request: FastifyRequest, reply: FastifyReply) => {
     const user = (request as any).user;
     const { id } = request.params as { id: string };
@@ -187,45 +187,70 @@ export async function taskRoutes(fastify: FastifyInstance): Promise<void> {
     if (task.status !== 'completed') {
       return reply.code(400).send({
         success: false,
-        error: 'Can only add follow-ups to completed tasks',
+        error: 'Can only refine completed tasks',
         code: 'TASK_NOT_COMPLETED',
       });
     }
 
-    // Create a new task based on the completed one
-    const followUpPrompt = `[Follow-up on previous task]\nOriginal prompt: ${task.prompt}\n\nFollow-up request: ${prompt}`;
-
-    try {
-      const { task: newTask, estimate } = await taskService.createTask(user.id, task.category, followUpPrompt);
-
-      // Carry over metadata context
-      const followUpCount = ((task.metadata as any)?.followUpCount ?? 0) + 1;
-      await prisma.task.update({
-        where: { id: newTask.id },
-        data: {
-          metadata: {
-            ...(newTask.metadata as any ?? {}),
-            parentTaskId: task.id,
-            followUpCount,
-          },
-        },
+    // Check user has at least 10 credits for refinement
+    const { creditService } = await import('../services/CreditService');
+    const balance = await creditService.getBalance(user.id);
+    if (balance < 10) {
+      return reply.code(402).send({
+        success: false,
+        error: 'Insufficient credits for refinement. You need at least 10 credits.',
+        code: 'INSUFFICIENT_CREDITS',
       });
-
-      // Start task
-      taskService.startTask(newTask.id).catch(err => {
-        console.error(`[Tasks] Failed to start follow-up task ${newTask.id}:`, err);
-      });
-
-      return reply.code(201).send({
-        success: true,
-        data: { task: newTask, estimate, message: 'Follow-up task created' },
-      });
-    } catch (err: any) {
-      if (err.message.includes('Insufficient credits')) {
-        return reply.code(402).send({ success: false, error: err.message, code: 'INSUFFICIENT_CREDITS' });
-      }
-      throw err;
     }
+
+    // Get previous files from metadata
+    const previousFiles: { path: string; content: string }[] = (task.metadata as any)?.files ?? [];
+
+    // Add user_message event
+    await taskService.emitEvent(id, {
+      type: 'user_message' as any,
+      data: { message: prompt },
+      timestamp: new Date().toISOString(),
+    });
+
+    // Run refinement asynchronously (same pattern as startTask)
+    const { CodeEngine } = await import('../engines/CodeEngine');
+    new CodeEngine().refine(task, prompt, previousFiles, async (event) => {
+      await taskService.emitEvent(id, event);
+    }).catch(async (err) => {
+      console.error(`[Tasks] Refinement failed for task ${id}:`, err);
+      await taskService.failTask(id, err.message ?? 'Refinement failed');
+    });
+
+    // Return the same task immediately
+    const updatedTask = await prisma.task.findFirst({ where: { id } });
+    return reply.send({
+      success: true,
+      data: { task: updatedTask, message: 'Refinement started' },
+    });
+  });
+
+  // DELETE /:id/permanent — hard delete task and all its events
+  fastify.delete('/:id/permanent', async (request: FastifyRequest, reply: FastifyReply) => {
+    const user = (request as any).user;
+    const { id } = request.params as { id: string };
+
+    const task = await prisma.task.findFirst({ where: { id, userId: user.id } });
+    if (!task) {
+      return reply.code(404).send({ success: false, error: 'Task not found' });
+    }
+
+    // Release any pending credit reservation before deleting
+    try {
+      const { creditService } = await import('../services/CreditService');
+      await creditService.releaseReservation(user.id, id);
+    } catch {
+      // ignore — no reservation may exist
+    }
+
+    await prisma.task.delete({ where: { id } });
+
+    return reply.send({ success: true, data: { message: 'Task deleted' } });
   });
 
   // GET /:id/files — get generated files for task

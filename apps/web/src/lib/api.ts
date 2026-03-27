@@ -268,6 +268,9 @@ export const tasksApi = {
   followUp: (taskId: string, prompt: string) =>
     api.post<Task>(`/tasks/${taskId}/follow-up`, { prompt }).then((r) => r.data),
 
+  deletePermanent: (taskId: string) =>
+    api.delete<void>(`/tasks/${taskId}/permanent`).then((r) => r.data),
+
   getFiles: (taskId: string) =>
     api.get<TaskFile[]>(`/tasks/${taskId}/files`).then((r) => r.data),
 }

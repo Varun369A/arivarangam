@@ -32,6 +32,18 @@ function EventRow({ event }: { event: TaskEvent }) {
 
   if (event.type === 'connected' || event.type === 'stream_end') return null;
 
+  // User message bubble
+  if (event.type === 'user_message') {
+    const d = (event.data ?? {}) as any;
+    return (
+      <div className="flex justify-end my-2">
+        <div className="bg-indigo-600 text-white text-xs px-3 py-2 rounded-2xl rounded-br-sm max-w-[90%] leading-relaxed">
+          {String(d.message ?? '')}
+        </div>
+      </div>
+    );
+  }
+
   type EventCfg = { icon: string; iconCls: string; textCls: string };
   const cfgMap: Record<string, EventCfg> = {
     file_created:  { icon: '✓', iconCls: 'text-emerald-500', textCls: 'text-slate-700' },
@@ -434,7 +446,7 @@ function CreditConfirmModal({
 
 // ─── More Menu ────────────────────────────────────────────────────────────────
 
-function MoreMenu({ onDownload }: { onDownload: () => void }) {
+function MoreMenu({ onDownload, onDelete }: { onDownload: () => void; onDelete: () => void }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -464,6 +476,13 @@ function MoreMenu({ onDownload }: { onDownload: () => void }) {
             onClick={() => { onDownload(); setOpen(false); }}
           >
             Download files
+          </button>
+          <button
+            type="button"
+            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+            onClick={() => { onDelete(); setOpen(false); }}
+          >
+            Delete task
           </button>
         </div>
       )}
@@ -507,7 +526,7 @@ export default function TaskPage() {
   // Determine if stream should be active
   const isTerminalStatus = (s: string) => ['done', 'completed', 'failed', 'cancelled'].includes(s);
   const streamActive = task !== null && confirmed;
-  const { events, status: streamStatus, previewUrl, files: streamFiles, isConnected, isComplete } =
+  const { events, status: streamStatus, previewUrl, files: streamFiles, isConnected, isComplete, forceReconnect } =
     useTaskStream(streamActive ? taskId : null);
 
   const activityEndRef = useRef<HTMLDivElement>(null);
@@ -594,15 +613,18 @@ export default function TaskPage() {
     setFollowUpSubmitting(true);
     setFollowUpError(null);
     try {
-      const newTask = await tasksApi.followUp(task.id, followUp.trim());
-      const newTaskId = (newTask as any)?.data?.task?.id ?? (newTask as any)?.id;
-      router.push(`/task/${newTaskId}`);
+      await tasksApi.followUp(task.id, followUp.trim());
+      setFollowUp('');
+      // Stay on same task — update status and reconnect stream
+      setTask(prev => prev ? { ...prev, status: 'running' } as any : prev);
+      setConfirmed(true);
+      forceReconnect();
     } catch (err) {
       setFollowUpError(getApiError(err));
     } finally {
       setFollowUpSubmitting(false);
     }
-  }, [task, followUp, router]);
+  }, [task, followUp, forceReconnect]);
 
   const handleSaveRepo = useCallback(async () => {
     if (!task) return;
@@ -623,6 +645,17 @@ export default function TaskPage() {
       setSaving(false);
     }
   }, [task]);
+
+  const handleDeleteTask = useCallback(async () => {
+    if (!task) return;
+    if (!window.confirm('Delete this task permanently? This cannot be undone.')) return;
+    try {
+      await tasksApi.deletePermanent(task.id);
+      router.push('/task');
+    } catch {
+      // ignore
+    }
+  }, [task, router]);
 
   const handleDownload = useCallback(() => {
     if (!streamFiles.length) return;
@@ -740,7 +773,7 @@ export default function TaskPage() {
               {cancelling ? '...' : 'Cancel'}
             </button>
           )}
-          <MoreMenu onDownload={handleDownload} />
+          <MoreMenu onDownload={handleDownload} onDelete={handleDeleteTask} />
         </div>
       </div>
 
@@ -852,8 +885,8 @@ export default function TaskPage() {
             onChange={e => setFollowUp(e.target.value)}
             placeholder={
               isCompleted
-                ? 'Add authentication / make it dark mode / refactor...'
-                : 'Follow-up available after task completes...'
+                ? 'Ask for changes — add auth, make it dark mode, add a feature...'
+                : isRunning ? 'Working on it...' : 'Available once task completes...'
             }
             disabled={!isCompleted || followUpSubmitting}
             className="input flex-1 text-sm disabled:bg-slate-50 disabled:text-slate-400"
