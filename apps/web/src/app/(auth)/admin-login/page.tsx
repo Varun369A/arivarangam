@@ -118,7 +118,7 @@ export default function AdminLoginPage() {
         return;
       }
       Cookies.set('accessToken', token, { expires: 7, sameSite: 'Lax' });
-      router.push('/admin');
+      window.location.href = '/admin';
     } catch (err) {
       setError(getApiError(err));
     } finally {
@@ -274,7 +274,7 @@ export default function AdminLoginPage() {
             </label>
             <OtpInput value={otp} onChange={setOtp} />
             <p className="text-xs text-center mt-3" style={{ color: '#9CA3AF' }}>
-              Check the server logs for the OTP (email sending coming soon)
+              Check your admin email inbox for the OTP
             </p>
           </div>
 

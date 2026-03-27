@@ -4,6 +4,7 @@ import { adminUsersRoutes } from './users';
 import { adminTasksRoutes } from './tasks';
 import { adminPlatformRoutes } from './platform';
 import { adminBillingRoutes } from './billing';
+import { adminSecurityRoutes } from './security';
 
 // ─── Admin Routes Index ───────────────────────────────────────────────────────
 // All admin routes are protected by requireAdmin middleware.
@@ -17,4 +18,5 @@ export async function adminRoutes(fastify: FastifyInstance): Promise<void> {
   await fastify.register(adminTasksRoutes, { prefix: '/tasks' });
   await fastify.register(adminPlatformRoutes, { prefix: '/platform' });
   await fastify.register(adminBillingRoutes, { prefix: '/billing' });
+  await fastify.register(adminSecurityRoutes, { prefix: '/security' });
 }
