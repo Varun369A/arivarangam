@@ -42,8 +42,8 @@ export default function TasksPage() {
     { keepPreviousData: true }
   )
 
-  const tasks = (data as any)?.data?.tasks ?? []
-  const totalPages = (data as any)?.data?.totalPages ?? 1
+  const tasks: any[] = (data as any)?.data?.tasks ?? []
+  const totalPages: number = (data as any)?.data?.totalPages ?? 1
 
   return (
     <div className="space-y-6">
