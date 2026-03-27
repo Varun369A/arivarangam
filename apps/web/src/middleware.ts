@@ -42,6 +42,14 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const accessToken = request.cookies.get('accessToken')?.value
 
+  // Always allow public routes first (before admin check — /admin-login starts with /admin)
+  if (isPublic(pathname)) {
+    if (accessToken && (pathname === '/login' || pathname === '/signup')) {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+    return NextResponse.next()
+  }
+
   // Admin routes: require authentication
   if (isAdmin(pathname)) {
     if (!accessToken) {
@@ -60,11 +68,6 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl)
     }
     return NextResponse.next()
-  }
-
-  // If authenticated user visits login/signup, redirect to dashboard
-  if (accessToken && (pathname === '/login' || pathname === '/signup')) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   return NextResponse.next()
