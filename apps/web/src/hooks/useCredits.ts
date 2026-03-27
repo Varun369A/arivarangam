@@ -56,9 +56,9 @@ export function useCredits(): UseCreditsReturn {
 // ---------------------------------------------------------------------------
 
 export interface CreditEstimateResult {
-  estimate: number
   min: number
   max: number
+  typical: number
 }
 
 export interface UseEstimateReturn {
