@@ -12,7 +12,6 @@ interface PreviewPanelProps {
   category: TaskCategory;
   previewUrl?: string | null;
   imageUrl?: string | null;
-  audioUrl?: string | null;
   report?: string | null;
   isRunning?: boolean;
   className?: string;
@@ -213,50 +212,17 @@ function ResearchPreview({ content }: { content: string }) {
   );
 }
 
-// ─── Voice preview ────────────────────────────────────────────────────────────
-
-function VoicePreview({ url }: { url: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center gap-6 p-8">
-      <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-pink-100 to-rose-100 flex items-center justify-center">
-        <span className="text-3xl">🎙️</span>
-      </div>
-      <p className="text-sm font-medium text-gray-700">Your generated audio</p>
-      <audio
-        controls
-        src={url}
-        className="w-full max-w-md"
-        style={{ colorScheme: 'light' }}
-      >
-        Your browser does not support the audio element.
-      </audio>
-      <a
-        href={url}
-        download="generated-audio.mp3"
-        className={cn(
-          'inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium',
-          'bg-pink-600 text-white hover:bg-pink-700 transition-colors shadow-sm'
-        )}
-      >
-        <Download className="h-4 w-4" />
-        Download Audio
-      </a>
-    </div>
-  );
-}
-
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function PreviewPanel({
   category,
   previewUrl,
   imageUrl,
-  audioUrl,
   report,
   isRunning = false,
   className,
 }: PreviewPanelProps) {
-  const hasContent = previewUrl || imageUrl || audioUrl || report;
+  const hasContent = previewUrl || imageUrl || report;
 
   const renderContent = () => {
     if (!hasContent) {
@@ -274,10 +240,6 @@ export function PreviewPanel({
           ? <ImagePreview url={imageUrl} />
           : <WaitingState message="Generating image…" />;
 
-      case 'voice':
-        return audioUrl
-          ? <VoicePreview url={audioUrl} />
-          : <WaitingState message="Synthesizing audio…" />;
 
       case 'research':
         return report

@@ -48,7 +48,7 @@ interface TaskDetailData {
 }
 
 const STATUS_FILTERS = ['all', 'running', 'analyzing', 'pending', 'completed', 'failed', 'cancelled'] as const;
-const CATEGORY_FILTERS: (TaskCategory | 'all')[] = ['all', 'code', 'research', 'image', 'voice', 'content'];
+const CATEGORY_FILTERS: (TaskCategory | 'all')[] = ['all', 'code', 'research', 'image', 'content', 'mobile', 'presentation', 'agent', 'workflow'];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

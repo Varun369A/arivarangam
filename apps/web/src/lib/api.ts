@@ -94,7 +94,7 @@ export interface TaskCreatePayload {
 
 
 export type TaskStatus = 'queued' | 'running' | 'done' | 'failed' | 'cancelled'
-export type TaskCategory = 'code' | 'research' | 'image' | 'voice' | 'content' | 'mobile' | 'presentation' | 'agent' | 'workflow'
+export type TaskCategory = 'code' | 'research' | 'image' | 'content' | 'mobile' | 'presentation' | 'agent' | 'workflow'
 
 export interface Task {
   id: string
