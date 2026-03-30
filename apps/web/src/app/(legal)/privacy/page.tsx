@@ -195,7 +195,7 @@ export default function PrivacyPage() {
         </ul>
         <p>
           To exercise any of these rights, email{' '}
-          <a href="mailto:legal@arivarangam.com" style={{ color: '#1E3461' }}>
+          <a href="mailto:legal@arivarangam.com" style={{ color: '#4F46E5' }}>
             legal@arivarangam.com
           </a>
           . We will respond within 30 days.
@@ -225,7 +225,7 @@ export default function PrivacyPage() {
         <ul>
           <li style={{ color: '#374151' }}>
             Email:{' '}
-            <a href="mailto:legal@arivarangam.com" style={{ color: '#1E3461' }}>
+            <a href="mailto:legal@arivarangam.com" style={{ color: '#4F46E5' }}>
               legal@arivarangam.com
             </a>
           </li>

@@ -8,7 +8,7 @@ export default function TermsPage() {
   return (
     <article
       style={{
-        ['--link-color' as string]: '#1E3461',
+        ['--link-color' as string]: '#4F46E5',
         ['--link-hover' as string]: '#16284D',
       }}
       className="[&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-1.5 [&_li]:leading-relaxed [&_p]:leading-relaxed [&_strong]:font-semibold [&_a]:underline [&_a]:underline-offset-2"
@@ -66,7 +66,7 @@ export default function TermsPage() {
           You must be at least 13 years old (or the age of digital consent in your jurisdiction) to use the
           Platform. You are responsible for maintaining the confidentiality of your account credentials.
           You must notify us immediately at{' '}
-          <a href="mailto:support@arivarangam.com" style={{ color: '#1E3461' }}>
+          <a href="mailto:support@arivarangam.com" style={{ color: '#4F46E5' }}>
             support@arivarangam.com
           </a>{' '}
           of any unauthorised access to your account.
@@ -170,7 +170,7 @@ export default function TermsPage() {
         </ul>
         <p>
           You may terminate your account at any time by contacting{' '}
-          <a href="mailto:support@arivarangam.com" style={{ color: '#1E3461' }}>
+          <a href="mailto:support@arivarangam.com" style={{ color: '#4F46E5' }}>
             support@arivarangam.com
           </a>
           . Upon termination, unused credits are subject to the refund policy in Section 3.
@@ -210,7 +210,7 @@ export default function TermsPage() {
         </p>
         <p>
           For minor disputes, we encourage you to first contact us at{' '}
-          <a href="mailto:legal@arivarangam.com" style={{ color: '#1E3461' }}>
+          <a href="mailto:legal@arivarangam.com" style={{ color: '#4F46E5' }}>
             legal@arivarangam.com
           </a>{' '}
           so we can resolve the matter amicably.
@@ -229,7 +229,7 @@ export default function TermsPage() {
       <Section title="12. Contact">
         <p>
           For questions about these Terms, please contact us at{' '}
-          <a href="mailto:legal@arivarangam.com" style={{ color: '#1E3461' }}>
+          <a href="mailto:legal@arivarangam.com" style={{ color: '#4F46E5' }}>
             legal@arivarangam.com
           </a>
           .

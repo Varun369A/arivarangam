@@ -615,13 +615,13 @@ function BillingTab() {
       border: 'border-slate-200',
       shadow: 'shadow-sm',
       badge: '',
-      btn: 'bg-slate-800 hover:bg-slate-900 text-white',
+      btn: 'bg-[#EEF2FF] hover:bg-[#E0E7FF] text-[#4F46E5] border border-[#C7D2FE]',
     },
     starter: {
       border: 'border-slate-200',
       shadow: 'shadow-sm',
       badge: '',
-      btn: 'bg-slate-800 hover:bg-slate-900 text-white',
+      btn: 'bg-[#EEF2FF] hover:bg-[#E0E7FF] text-[#4F46E5] border border-[#C7D2FE]',
     },
     pro: {
       border: 'border-indigo-400',
@@ -633,7 +633,7 @@ function BillingTab() {
       border: 'border-slate-200',
       shadow: 'shadow-sm',
       badge: '',
-      btn: 'bg-slate-800 hover:bg-slate-900 text-white',
+      btn: 'bg-[#EEF2FF] hover:bg-[#E0E7FF] text-[#4F46E5] border border-[#C7D2FE]',
     },
   };
 
@@ -818,7 +818,7 @@ function ApiKeysTab() {
           </button>
           <button
             onClick={() => setShowAdd(s => !s)}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-slate-900 text-white hover:bg-slate-700 rounded-xl transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-[#EEF2FF] text-[#4F46E5] hover:bg-[#E0E7FF] rounded-xl transition-colors border border-[#C7D2FE]"
           >
             <Key className="w-3.5 h-3.5" />
             Add variable
