@@ -483,10 +483,83 @@ function PreviewContent({
   }
 
   const imageFile = streamFiles.find(f => ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(fileExt(f.path)));
-  if (task?.category === 'image' && imageFile?.content) {
+  const imageUrl = (task?.metadata as any)?.imageUrl ?? task?.previewUrl ?? imageFile?.content ?? null;
+  if (task?.category === 'image' && imageUrl) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-slate-100 p-8">
-        <img src={imageFile.content} alt="Generated" className="max-w-full max-h-full rounded-xl shadow-lg" />
+      <div className="flex-1 flex flex-col items-center justify-center bg-slate-100 p-8 gap-4">
+        <img src={imageUrl} alt="Generated" className="max-w-full max-h-[60vh] rounded-xl shadow-lg" />
+        <div className="flex gap-3">
+          <a
+            href={imageUrl}
+            download="generated-image.png"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors"
+          >
+            ↓ Download Image
+          </a>
+          <a
+            href={imageUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 transition-colors"
+          >
+            ↗ Open full size
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  // Research / Content export
+  if (['research', 'content'].includes(task?.category ?? '') && streamFiles.length > 0) {
+    const mainFile = streamFiles.find(f => f.path.endsWith('.md') || f.path.endsWith('report.md') || f.path.endsWith('content.md')) ?? streamFiles[0];
+    return (
+      <div className="flex-1 overflow-auto p-6">
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-4 flex items-center justify-between">
+            <div>
+              <div className="text-2xl mb-1">{task?.category === 'research' ? '📄' : '✍️'}</div>
+              <p className="text-sm font-bold text-slate-800">{task?.category === 'research' ? 'Research Report' : 'Content'} ready</p>
+              <p className="text-xs text-slate-500 mt-0.5">{streamFiles.length} file{streamFiles.length !== 1 ? 's' : ''} generated</p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const content = streamFiles.map(f => `# ${f.path}\n\n${f.content ?? ''}`).join('\n\n---\n\n');
+                  const blob = new Blob([content], { type: 'text/markdown' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url; a.download = `${task?.category}-report.md`; a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors"
+              >
+                ↓ Download .md
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const content = streamFiles.map(f => `${f.path}\n${'─'.repeat(40)}\n${f.content ?? ''}`).join('\n\n');
+                  const blob = new Blob([content], { type: 'text/plain' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url; a.download = `${task?.category}-report.txt`; a.click();
+                  URL.revokeObjectURL(url);
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 transition-colors"
+              >
+                ↓ Download .txt
+              </button>
+            </div>
+          </div>
+          {mainFile && (
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 prose prose-sm max-w-none">
+              <pre className="whitespace-pre-wrap text-sm text-slate-700 font-sans leading-relaxed">{mainFile.content}</pre>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -685,11 +758,24 @@ export default function TaskPage() {
     setTask(prev => prev ? { ...prev, status: streamStatus } as any : prev);
   }, [streamStatus]);
 
-  // Reload on complete
+  // Reload on complete + auto-save to repo
+  const autoSavedRef = useRef(false);
   useEffect(() => {
     if (!isComplete || !taskId) return;
     tasksApi.get(taskId)
-      .then(t => setTask((t as any)?.data?.task ?? (t as any)))
+      .then(t => {
+        const obj = (t as any)?.data?.task ?? (t as any);
+        setTask(obj);
+        // Auto-save to repos (once per task completion)
+        if (!autoSavedRef.current && obj?.status === 'completed' && !obj?.repoId) {
+          autoSavedRef.current = true;
+          const repoName = (obj.prompt ?? 'Project')
+            .split('\n')[0].slice(0, 60).trim() || 'Project';
+          reposApi.create({ name: repoName, taskId: obj.id, isPublic: false })
+            .then(r => setSavedRepo({ id: (r as any).id ?? (r as any).data?.repo?.id, name: repoName }))
+            .catch(() => {});
+        }
+      })
       .catch(() => {});
   }, [isComplete, taskId]);
 
