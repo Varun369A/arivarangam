@@ -261,7 +261,7 @@ export default function AdminPlatformPage() {
     <div className="space-y-5">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-slate-900">Platform Self-Improvement</h1>
+        <h1 className="text-xl font-bold text-white">Platform Self-Improvement</h1>
         <p className="text-xs text-slate-400 mt-0.5">Monitor AI models, review fixes, track performance</p>
       </div>
 

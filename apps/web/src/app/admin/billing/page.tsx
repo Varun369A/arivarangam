@@ -212,7 +212,7 @@ export default function AdminBillingPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-slate-900">Revenue & Billing</h1>
+        <h1 className="text-xl font-bold text-white">Revenue & Billing</h1>
         <p className="text-xs text-slate-400 mt-0.5">Track revenue, transactions, and credit pack performance</p>
       </div>
 
@@ -376,7 +376,7 @@ export default function AdminBillingPage() {
       {/* Transactions Table */}
       <div className="space-y-3">
         <div className="flex items-center justify-between flex-wrap gap-3">
-          <h2 className="text-base font-semibold text-slate-900">All Transactions</h2>
+          <h2 className="text-base font-semibold text-white">All Transactions</h2>
           <button
             onClick={handleExport}
             className="btn-secondary text-xs py-1.5 px-3 flex items-center gap-1.5"

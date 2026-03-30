@@ -140,10 +140,10 @@ export default function ReposPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <GitBranch className="w-5 h-5 text-indigo-500" /> Repos
+          <h1 className="text-xl font-bold text-white flex items-center gap-2">
+            <GitBranch className="w-5 h-5 text-indigo-400" /> Repos
           </h1>
-          <p className="text-sm text-slate-500 mt-0.5">AI-generated code repositories</p>
+          <p className="text-sm text-slate-400 mt-0.5">AI-generated code repositories</p>
         </div>
         <Link href="/dashboard" className="btn-primary text-sm flex items-center gap-1.5">
           <Plus className="w-4 h-4" /> New repo

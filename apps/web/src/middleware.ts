@@ -15,6 +15,7 @@ const ADMIN_ROUTES = ['/admin']
 // Routes that are always public — no redirect needed
 const PUBLIC_ROUTES = [
   '/',
+  '/gallery',
   '/login',
   '/signup',
   '/forgot-password',

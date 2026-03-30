@@ -1,129 +1,128 @@
-'use client';
+'use client'
 
-import { useState, FormEvent } from 'react';
-import Link from 'next/link';
-import { Loader2, Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
-import { authApi, getApiError } from '@/lib/api';
+import { useState, FormEvent } from 'react'
+import Link from 'next/link'
+import { Loader2, Mail, ArrowLeft, CheckCircle2 } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { authApi, getApiError } from '@/lib/api'
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  show: (d = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: d } }),
+}
+const stagger = { show: { transition: { staggerChildren: 0.07 } }, hidden: {} }
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [sent, setSent] = useState(false);
+  const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [sent, setSent] = useState(false)
 
   async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    setError('');
-
-    if (!email.trim()) {
-      setError('Please enter your email address.');
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Please enter a valid email address.');
-      return;
-    }
-
-    setLoading(true);
+    e.preventDefault()
+    setError('')
+    if (!email.trim()) { setError('Please enter your email address.'); return }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('Please enter a valid email address.'); return }
+    setLoading(true)
     try {
-      await authApi.forgotPassword(email.trim().toLowerCase());
-      setSent(true);
+      await authApi.forgotPassword(email.trim().toLowerCase())
+      setSent(true)
     } catch (err) {
-      setError(getApiError(err));
+      setError(getApiError(err))
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
   if (sent) {
     return (
-      <div className="text-center py-4">
-        <div className="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
-          <CheckCircle2 className="w-7 h-7 text-green-600" />
-        </div>
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">Check your inbox</h1>
-        <p className="text-sm text-slate-500 mb-1">
+      <motion.div variants={stagger} initial="hidden" animate="show" className="text-center py-4">
+        <motion.div variants={fadeUp}>
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5"
+            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 0 24px rgba(99,102,241,0.4)' }}>
+            <CheckCircle2 className="w-7 h-7 text-white" />
+          </div>
+        </motion.div>
+        <motion.h1 variants={fadeUp} style={{ fontSize: '22px', fontWeight: 800, color: '#0A0D14', letterSpacing: '-0.3px', margin: '0 0 8px' }}>
+          Check your inbox
+        </motion.h1>
+        <motion.p variants={fadeUp} style={{ fontSize: '14px', color: '#6B7280', margin: '0 0 4px' }}>
           We sent a password reset link to
-        </p>
-        <p className="text-sm font-semibold text-slate-700 mb-6">{email}</p>
-        <p className="text-xs text-slate-400 mb-8 leading-relaxed">
-          If you don&apos;t see it in a few minutes, check your spam folder.
-          The link expires in 1 hour.
-        </p>
-        <Link
-          href="/login"
-          className="inline-flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to sign in
-        </Link>
-      </div>
-    );
+        </motion.p>
+        <motion.p variants={fadeUp} style={{ fontSize: '14px', fontWeight: 700, color: '#6366f1', margin: '0 0 20px' }}>
+          {email}
+        </motion.p>
+        <motion.p variants={fadeUp} style={{ fontSize: '13px', color: '#9CA3AF', margin: '0 0 28px', lineHeight: 1.65 }}>
+          If you don&apos;t see it in a few minutes, check your spam folder. The link expires in 1 hour.
+        </motion.p>
+        <motion.div variants={fadeUp}>
+          <Link href="/login" className="inline-flex items-center gap-2 text-sm font-semibold transition-colors" style={{ color: '#6366f1' }}>
+            <ArrowLeft className="w-4 h-4" />
+            Back to sign in
+          </Link>
+        </motion.div>
+      </motion.div>
+    )
   }
 
   return (
-    <>
-      <div className="text-center mb-7">
-        <div className="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <Mail className="w-7 h-7 text-indigo-600" />
+    <motion.div variants={stagger} initial="hidden" animate="show">
+      <motion.div variants={fadeUp} className="text-center mb-7">
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+          style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 0 20px rgba(99,102,241,0.4)' }}>
+          <Mail className="w-7 h-7 text-white" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-800 mb-1">Reset your password</h1>
-        <p className="text-sm text-slate-500">
+        <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#0A0D14', letterSpacing: '-0.3px', margin: '0 0 4px' }}>
+          Reset your password
+        </h1>
+        <p style={{ fontSize: '14px', color: '#6B7280', margin: 0, lineHeight: 1.6 }}>
           Enter the email address linked to your account and we&apos;ll send you a reset link.
         </p>
-      </div>
+      </motion.div>
 
       {error && (
-        <div className="mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
+        <motion.div variants={fadeUp} style={{
+          marginBottom: '16px', padding: '12px 16px', borderRadius: '10px',
+          background: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626', fontSize: '14px', fontWeight: 500,
+        }}>
           {error}
-        </div>
+        </motion.div>
       )}
 
-      <form onSubmit={handleSubmit} noValidate className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5" htmlFor="fp-email">
+      <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <motion.div variants={fadeUp}>
+          <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '6px' }} htmlFor="fp-email">
             Email address
           </label>
           <input
-            id="fp-email"
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            id="fp-email" type="email" autoComplete="email"
+            value={email} onChange={e => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800
-              placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-              transition-shadow"
+            style={{ width: '100%', padding: '10px 14px', borderRadius: '9px', fontSize: '14px', border: '1px solid #E8E5DF', background: '#FFFFFF', color: '#0A0D14', boxSizing: 'border-box', outline: 'none' }}
+            onFocus={e => (e.currentTarget.style.borderColor = '#6366f1')}
+            onBlur={e => (e.currentTarget.style.borderColor = '#E8E5DF')}
           />
-        </div>
+        </motion.div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-sm text-white
-            bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800
-            disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-md shadow-indigo-100"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Sending…
-            </>
-          ) : (
-            'Send reset link'
-          )}
-        </button>
+        <motion.div variants={fadeUp}>
+          <motion.button
+            type="submit"
+            disabled={loading}
+            whileHover={!loading ? { scale: 1.02 } : {}}
+            whileTap={!loading ? { scale: 0.98 } : {}}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '12px', borderRadius: '10px', border: 'none', background: loading ? '#374151' : 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', fontSize: '14px', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, boxShadow: loading ? 'none' : '0 0 20px rgba(99,102,241,0.35)' }}
+          >
+            {loading ? <><Loader2 style={{ width: '16px', height: '16px' }} className="animate-spin" />Sending…</> : 'Send reset link'}
+          </motion.button>
+        </motion.div>
       </form>
 
-      <div className="mt-6 text-center">
-        <Link
-          href="/login"
-          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors"
-        >
+      <motion.div variants={fadeUp} className="mt-6 text-center">
+        <Link href="/login" className="inline-flex items-center gap-1.5 text-sm font-medium transition-colors" style={{ color: '#6B7280' }}>
           <ArrowLeft className="w-4 h-4" />
           Back to sign in
         </Link>
-      </div>
-    </>
-  );
+      </motion.div>
+    </motion.div>
+  )
 }

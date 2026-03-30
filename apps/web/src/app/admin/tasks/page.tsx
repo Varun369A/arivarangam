@@ -309,7 +309,7 @@ export default function AdminTasksPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Task Monitor</h1>
+          <h1 className="text-xl font-bold text-white">Task Monitor</h1>
           <p className="text-xs text-slate-400 mt-0.5">
             {data?.total ?? '—'} tasks
             {isLive && ' · auto-refresh 10s'}

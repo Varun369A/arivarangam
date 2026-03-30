@@ -25,13 +25,19 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
-// Response interceptor — on 401 redirect to login
+// Public paths where a 401 should NOT trigger a login redirect
+const PUBLIC_PATHS = ['/', '/gallery', '/login', '/signup', '/forgot-password', '/reset-password', '/verify-email', '/admin-login', '/terms', '/privacy']
+function isPublicPath(pathname: string): boolean {
+  return PUBLIC_PATHS.some(p => pathname === p || (p !== '/' && pathname.startsWith(p + '/')))
+}
+
+// Response interceptor — on 401 redirect to login (only for auth-required pages)
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error.response?.status === 401) {
       Cookies.remove('accessToken')
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && !isPublicPath(window.location.pathname)) {
         const redirect = encodeURIComponent(window.location.pathname + window.location.search)
         window.location.href = `/login?redirect=${redirect}`
       }

@@ -32,9 +32,9 @@
 
   body {
     @apply font-sans;
-    background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 35%, #eff6ff 65%, #f0fdf4 100%);
+    background: #05061a;
     background-attachment: fixed;
-    color: #1e293b;
+    color: #e2e8f0;
     font-weight: 450;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -43,27 +43,16 @@
   }
 
   h1, h2, h3 {
-    @apply text-slate-900;
     font-weight: 700;
   }
 
   h4, h5, h6 {
-    @apply text-slate-900;
     font-weight: 650;
-  }
-
-  p {
-    color: #1e293b;
   }
 
   label {
     font-weight: 500;
-    color: #334155;
   }
-
-  .text-slate-400 { color: #64748b !important; font-weight: 450; }
-  .text-slate-500 { color: #475569 !important; font-weight: 450; }
-  .text-slate-600 { color: #334155 !important; }
 }
 
 @layer components {
@@ -179,8 +168,17 @@
 
 /* ── Page background sections ── */
 .bg-surface {
-  background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 35%, #eff6ff 65%, #f0fdf4 100%);
+  background: #05061a;
   background-attachment: fixed;
+}
+
+/* ── Auth card entrance animation ── */
+@keyframes authCardIn {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+.auth-card-animate {
+  animation: authCardIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* ── Custom scrollbar ── */

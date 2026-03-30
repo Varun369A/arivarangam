@@ -194,7 +194,7 @@ export default function AdminSecurityPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-slate-900">Security Center</h1>
+        <h1 className="text-xl font-bold text-white">Security Center</h1>
         <p className="text-xs text-slate-400 mt-0.5">Monitor suspicious activity, resolve events, manage frozen accounts</p>
       </div>
 

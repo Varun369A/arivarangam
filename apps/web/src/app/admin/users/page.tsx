@@ -348,7 +348,7 @@ export default function AdminUsersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">User Management</h1>
+          <h1 className="text-xl font-bold text-white">User Management</h1>
           <p className="text-xs text-slate-400 mt-0.5">
             {data?.total ?? '—'} total users
           </p>

@@ -315,10 +315,10 @@ export default function DashboardPage() {
         <motion.div className="flex items-center justify-between"
           initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.16,1,0.3,1] }}>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">
+            <h1 className="text-2xl font-bold text-white">
               {user ? `Hey, ${user.name.split(' ')[0]} 👋` : 'Dashboard'}
             </h1>
-            <p className="text-slate-500 text-sm mt-0.5">What will you build today?</p>
+            <p className="text-slate-400 text-sm mt-0.5">What will you build today?</p>
           </div>
           {balance !== null && (
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
@@ -483,7 +483,7 @@ export default function DashboardPage() {
         <section>
           <motion.div className="flex items-center justify-between mb-4"
             variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
-            <h2 className="text-lg font-bold text-indigo-700 flex items-center gap-2">⚡ Recent Projects</h2>
+            <h2 className="text-lg font-bold text-indigo-300 flex items-center gap-2">⚡ Recent Projects</h2>
             <Link href="/task" className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">
               View all →
             </Link>
@@ -527,7 +527,7 @@ export default function DashboardPage() {
         <section className="pb-8">
           <motion.div className="flex items-center justify-between mb-4"
             variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
-            <h2 className="text-lg font-bold text-violet-700 flex items-center gap-2">📦 Saved Repos</h2>
+            <h2 className="text-lg font-bold text-violet-300 flex items-center gap-2">📦 Saved Repos</h2>
             <Link href="/repos" className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">
               View all →
             </Link>
@@ -718,7 +718,7 @@ function TemplateGallery({ onSelect }: { onSelect: (t: Template) => void }) {
     <section ref={ref}>
       <motion.div className="flex items-center justify-between mb-4"
         initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.4 }}>
-        <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">🇮🇳 India Templates</h2>
+        <h2 className="text-lg font-bold text-white flex items-center gap-2">🇮🇳 India Templates</h2>
         <div className="flex gap-1.5 flex-wrap justify-end">
           {TEMPLATE_FILTER_CATS.map(c => (
             <motion.button
