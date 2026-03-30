@@ -788,7 +788,15 @@ export default function TaskPage() {
       setDeployResult(result);
       setTask(prev => prev ? { ...prev, deployUrl: result.url } as any : prev);
     } catch (err) {
-      setDeployError(getApiError(err));
+      const msg = getApiError(err);
+      if (msg.includes('token not found') || msg.includes('NO_VERCEL_TOKEN') || msg.includes('NO_GITHUB_TOKEN')) {
+        const key = target === 'vercel' ? 'VERCEL_TOKEN' : target === 'github' ? 'GITHUB_TOKEN' : null;
+        if (key && typeof window !== 'undefined') {
+          window.location.href = `/settings/profile?addKey=${key}`;
+          return;
+        }
+      }
+      setDeployError(msg);
     } finally {
       setDeploying(null);
     }

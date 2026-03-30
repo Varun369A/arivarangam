@@ -42,7 +42,7 @@ export class ImageEngine {
 
       await emit({
         type: 'log',
-        data: { message: `Generating ${size} image with gpt-image-1...` },
+        data: { message: `Generating ${size} image in high quality...` },
         timestamp: new Date().toISOString(),
       });
 
@@ -100,7 +100,7 @@ export class ImageEngine {
   // ─── Enhance Prompt ───────────────────────────────────────────────────────────
 
   private async enhancePrompt(userPrompt: string): Promise<string> {
-    const systemPrompt = `You are an expert AI image prompt engineer. Transform the user's request into a rich, detailed prompt for gpt-image-1.
+    const systemPrompt = `You are an expert image prompt engineer. Transform the user's request into a rich, detailed prompt for image generation.
 
 Rules:
 - Add artistic style details (lighting, perspective, medium)

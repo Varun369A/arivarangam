@@ -283,7 +283,16 @@ ${existing?.content ?? '(new file)'}`;
 
   private async planStructure(prompt: string, category: string): Promise<FilePlan> {
     const categoryGuidance: Record<string, string> = {
-      code: `Generate a complete web application. Include: package.json, src/ folder with components, index.html or main entry, README.md. Use React + Vite or Next.js for web apps. Always include a working index.html so the app can be previewed in a browser.`,
+      code: `Generate a complete web application that runs directly in a browser WITHOUT any build step. Rules:
+- ALWAYS include a self-contained index.html that works when opened directly in a browser
+- Use React via CDN (https://unpkg.com/react@18/umd/react.development.js + react-dom) NOT npm
+- Use Tailwind CSS via CDN (<script src="https://cdn.tailwindcss.com"></script>) NOT npm
+- Use Babel standalone for JSX: <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script> and <script type="text/babel">
+- Put ALL JavaScript inline in index.html or in a separate script.js that is loaded via <script src="./script.js">
+- Include style.css for custom styles
+- The app must be fully functional with NO npm install required
+- Include a README.md with description
+- NEVER use import/require in files loaded in the browser — use CDN globals only`,
       research: `Generate a structured research report. Include: README.md (executive summary), report.md (full report with sections), sources.md (citations/links), data/ folder with any JSON data files.`,
       image: `Generate SVG artwork or an HTML canvas animation. Include: index.html (with embedded SVG or canvas), style.css, and a README.md.`,
       voice: `Generate a voice script and TTS configuration. Include: script.md (voice script with SSML markup), config.json (TTS settings), README.md.`,

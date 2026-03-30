@@ -20,33 +20,32 @@ export async function generateImage(
 
   try {
     const response = await client.images.generate({
-      model: 'gpt-image-1',
+      model: 'dall-e-3',
       prompt,
       n: 1,
       size,
-      quality: 'standard',
-    } as any);
+      quality: 'hd',
+      response_format: 'url',
+    });
 
     const imageData = response.data?.[0];
 
     if (!imageData) {
-      throw new Error('No image data returned from OpenAI');
+      throw new Error('No image data returned');
     }
 
-    // gpt-image-1 returns base64 by default
-    if ((imageData as any).b64_json) {
-      return `data:image/png;base64,${(imageData as any).b64_json}`;
-    }
-
-    // Fallback: url
     if (imageData.url) {
       return imageData.url;
     }
 
-    throw new Error('OpenAI image response had neither url nor b64_json');
+    if ((imageData as any).b64_json) {
+      return `data:image/png;base64,${(imageData as any).b64_json}`;
+    }
+
+    throw new Error('Image generation returned no output');
   } catch (err: any) {
-    console.error('[OpenAI] generateImage error:', err?.message ?? err);
-    throw new Error(`OpenAI image generation failed: ${err?.message ?? 'Unknown error'}`);
+    console.error('[Image] generateImage error:', err?.message ?? err);
+    throw new Error(`Image generation failed: ${err?.message ?? 'Unknown error'}`);
   }
 }
 
