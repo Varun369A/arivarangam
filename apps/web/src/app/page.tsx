@@ -388,7 +388,7 @@ export default function LandingPage() {
                   whileHover={{ y: -6, scale: 1.02 }}
                   className={`group relative rounded-2xl p-6 border border-white/5 bg-white/[0.03] cursor-pointer overflow-hidden transition-all duration-300 hover:border-white/10 hover:bg-white/[0.06] ring-1 ring-transparent hover:${cat.ring}`}>
                   {/* Hover glow */}
-                  <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br ${cat.color} opacity-[0.04]`} />
+                  <div className={`absolute inset-0 bg-gradient-to-br ${cat.color} opacity-0 group-hover:opacity-[0.08] transition-opacity duration-500`} />
                   <div className={`${cat.bg} w-11 h-11 rounded-xl flex items-center justify-center mb-4 ring-1 ${cat.ring}`}>
                     <Icon className="w-5 h-5 text-white/80" />
                   </div>

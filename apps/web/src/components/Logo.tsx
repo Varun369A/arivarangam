@@ -22,8 +22,8 @@ export function Logo({
       >
         <defs>
           <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#1E3461" />
-            <stop offset="100%" stopColor="#C4882A" />
+            <stop offset="0%" stopColor="#6366f1" />
+            <stop offset="100%" stopColor="#8b5cf6" />
           </linearGradient>
         </defs>
         {/* Diamond / rhombus shape */}
@@ -45,7 +45,7 @@ export function Logo({
       {showText && (
         <span
           className={`font-bold text-lg tracking-tight leading-none ${
-            inverted ? 'text-white' : 'text-[#0A0D14]'
+            inverted ? 'text-[#0A0D14]' : 'text-white'
           }`}
         >
           arivarangam
