@@ -45,7 +45,7 @@ export class VoiceEngine {
       if (useIndianLang) {
         await emit({
           type: 'log',
-          data: { message: `Generating voice with Sarvam AI — ${getLangLabel(language)}...` },
+          data: { message: `Generating voice in ${getLangLabel(language)}...` },
           timestamp: new Date().toISOString(),
         });
         audioBuffer = await this.sarvamTTSChunked(speechText, language as any);
@@ -54,7 +54,7 @@ export class VoiceEngine {
         const voiceId = this.selectVoice(task.prompt);
         await emit({
           type: 'log',
-          data: { message: `Converting to speech via ElevenLabs (voice: ${voiceId})...` },
+          data: { message: `Converting text to speech...` },
           timestamp: new Date().toISOString(),
         });
         audioBuffer = await textToSpeech(speechText, voiceId);

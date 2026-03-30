@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     'AI website builder India',
     'automatic code generation',
     'AI programming assistant',
-    'Claude AI coding',
+    'AI coding assistant',
     'AI agent platform',
     'build app with AI',
     'AI software development',

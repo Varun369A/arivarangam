@@ -114,7 +114,7 @@ const CATEGORIES = [
     iconBg: 'bg-orange-100',
     iconColor: 'text-orange-600',
     tag: 'bg-orange-100 text-orange-700',
-    desc: 'Generate stunning visuals, product images, and creative artwork with GPT-4o.',
+    desc: 'Generate stunning visuals, product images, and creative artwork with our AI.',
     example: 'Logo for a fintech startup',
   },
   {
@@ -126,7 +126,7 @@ const CATEGORIES = [
     iconBg: 'bg-pink-100',
     iconColor: 'text-pink-600',
     tag: 'bg-pink-100 text-pink-700',
-    desc: 'Studio-quality text-to-speech in Indian languages via Sarvam AI + ElevenLabs.',
+    desc: 'Studio-quality text-to-speech in Indian languages and English with natural voices.',
     example: 'Hindi product explainer narration',
   },
 ];

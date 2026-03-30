@@ -857,7 +857,7 @@ function ApiKeysTab() {
           <p className="text-sm font-semibold text-slate-700">Add / Update variable</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-slate-500 mb-1 block">Key (e.g. OPENAI_API_KEY) *</label>
+              <label className="text-xs text-slate-500 mb-1 block">Key (e.g. VERCEL_TOKEN) *</label>
               <input
                 type="text"
                 value={addKey}
@@ -884,7 +884,7 @@ function ApiKeysTab() {
                 type="text"
                 value={addLabel}
                 onChange={e => setAddLabel(e.target.value)}
-                placeholder="My OpenAI key"
+                placeholder="My API key"
                 className="input w-full text-sm"
               />
             </div>
