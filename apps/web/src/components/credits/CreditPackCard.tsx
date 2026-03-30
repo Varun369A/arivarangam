@@ -22,7 +22,7 @@ interface CreditPackCardProps {
 const defaultFeatures: Record<string, string[]> = {
   Starter: [
     'All task categories',
-    'Code, Research, Image & Voice',
+    'Code, Research, Image & Content',
     'File downloads',
   ],
   Pro: [
@@ -39,7 +39,7 @@ const defaultFeatures: Record<string, string[]> = {
   ],
   Basic: [
     'All task categories',
-    'Code, Research, Image & Voice',
+    'Code, Research, Image & Content',
     '30-day validity',
   ],
 };

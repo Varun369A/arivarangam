@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { galleryApi, tasksApi, getApiError } from '@/lib/api';
 import { cn, formatDate } from '@/lib/utils';
 
-type GalleryCategory = 'all' | 'code' | 'research' | 'image' | 'voice' | 'content' | 'mobile' | 'presentation' | 'agent' | 'workflow';
+type GalleryCategory = 'all' | 'code' | 'research' | 'image' | 'content' | 'mobile' | 'presentation' | 'agent' | 'workflow';
 
 const CATEGORY_LABELS: Record<string, { label: string; icon: string; color: string }> = {
   all:          { label: 'All',          icon: '🌐', color: 'bg-slate-100 text-slate-700' },
@@ -17,7 +17,6 @@ const CATEGORY_LABELS: Record<string, { label: string; icon: string; color: stri
   research:     { label: 'Research',     icon: '🔍', color: 'bg-teal-100 text-teal-700' },
   content:      { label: 'Content',      icon: '📝', color: 'bg-pink-100 text-pink-700' },
   image:        { label: 'Image',        icon: '🎨', color: 'bg-orange-100 text-orange-700' },
-  voice:        { label: 'Voice',        icon: '🎙️', color: 'bg-rose-100 text-rose-700' },
 };
 
 function GalleryCard({ task }: { task: any }) {

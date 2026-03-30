@@ -117,18 +117,6 @@ const CATEGORIES = [
     desc: 'Generate stunning visuals, product images, and creative artwork with our AI.',
     example: 'Logo for a fintech startup',
   },
-  {
-    icon: <Mic className="w-6 h-6" />,
-    label: 'Voice',
-    color: 'pink',
-    bg: 'bg-pink-50',
-    border: 'border-pink-100',
-    iconBg: 'bg-pink-100',
-    iconColor: 'text-pink-600',
-    tag: 'bg-pink-100 text-pink-700',
-    desc: 'Studio-quality text-to-speech in Indian languages and English with natural voices.',
-    example: 'Hindi product explainer narration',
-  },
 ];
 
 const STEPS = [
@@ -394,7 +382,7 @@ export default function LandingPage() {
               className="max-w-lg mb-8"
               style={{ fontSize: '16px', lineHeight: 1.7, color: '#374151' }}
             >
-              One platform for code, research, images and voice. Our AI agents pick the best
+              One platform for code, research, images and more. Our AI agents pick the best
               model for every task and deliver results — no subscriptions, pay only per credit.{' '}
               <strong style={{ color: '#0A0D14' }}>20-70x cheaper</strong> than Lovable or Bolt.
             </motion.p>

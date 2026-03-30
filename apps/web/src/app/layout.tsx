@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     'AI software development',
     'AI research tool',
     'AI image generation',
-    'AI voice generation',
+    'AI content generation',
     'arivarangam',
     'free AI coding',
     'AI developer tool India',
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     locale: 'en_IN',
     url: process.env.NEXT_PUBLIC_APP_URL || 'https://arivarangam.com',
     title: 'Arivarangam — AI Code Generator & Development Platform',
-    description: 'Generate full code projects, research reports, images and voice using AI. Built for Indian developers and creators.',
+    description: 'Generate full code projects, research reports, images and content using AI. Built for Indian developers and creators.',
     siteName: 'Arivarangam',
     images: [
       {
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Arivarangam — AI Code Generator India',
-    description: 'Generate full code projects, research, images and voice using AI. Built for Indian developers.',
+    description: 'Generate full code projects, research, images and content using AI. Built for Indian developers.',
     images: ['/og-image.png'],
   },
   icons: {

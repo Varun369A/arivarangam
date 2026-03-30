@@ -10,7 +10,7 @@ import { cn, formatDate } from '@/lib/utils'
 type StatusFilter = '' | 'queued' | 'running' | 'done' | 'failed' | 'cancelled'
 
 const CATEGORY_ICONS: Record<string, string> = {
-  code: '⌨️', research: '🔍', image: '🎨', voice: '🎙️', content: '✍️',
+  code: '⌨️', research: '🔍', image: '🎨', content: '✍️',
 }
 
 function StatusBadge({ status }: { status: string }) {

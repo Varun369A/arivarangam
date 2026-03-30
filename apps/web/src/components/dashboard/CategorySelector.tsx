@@ -77,21 +77,6 @@ const categories: CategoryTab[] = [
       dot:           'bg-orange-500',
     },
   },
-  {
-    value: 'voice',
-    label: 'Voice',
-    icon: <Mic className="h-5 w-5" />,
-    description: 'Text-to-speech synthesis',
-    color: {
-      bg:            'hover:bg-pink-50',
-      activeBg:      'bg-gradient-to-br from-pink-50 to-rose-50',
-      activeText:    'text-pink-700',
-      activeBorder:  'border-pink-200',
-      activeIcon:    'text-pink-600 bg-pink-100',
-      inactiveIcon:  'text-gray-400 bg-gray-100',
-      dot:           'bg-pink-500',
-    },
-  },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────

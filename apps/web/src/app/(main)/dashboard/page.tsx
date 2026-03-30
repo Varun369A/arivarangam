@@ -8,7 +8,7 @@ import { useCredits } from '@/hooks/useCredits';
 import { tasksApi, reposApi, creditsApi, getApiError } from '@/lib/api';
 import { cn, formatDate, formatCredits } from '@/lib/utils';
 
-type TaskCategory = 'code' | 'research' | 'image' | 'voice' | 'content' | 'mobile' | 'presentation' | 'agent' | 'workflow';
+type TaskCategory = 'code' | 'research' | 'image' | 'content' | 'mobile' | 'presentation' | 'agent' | 'workflow';
 
 // ─── Category Config ──────────────────────────────────────────────────────────
 
@@ -95,16 +95,6 @@ const CATEGORIES: CategoryConfig[] = [
     placeholder: 'Generate a futuristic city skyline at sunset with neon lights...',
   },
   {
-    key: 'voice',
-    label: 'Voice',
-    icon: '🎙️',
-    colorText: 'text-pink-700',
-    colorBg: 'bg-pink-50',
-    activeRing: 'ring-2 ring-pink-500 ring-offset-1',
-    btnBg: 'bg-pink-500 hover:bg-pink-600',
-    placeholder: 'Create a warm, professional voice-over for a product launch video...',
-  },
-  {
     key: 'content',
     label: 'Content',
     icon: '📝',
@@ -156,7 +146,6 @@ const CATEGORY_ICON_MAP: Record<string, { icon: string; bg: string }> = {
   workflow:     { icon: '⚡', bg: 'bg-amber-50' },
   research:     { icon: '🔍', bg: 'bg-teal-50' },
   image:        { icon: '🎨', bg: 'bg-orange-50' },
-  voice:        { icon: '🎙️', bg: 'bg-pink-50' },
   content:      { icon: '📝', bg: 'bg-rose-50' },
 };
 
@@ -213,7 +202,6 @@ export default function DashboardPage() {
 
   // Create task state
   const [category, setCategory] = useState<TaskCategory>('code');
-  const [voiceLang, setVoiceLang] = useState('en');
   const [prompt, setPrompt] = useState('');
   const [estimate, setEstimate] = useState<CreditEstimate | null>(null);
   const [estimating, setEstimating] = useState(false);
@@ -288,10 +276,7 @@ export default function DashboardPage() {
     setSubmitting(true);
     setSubmitError(null);
     try {
-      const context = category === 'voice' && voiceLang !== 'en'
-        ? JSON.stringify({ language: voiceLang })
-        : undefined;
-      const res = await tasksApi.create({ category, prompt: prompt.trim(), context });
+      const res = await tasksApi.create({ category, prompt: prompt.trim() });
       const taskId = (res as any)?.data?.task?.id ?? (res as any)?.id;
       // If backend returned activeTaskId, redirect to that running task instead
       const activeTaskId = (res as any)?.data?.activeTaskId
@@ -377,43 +362,6 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* Indian language selector — shown only for voice category */}
-          {category === 'voice' && (
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="text-xs font-semibold text-pink-700">🌐 Language:</span>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { code: 'en',    label: 'English' },
-                  { code: 'hi-IN', label: 'हिन्दी' },
-                  { code: 'ta-IN', label: 'தமிழ்' },
-                  { code: 'te-IN', label: 'తెలుగు' },
-                  { code: 'kn-IN', label: 'ಕನ್ನಡ' },
-                  { code: 'ml-IN', label: 'മലയാളം' },
-                  { code: 'mr-IN', label: 'मराठी' },
-                  { code: 'bn-IN', label: 'বাংলা' },
-                  { code: 'gu-IN', label: 'ગુજરાતી' },
-                  { code: 'pa-IN', label: 'ਪੰਜਾਬੀ' },
-                ].map(lang => (
-                  <button
-                    key={lang.code}
-                    type="button"
-                    onClick={() => setVoiceLang(lang.code)}
-                    className={cn(
-                      'px-2.5 py-1 rounded-full text-xs font-medium transition-all',
-                      voiceLang === lang.code
-                        ? 'bg-pink-500 text-white ring-2 ring-pink-400 ring-offset-1'
-                        : 'bg-pink-50 text-pink-700 hover:bg-pink-100'
-                    )}
-                  >
-                    {lang.label}
-                  </button>
-                ))}
-              </div>
-              {voiceLang !== 'en' && (
-                <span className="text-[11px] text-pink-500 font-medium">Powered by Sarvam AI</span>
-              )}
-            </div>
-          )}
 
           {/* Textarea */}
           <textarea

@@ -41,12 +41,6 @@ const categoryConfig: Record<TaskCategory, {
     iconColor: 'text-orange-600',
     accent: 'group-hover:border-orange-200',
   },
-  voice: {
-    icon: <Mic className="h-4 w-4" />,
-    iconBg: 'bg-pink-100',
-    iconColor: 'text-pink-600',
-    accent: 'group-hover:border-pink-200',
-  },
   content: {
     icon: <FileText className="h-4 w-4" />,
     iconBg: 'bg-purple-100',
