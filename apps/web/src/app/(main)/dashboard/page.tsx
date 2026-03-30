@@ -391,23 +391,19 @@ export default function DashboardPage() {
           </div>
 
           {/* Textarea */}
-          <AnimatePresence mode="wait">
-            <motion.textarea
-              key={category}
+          <motion.div key={category} initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}>
+            <textarea
               ref={textareaRef}
               value={prompt}
               onChange={e => handlePromptChange(e.target.value)}
               placeholder={activeCfg.placeholder}
               rows={3}
               className="input resize-none min-h-[80px] w-full"
-              initial={{ opacity: 0.6 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.25 }}
               onKeyDown={e => {
                 if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit();
               }}
             />
-          </AnimatePresence>
+          </motion.div>
 
           {/* Estimate + submit row */}
           <div className="flex items-center justify-between gap-4 flex-wrap">

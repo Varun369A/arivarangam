@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence, useInView } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   RefreshCw,
   ExternalLink,
