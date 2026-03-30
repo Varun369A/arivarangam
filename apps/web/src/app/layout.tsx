@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 import { Providers } from '@/components/Providers'
 
@@ -95,6 +96,18 @@ export default function RootLayout({
         <meta name="color-scheme" content="light" />
       </head>
       <body className="min-h-screen bg-surface font-sans antialiased">
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-3CL1MZL6DS"
+          strategy="afterInteractive"
+        />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-3CL1MZL6DS');
+          `}
+        </Script>
         <Providers>{children}</Providers>
       </body>
     </html>
