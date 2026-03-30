@@ -3,10 +3,21 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { motion, AnimatePresence, useInView } from 'motion/react';
 import { useAuth } from '@/hooks/useAuth';
 import { useCredits } from '@/hooks/useCredits';
 import { tasksApi, reposApi, creditsApi, getApiError } from '@/lib/api';
 import { cn, formatDate, formatCredits } from '@/lib/utils';
+
+// ─── Animation helpers ────────────────────────────────────────────────────────
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: (d = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: d } }),
+};
+const staggerGrid = {
+  show: { transition: { staggerChildren: 0.06 } },
+  hidden: {},
+};
 
 type TaskCategory = 'code' | 'research' | 'image' | 'content' | 'mobile' | 'presentation' | 'agent' | 'workflow';
 
@@ -301,7 +312,8 @@ export default function DashboardPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-10">
 
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <motion.div className="flex items-center justify-between"
+          initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.16,1,0.3,1] }}>
           <div>
             <h1 className="text-2xl font-bold text-slate-900">
               {user ? `Hey, ${user.name.split(' ')[0]} 👋` : 'Dashboard'}
@@ -309,16 +321,18 @@ export default function DashboardPage() {
             <p className="text-slate-500 text-sm mt-0.5">What will you build today?</p>
           </div>
           {balance !== null && (
-            <Link
-              href="/settings?tab=credits"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors font-semibold text-sm text-white"
-              style={{background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', boxShadow: '0 2px 8px rgba(99,102,241,0.3)'}}
-            >
-              <span>⚡</span>
-              <span>{formatCredits(balance)}</span>
-            </Link>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+              <Link
+                href="/settings?tab=credits"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl transition-colors font-semibold text-sm text-white"
+                style={{background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', boxShadow: '0 2px 8px rgba(99,102,241,0.3)'}}
+              >
+                <motion.span animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 2, repeat: Infinity }}>⚡</motion.span>
+                <span>{formatCredits(balance)}</span>
+              </Link>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
 
         {/* Low credits banner */}
         {balance !== null && balance < 50 && (
@@ -339,18 +353,24 @@ export default function DashboardPage() {
         )}
 
         {/* Create Task Card */}
-        <div className="bg-white rounded-2xl shadow-card p-6 space-y-5" style={{border: '1.5px solid #c7d2fe', boxShadow: '0 4px 20px rgba(99,102,241,0.10)'}}>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1, ease: [0.16,1,0.3,1] }}
+          className="bg-white rounded-2xl shadow-card p-6 space-y-5"
+          style={{border: '1.5px solid #c7d2fe', boxShadow: '0 4px 20px rgba(99,102,241,0.10)'}}>
           <p className="text-base font-bold text-indigo-800">What do you want to build?</p>
 
           {/* Category tabs */}
           <div className="flex gap-2 flex-wrap">
             {CATEGORIES.map(cfg => (
-              <button
+              <motion.button
                 key={cfg.key}
                 type="button"
                 onClick={() => setCategory(cfg.key)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 className={cn(
-                  'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all duration-150',
+                  'relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all duration-150',
                   category === cfg.key
                     ? cn(cfg.colorBg, cfg.colorText, cfg.activeRing)
                     : 'bg-slate-50 text-slate-600 hover:bg-slate-100',
@@ -358,63 +378,90 @@ export default function DashboardPage() {
               >
                 <span>{cfg.icon}</span>
                 {cfg.label}
-              </button>
+                {category === cfg.key && (
+                  <motion.span
+                    layoutId="categoryIndicator"
+                    className="absolute inset-0 rounded-full pointer-events-none"
+                    style={{ boxShadow: '0 0 12px rgba(99,102,241,0.25)' }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  />
+                )}
+              </motion.button>
             ))}
           </div>
 
-
           {/* Textarea */}
-          <textarea
-            ref={textareaRef}
-            value={prompt}
-            onChange={e => handlePromptChange(e.target.value)}
-            placeholder={activeCfg.placeholder}
-            rows={3}
-            className="input resize-none min-h-[80px]"
-            onKeyDown={e => {
-              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit();
-            }}
-          />
+          <AnimatePresence mode="wait">
+            <motion.textarea
+              key={category}
+              ref={textareaRef}
+              value={prompt}
+              onChange={e => handlePromptChange(e.target.value)}
+              placeholder={activeCfg.placeholder}
+              rows={3}
+              className="input resize-none min-h-[80px] w-full"
+              initial={{ opacity: 0.6 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.25 }}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit();
+              }}
+            />
+          </AnimatePresence>
 
           {/* Estimate + submit row */}
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-2 text-sm text-slate-500 min-h-[22px]">
-              {estimating ? (
-                <span className="flex items-center gap-1.5 text-slate-400 text-sm">
-                  <span className="inline-block w-3.5 h-3.5 border-2 border-slate-200 border-t-indigo-500 rounded-full animate-spin" />
-                  Estimating...
-                </span>
-              ) : estimate ? (
-                <span className="flex items-center gap-1.5">
-                  <span className="text-slate-400 text-sm">Credit estimate:</span>
-                  <span className="font-semibold text-slate-700 text-sm">
-                    ~{estimate.min}–{estimate.max} credits
-                  </span>
-                  <InfoTooltip text="Estimates may vary by ±20% based on task complexity" />
-                </span>
-              ) : null}
+              <AnimatePresence mode="wait">
+                {estimating ? (
+                  <motion.span key="est" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    className="flex items-center gap-1.5 text-slate-400 text-sm">
+                    <span className="inline-block w-3.5 h-3.5 border-2 border-slate-200 border-t-indigo-500 rounded-full animate-spin" />
+                    Estimating...
+                  </motion.span>
+                ) : estimate ? (
+                  <motion.span key="show" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                    className="flex items-center gap-1.5">
+                    <span className="text-slate-400 text-sm">Credit estimate:</span>
+                    <span className="font-semibold text-slate-700 text-sm">
+                      ~{estimate.min}–{estimate.max} credits
+                    </span>
+                    <InfoTooltip text="Estimates may vary by ±20% based on task complexity" />
+                  </motion.span>
+                ) : null}
+              </AnimatePresence>
             </div>
 
             <div className="flex items-center gap-3 flex-wrap">
               {submitError && (
-                <span className="text-sm text-red-600 max-w-xs">{submitError}</span>
+                <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm text-red-600 max-w-xs">{submitError}</motion.span>
               )}
-              <button
+              <motion.button
                 type="button"
                 onClick={handleSubmit}
                 disabled={!canSubmit}
+                whileHover={canSubmit ? { scale: 1.05, boxShadow: '0 0 20px rgba(99,102,241,0.5)' } : {}}
+                whileTap={canSubmit ? { scale: 0.96 } : {}}
                 className={cn(
-                  'inline-flex items-center justify-center gap-2 px-5 py-2 rounded-xl text-white font-medium text-sm transition-colors',
+                  'relative inline-flex items-center justify-center gap-2 px-5 py-2 rounded-xl text-white font-medium text-sm transition-colors overflow-hidden',
                   'disabled:opacity-50 disabled:cursor-not-allowed',
                   activeCfg.btnBg,
                 )}
               >
+                {canSubmit && !submitting && (
+                  <motion.span
+                    className="absolute inset-0 rounded-xl"
+                    animate={{ opacity: [0, 0.15, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    style={{ background: 'white' }}
+                  />
+                )}
                 {submitting ? (
                   <span className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                 ) : (
-                  <>Run <span className="text-white/80">→</span></>
+                  <>Run <motion.span animate={{ x: [0, 3, 0] }} transition={{ duration: 1, repeat: Infinity }} className="text-white/80">→</motion.span></>
                 )}
-              </button>
+              </motion.button>
             </div>
           </div>
 
@@ -438,80 +485,86 @@ export default function DashboardPage() {
 
         {/* Recent Projects */}
         <section>
-          <div className="flex items-center justify-between mb-4">
+          <motion.div className="flex items-center justify-between mb-4"
+            variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
             <h2 className="text-lg font-bold text-indigo-700 flex items-center gap-2">⚡ Recent Projects</h2>
             <Link href="/task" className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">
               View all →
             </Link>
-          </div>
+          </motion.div>
 
           {tasksLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+              variants={staggerGrid} initial="hidden" animate="show">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white rounded-xl2 border border-surface-border p-5 space-y-3">
+                <motion.div key={i} variants={fadeUp} className="bg-white rounded-xl2 border border-surface-border p-5 space-y-3">
                   <Skeleton className="h-8 w-8" />
                   <Skeleton className="h-4 w-3/4" />
                   <Skeleton className="h-3 w-1/2" />
                   <Skeleton className="h-8 w-full mt-2" />
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           ) : tasks.length === 0 ? (
-            <div className="bg-white rounded-xl2 border-2 border-dashed border-slate-200 py-16 flex flex-col items-center gap-3">
-              <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center text-3xl">
+            <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}
+              className="bg-white rounded-xl2 border-2 border-dashed border-slate-200 py-16 flex flex-col items-center gap-3">
+              <motion.div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center text-3xl"
+                animate={{ y: [0, -6, 0] }} transition={{ duration: 2.5, repeat: Infinity }}>
                 🚀
-              </div>
+              </motion.div>
               <p className="font-semibold text-slate-700">Start your first project</p>
               <p className="text-sm text-slate-400 text-center max-w-xs">
                 Describe what you want to build above and let AI agents do the work.
               </p>
-            </div>
+            </motion.div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+              variants={staggerGrid} initial="hidden" animate="show">
               {tasks.map(task => (
                 <TaskCard key={task.id} task={task} />
               ))}
-            </div>
+            </motion.div>
           )}
         </section>
 
         {/* Repos Section */}
         <section className="pb-8">
-          <div className="flex items-center justify-between mb-4">
+          <motion.div className="flex items-center justify-between mb-4"
+            variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
             <h2 className="text-lg font-bold text-violet-700 flex items-center gap-2">📦 Saved Repos</h2>
             <Link href="/repos" className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">
               View all →
             </Link>
-          </div>
+          </motion.div>
 
           {reposLoading ? (
             <div className="space-y-3">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="bg-white rounded-xl2 border border-surface-border p-4 flex items-center gap-4">
+                <motion.div key={i} variants={fadeUp} initial="hidden" animate="show" custom={i * 0.1}
+                  className="bg-white rounded-xl2 border border-surface-border p-4 flex items-center gap-4">
                   <Skeleton className="w-10 h-10 flex-shrink-0" />
                   <div className="flex-1 space-y-2">
                     <Skeleton className="h-4 w-1/3" />
                     <Skeleton className="h-3 w-1/2" />
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           ) : repos.length === 0 ? (
-            <div className="bg-white rounded-xl2 border-2 border-dashed border-slate-200 py-12 flex flex-col items-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-violet-50 flex items-center justify-center text-2xl">
-                📁
-              </div>
+            <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}
+              className="bg-white rounded-xl2 border-2 border-dashed border-slate-200 py-12 flex flex-col items-center gap-3">
+              <div className="w-14 h-14 rounded-2xl bg-violet-50 flex items-center justify-center text-2xl">📁</div>
               <p className="font-semibold text-slate-700">No repos yet</p>
               <p className="text-sm text-slate-400 text-center max-w-xs">
                 Complete a code task and save it as a repo for version control.
               </p>
-            </div>
+            </motion.div>
           ) : (
-            <div className="space-y-3">
+            <motion.div className="space-y-3" variants={staggerGrid} initial="hidden" whileInView="show" viewport={{ once: true }}>
               {repos.map(repo => (
                 <RepoRow key={repo.id} repo={repo} />
               ))}
-            </div>
+            </motion.div>
           )}
         </section>
       </div>
@@ -526,7 +579,11 @@ function TaskCard({ task }: { task: any }) {
   const credits = task.creditsActuallyUsed ?? task.creditsUsed ?? task.creditsEstimatedMax ?? '—';
 
   return (
-    <div className="bg-white rounded-2xl shadow-card p-5 card-hover flex flex-col gap-3" style={{border: '1.5px solid #e0e7ff'}}>
+    <motion.div
+      variants={fadeUp}
+      whileHover={{ y: -4, boxShadow: '0 8px 30px rgba(99,102,241,0.15)' }}
+      className="bg-white rounded-2xl shadow-card p-5 flex flex-col gap-3 transition-shadow"
+      style={{border: '1.5px solid #e0e7ff'}}>
       <div className="flex items-start justify-between gap-2">
         <CategoryIcon category={task.category} />
         <StatusBadge status={task.status} />
@@ -536,13 +593,15 @@ function TaskCard({ task }: { task: any }) {
         <span>{task.createdAt ? formatDate(task.createdAt) : '—'}</span>
         <span className="text-indigo-600 font-semibold">{credits !== '—' ? `${credits} cr` : '—'}</span>
       </div>
-      <Link
-        href={`/task/${task.id}`}
-        className="btn-primary text-xs py-1.5 text-center w-full"
-      >
-        Open →
-      </Link>
-    </div>
+      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+        <Link
+          href={`/task/${task.id}`}
+          className="btn-primary text-xs py-1.5 text-center w-full block"
+        >
+          Open →
+        </Link>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -551,10 +610,17 @@ function TaskCard({ task }: { task: any }) {
 function RepoRow({ repo }: { repo: any }) {
   const fileCount = Array.isArray(repo.files) ? repo.files.length : 0;
   return (
-    <div className="bg-white rounded-2xl shadow-card px-5 py-4 flex items-center gap-4 card-hover" style={{border: '1.5px solid #ede9fe'}}>
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0" style={{background: 'linear-gradient(135deg, #ede9fe, #ddd6fe)'}}>
+    <motion.div
+      variants={fadeUp}
+      whileHover={{ x: 4, boxShadow: '0 4px 20px rgba(139,92,246,0.12)' }}
+      className="bg-white rounded-2xl shadow-card px-5 py-4 flex items-center gap-4 transition-shadow"
+      style={{border: '1.5px solid #ede9fe'}}>
+      <motion.div
+        whileHover={{ rotate: [0, -5, 5, 0] }} transition={{ duration: 0.4 }}
+        className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+        style={{background: 'linear-gradient(135deg, #ede9fe, #ddd6fe)'}}>
         📦
-      </div>
+      </motion.div>
       <div className="flex-1 min-w-0">
         <p className="font-medium text-slate-800 truncate">{repo.name}</p>
         <p className="text-xs text-slate-400 truncate mt-0.5">
@@ -565,10 +631,14 @@ function RepoRow({ repo }: { repo: any }) {
         {repo.updatedAt ? formatDate(repo.updatedAt) : ''}
       </span>
       <div className="flex gap-2 flex-shrink-0">
-        <Link href={`/repos/${repo.id}`} className="btn-secondary text-xs py-1.5 px-3">Open</Link>
-        <Link href={`/repos/${repo.id}?edit=1`} className="btn-secondary text-xs py-1.5 px-3 text-indigo-600">Edit</Link>
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Link href={`/repos/${repo.id}`} className="btn-secondary text-xs py-1.5 px-3">Open</Link>
+        </motion.div>
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Link href={`/repos/${repo.id}?edit=1`} className="btn-secondary text-xs py-1.5 px-3 text-indigo-600">Edit</Link>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -645,52 +715,70 @@ function TemplateGallery({ onSelect }: { onSelect: (t: Template) => void }) {
   const [expanded, setExpanded] = useState(false);
   const filtered = INDIA_TEMPLATES.filter(t => filter === 'all' || t.category === filter);
   const shown = expanded ? filtered : filtered.slice(0, 6);
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true });
 
   return (
-    <section>
-      <div className="flex items-center justify-between mb-4">
+    <section ref={ref}>
+      <motion.div className="flex items-center justify-between mb-4"
+        initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.4 }}>
         <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">🇮🇳 India Templates</h2>
         <div className="flex gap-1.5 flex-wrap justify-end">
           {TEMPLATE_FILTER_CATS.map(c => (
-            <button
+            <motion.button
               key={c}
               type="button"
-              onClick={() => setFilter(c)}
+              onClick={() => { setFilter(c); setExpanded(false); }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               className={cn(
                 'px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all',
                 filter === c ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               )}
             >
               {c === 'all' ? 'All' : c.charAt(0).toUpperCase() + c.slice(1)}
-            </button>
+            </motion.button>
           ))}
         </div>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {shown.map(tmpl => (
-          <button
-            key={tmpl.title}
-            type="button"
-            onClick={() => onSelect(tmpl)}
-            className="text-left bg-white border border-slate-200 rounded-xl p-4 hover:border-indigo-300 hover:shadow-sm transition-all group"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xl">{tmpl.icon}</span>
-              <span className="text-[10px] font-semibold text-slate-400">{tmpl.tag}</span>
-            </div>
-            <p className="text-sm font-semibold text-slate-800 mb-1 group-hover:text-indigo-700 transition-colors">{tmpl.title}</p>
-            <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">{tmpl.prompt}</p>
-          </button>
-        ))}
-      </div>
+      </motion.div>
+      <AnimatePresence mode="wait">
+        <motion.div key={filter} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
+          variants={staggerGrid} initial="hidden" animate="show">
+          {shown.map((tmpl, i) => (
+            <motion.button
+              key={tmpl.title}
+              variants={fadeUp}
+              custom={i * 0.04}
+              type="button"
+              onClick={() => onSelect(tmpl)}
+              whileHover={{ y: -3, boxShadow: '0 6px 20px rgba(99,102,241,0.12)', borderColor: '#a5b4fc' }}
+              whileTap={{ scale: 0.97 }}
+              className="text-left bg-white border border-slate-200 rounded-xl p-4 transition-all group"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <motion.span className="text-xl" whileHover={{ scale: 1.2 }} transition={{ type: 'spring', stiffness: 400 }}>{tmpl.icon}</motion.span>
+                <span className="text-[10px] font-semibold text-slate-400">{tmpl.tag}</span>
+              </div>
+              <p className="text-sm font-semibold text-slate-800 mb-1 group-hover:text-indigo-700 transition-colors">{tmpl.title}</p>
+              <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">{tmpl.prompt}</p>
+            </motion.button>
+          ))}
+        </motion.div>
+      </AnimatePresence>
       {filtered.length > 6 && (
-        <button
+        <motion.button
           type="button"
           onClick={() => setExpanded(e => !e)}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           className="mt-3 w-full py-2.5 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-colors"
         >
-          {expanded ? 'Show less ↑' : `Show all ${filtered.length} templates ↓`}
-        </button>
+          <AnimatePresence mode="wait">
+            <motion.span key={expanded ? 'less' : 'more'} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}>
+              {expanded ? 'Show less ↑' : `Show all ${filtered.length} templates ↓`}
+            </motion.span>
+          </AnimatePresence>
+        </motion.button>
       )}
     </section>
   );

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence, useInView } from 'motion/react';
 import {
   RefreshCw,
   ExternalLink,
@@ -18,6 +19,13 @@ import {
 import { useQuery, useQueryClient } from 'react-query';
 import api, { getApiError } from '@/lib/api';
 import { cn, formatINR, formatDateTime, formatCredits } from '@/lib/utils';
+
+// ─── Animation helpers ────────────────────────────────────────────────────────
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  show: (d = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: d } }),
+};
+const stagger = { show: { transition: { staggerChildren: 0.07 } }, hidden: {} };
 import type {
   AdminHealthStatus,
   AdminRevenueStats,
@@ -124,8 +132,17 @@ function KillConfirmModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      initial={{ backgroundColor: 'rgba(0,0,0,0)' }}
+      animate={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+      exit={{ backgroundColor: 'rgba(0,0,0,0)' }}>
+      <motion.div
+        className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+        initial={{ scale: 0.9, opacity: 0, y: 16 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 30 }}>
         <h3 className="text-base font-semibold text-slate-900 mb-1">Kill Task?</h3>
         <p className="text-sm text-slate-600 mb-4">
           This will force-fail the{' '}
@@ -134,19 +151,21 @@ function KillConfirmModal({
         </p>
         {error && <p className="text-xs text-red-600 mb-3">{error}</p>}
         <div className="flex gap-3 justify-end">
-          <button onClick={onClose} className="btn-secondary text-sm">
+          <motion.button onClick={onClose} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="btn-secondary text-sm">
             Cancel
-          </button>
-          <button
+          </motion.button>
+          <motion.button
             onClick={handleKill}
             disabled={loading}
+            whileHover={!loading ? { scale: 1.03 } : {}}
+            whileTap={!loading ? { scale: 0.97 } : {}}
             className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-red-600 text-white font-medium text-sm hover:bg-red-700 disabled:opacity-50 transition-colors"
           >
             {loading ? 'Killing…' : 'Kill & Refund'}
-          </button>
+          </motion.button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -216,38 +235,42 @@ export default function AdminOverviewPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-5 animate-pulse">
-        <div className="h-8 w-64 bg-slate-200 rounded-lg" />
+      <motion.div className="space-y-5" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <div className="h-8 w-64 bg-slate-200 rounded-lg animate-pulse" />
         <div className="grid grid-cols-5 gap-4">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-24 bg-slate-100 rounded-2xl" />
+            <div key={i} className="h-24 bg-slate-100 rounded-2xl animate-pulse" />
           ))}
         </div>
-        <div className="h-64 bg-slate-100 rounded-2xl" />
-      </div>
+        <div className="h-64 bg-slate-100 rounded-2xl animate-pulse" />
+      </motion.div>
     );
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <motion.div className="flex items-center justify-between"
+        initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <div>
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-            ARRIVARANGAM ADMIN
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            ARIVARANGAM ADMIN
+            <motion.span className="inline-block w-2 h-2 rounded-full bg-emerald-500"
+              animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 2, repeat: Infinity }} />
           </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Auto-refresh every 30s
-          </p>
+          <p className="text-xs text-slate-400 mt-0.5">Auto-refresh every 30s</p>
         </div>
         <div className="flex items-center gap-3">
-          <button
+          <motion.button
             onClick={refreshAll}
+            whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
             className="btn-secondary text-xs py-1.5 px-3 flex items-center gap-1.5"
           >
-            <RefreshCw className="w-3 h-3" />
+            <motion.span animate={{ rotate: healthQ.isFetching ? 360 : 0 }} transition={{ duration: 0.8, ease: 'linear', repeat: healthQ.isFetching ? Infinity : 0 }}>
+              <RefreshCw className="w-3 h-3" />
+            </motion.span>
             Refresh
-          </button>
+          </motion.button>
           <Link
             href="/"
             className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
@@ -256,16 +279,18 @@ export default function AdminOverviewPage() {
             <ExternalLink className="w-3.5 h-3.5" />
           </Link>
         </div>
-      </div>
+      </motion.div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      <motion.div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4"
+        variants={stagger} initial="hidden" animate="show">
         <StatCard
           label="Active Tasks"
           value={health ? health.activeTasks.toString() : '—'}
           sub="running now"
           icon={<Activity className="w-4 h-4" />}
           accent="indigo"
+          pulse={health ? health.activeTasks > 0 : false}
         />
         <StatCard
           label="Users Today"
@@ -295,39 +320,46 @@ export default function AdminOverviewPage() {
           icon={<ListTodo className="w-4 h-4" />}
           accent="purple"
         />
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <motion.div className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+        variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}>
         {/* Live Tasks */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-indigo-200 shadow-card overflow-hidden">
+        <motion.div variants={fadeUp} className="lg:col-span-2 bg-white rounded-2xl border border-indigo-200 shadow-card overflow-hidden">
           <div className="px-5 py-4 border-b border-indigo-100 flex items-center justify-between" style={{background: 'linear-gradient(135deg, #eef2ff, #ede9fe)'}}>
             <h2 className="text-sm font-bold text-indigo-800 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse-soft inline-block" />
+              <span className="relative flex w-2 h-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
+                <span className="relative inline-flex rounded-full w-2 h-2 bg-indigo-500" />
+              </span>
               LIVE TASKS
             </h2>
             <Link href="/admin/tasks" className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold">
               View all →
             </Link>
           </div>
-          <div className="divide-y divide-slate-50">
-            {runningTasks.length === 0 ? (
-              <div className="px-5 py-10 text-center text-sm text-slate-400">
-                No active tasks right now
-              </div>
-            ) : (
-              runningTasks.map((task) => (
-                <LiveTaskRow
-                  key={task.id}
-                  task={task}
-                  onKill={() => setKillTarget(task)}
-                />
-              ))
-            )}
-          </div>
-        </div>
+          <AnimatePresence>
+            <div className="divide-y divide-slate-50">
+              {runningTasks.length === 0 ? (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="px-5 py-10 text-center text-sm text-slate-400">
+                  No active tasks right now
+                </motion.div>
+              ) : (
+                runningTasks.map((task, i) => (
+                  <LiveTaskRow
+                    key={task.id}
+                    task={task}
+                    index={i}
+                    onKill={() => setKillTarget(task)}
+                  />
+                ))
+              )}
+            </div>
+          </AnimatePresence>
+        </motion.div>
 
         {/* Right column */}
-        <div className="space-y-4">
+        <motion.div variants={fadeUp} className="space-y-4">
           {/* Model Health */}
           <div className="bg-white rounded-2xl border border-surface-border shadow-card p-5">
             <h2 className="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
@@ -424,11 +456,12 @@ export default function AdminOverviewPage() {
               </div>
             )}
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Self-Improve Queue */}
-      <div className="bg-white rounded-2xl border border-surface-border shadow-card overflow-hidden">
+      <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}
+        className="bg-white rounded-2xl border border-surface-border shadow-card overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-800">SELF-IMPROVE QUEUE</h2>
           <Link href="/admin/platform" className="text-xs text-indigo-600 hover:text-indigo-800">
@@ -463,16 +496,18 @@ export default function AdminOverviewPage() {
             ))
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* Kill Modal */}
-      {killTarget && (
-        <KillConfirmModal
-          task={killTarget}
-          onClose={() => setKillTarget(null)}
-          onKilled={refreshAll}
-        />
-      )}
+      <AnimatePresence>
+        {killTarget && (
+          <KillConfirmModal
+            task={killTarget}
+            onClose={() => setKillTarget(null)}
+            onKilled={refreshAll}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -485,12 +520,14 @@ function StatCard({
   sub,
   icon,
   accent,
+  pulse,
 }: {
   label: string;
   value: string;
   sub: string;
   icon: React.ReactNode;
   accent: 'indigo' | 'violet' | 'purple' | 'amber' | 'emerald';
+  pulse?: boolean;
 }) {
   const gradMap = {
     indigo: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)',
@@ -521,26 +558,50 @@ function StatCard({
     emerald: 'text-emerald-700',
   };
   return (
-    <div className="rounded-2xl shadow-card p-4" style={{ background: gradMap[accent], border: `1.5px solid ${borderMap[accent]}` }}>
-      <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center mb-3', iconMap[accent])}>
+    <motion.div
+      variants={fadeUp}
+      whileHover={{ y: -4, boxShadow: `0 8px 24px ${borderMap[accent]}66` }}
+      className="rounded-2xl shadow-card p-4 cursor-default"
+      style={{ background: gradMap[accent], border: `1.5px solid ${borderMap[accent]}` }}>
+      <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center mb-3 relative', iconMap[accent])}>
         {icon}
+        {pulse && (
+          <span className="absolute -top-1 -right-1 flex w-2.5 h-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
+            <span className="relative inline-flex rounded-full w-2.5 h-2.5 bg-indigo-500" />
+          </span>
+        )}
       </div>
-      <p className={cn('text-2xl font-bold', valueMap[accent])}>{value}</p>
+      <motion.p
+        className={cn('text-2xl font-bold', valueMap[accent])}
+        key={value}
+        initial={{ opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}>
+        {value}
+      </motion.p>
       <p className="text-xs text-slate-600 mt-0.5 font-semibold">{label}</p>
       <p className="text-xs text-slate-500">{sub}</p>
-    </div>
+    </motion.div>
   );
 }
 
 function LiveTaskRow({
   task,
   onKill,
+  index = 0,
 }: {
   task: AdminTask;
   onKill: () => void;
+  index?: number;
 }) {
   return (
-    <div className="px-5 py-3.5 flex items-center gap-4 hover:bg-slate-50 transition-colors">
+    <motion.div
+      initial={{ opacity: 0, x: -12 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 12 }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+      className="px-5 py-3.5 flex items-center gap-4 hover:bg-indigo-50/40 transition-colors">
       <div className="flex-1 min-w-0">
         <p className="text-xs font-medium text-slate-800 truncate">{task.user.email}</p>
         <p className="text-xs text-slate-400 mt-0.5 truncate max-w-xs">
@@ -560,13 +621,15 @@ function LiveTaskRow({
         >
           View
         </Link>
-        <button
+        <motion.button
           onClick={onKill}
-          className="text-xs text-red-500 hover:text-red-700 font-medium"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors"
         >
           Kill
-        </button>
+        </motion.button>
       </div>
-    </div>
+    </motion.div>
   );
 }
