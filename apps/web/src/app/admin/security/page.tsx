@@ -101,7 +101,7 @@ function StatsCard({
         {icon}
       </div>
       <p className="text-2xl font-bold text-slate-900">{value}</p>
-      <p className="text-xs text-slate-500 mt-0.5">{label}</p>
+      <p className="text-xs text-slate-700 mt-0.5">{label}</p>
     </div>
   );
 }
@@ -195,7 +195,7 @@ export default function AdminSecurityPage() {
       {/* Header */}
       <div>
         <h1 className="text-xl font-bold text-[#1E1B4B]">Security Center</h1>
-        <p className="text-xs text-slate-500 mt-0.5">Monitor suspicious activity, resolve events, manage frozen accounts</p>
+        <p className="text-xs text-slate-700 mt-0.5">Monitor suspicious activity, resolve events, manage frozen accounts</p>
       </div>
 
       {/* Stats Cards */}
@@ -232,7 +232,7 @@ export default function AdminSecurityPage() {
                 'px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors',
                 resolved === v
                   ? 'bg-white text-indigo-700 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700',
+                  : 'text-slate-700 hover:text-slate-700',
               )}
             >
               {v}
@@ -256,18 +256,18 @@ export default function AdminSecurityPage() {
       {/* Events table */}
       <div className="bg-white rounded-2xl border border-surface-border shadow-card overflow-hidden">
         {eventsQ.isLoading ? (
-          <div className="py-16 text-center text-sm text-slate-400 animate-pulse">
+          <div className="py-16 text-center text-sm text-slate-600 animate-pulse">
             Loading security events…
           </div>
         ) : events.length === 0 ? (
           <div className="py-16 text-center">
             <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto mb-3" />
-            <p className="text-sm text-slate-500">No security events match your filters.</p>
+            <p className="text-sm text-slate-700">No security events match your filters.</p>
           </div>
         ) : (
           <>
             {/* Table header */}
-            <div className="grid grid-cols-[1fr_1fr_1.5fr_1fr_1fr_auto] gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+            <div className="grid grid-cols-[1fr_1fr_1.5fr_1fr_1fr_auto] gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-700 uppercase tracking-wide">
               <span>Type</span>
               <span>Severity</span>
               <span>Description</span>
@@ -289,14 +289,14 @@ export default function AdminSecurityPage() {
                   <EventTypeBadge type={ev.type} />
                   <SeverityBadge severity={ev.severity} />
                   <p className="text-sm text-slate-700 leading-snug">{ev.description}</p>
-                  <div className="text-xs text-slate-500">
+                  <div className="text-xs text-slate-700">
                     {ev.user?.email && (
                       <p className="font-medium text-slate-700">{ev.user.email}</p>
                     )}
                     {ev.ipAddress && <p className="font-mono">{ev.ipAddress}</p>}
                     {!ev.user?.email && !ev.ipAddress && <span className="text-slate-300">—</span>}
                   </div>
-                  <span className="text-xs text-slate-400">{formatDateTime(ev.createdAt)}</span>
+                  <span className="text-xs text-slate-600">{formatDateTime(ev.createdAt)}</span>
                   <div>
                     {!ev.resolved ? (
                       <button
@@ -307,7 +307,7 @@ export default function AdminSecurityPage() {
                         Resolve
                       </button>
                     ) : (
-                      <span className="text-xs text-slate-400 flex items-center gap-1">
+                      <span className="text-xs text-slate-600 flex items-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                         Resolved
                       </span>
@@ -323,7 +323,7 @@ export default function AdminSecurityPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-700">
             Page {page} of {totalPages} · {eventsQ.data?.total ?? 0} events
           </p>
           <div className="flex items-center gap-2">
@@ -366,16 +366,16 @@ export default function AdminSecurityPage() {
           <h2 className="text-sm font-semibold text-slate-800">
             Frozen / Suspended Accounts ({frozenUsers.length})
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-600 mt-0.5">
             Accounts suspended due to chargebacks or policy violations
           </p>
         </div>
         {frozenQ.isLoading ? (
-          <div className="py-8 text-center text-sm text-slate-400 animate-pulse">
+          <div className="py-8 text-center text-sm text-slate-600 animate-pulse">
             Loading suspended accounts…
           </div>
         ) : frozenUsers.length === 0 ? (
-          <div className="py-8 text-center text-sm text-slate-400">
+          <div className="py-8 text-center text-sm text-slate-600">
             No suspended accounts.
           </div>
         ) : (
@@ -389,7 +389,7 @@ export default function AdminSecurityPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-slate-800">{u.name}</p>
-                  <p className="text-xs text-slate-500">{u.email}</p>
+                  <p className="text-xs text-slate-700">{u.email}</p>
                 </div>
                 <span className="badge bg-red-100 text-red-700">SUSPENDED</span>
                 <button

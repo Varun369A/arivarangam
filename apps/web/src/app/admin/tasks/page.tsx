@@ -88,7 +88,7 @@ function EventIcon({ type }: { type: string }) {
     completed: <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />,
     error: <XCircle className="w-3.5 h-3.5 text-red-500" />,
     error_fixed: <CheckCircle2 className="w-3.5 h-3.5 text-blue-500" />,
-    command_run: <Clock className="w-3.5 h-3.5 text-slate-400" />,
+    command_run: <Clock className="w-3.5 h-3.5 text-slate-600" />,
     file_created: <AlertCircle className="w-3.5 h-3.5 text-violet-400" />,
     file_updated: <AlertCircle className="w-3.5 h-3.5 text-indigo-400" />,
     preview_ready: <CheckCircle2 className="w-3.5 h-3.5 text-teal-500" />,
@@ -143,7 +143,7 @@ function TaskDetailModal({
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
           <div>
             <h3 className="text-base font-semibold text-slate-900">Task Detail</h3>
-            <p className="text-xs text-slate-400 font-mono">{taskId}</p>
+            <p className="text-xs text-slate-600 font-mono">{taskId}</p>
           </div>
           <div className="flex items-center gap-2">
             {isActive && (
@@ -167,7 +167,7 @@ function TaskDetailModal({
             )}
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -177,7 +177,7 @@ function TaskDetailModal({
         {/* Body */}
         <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
           {isLoading ? (
-            <div className="py-10 text-center text-sm text-slate-400 animate-pulse">
+            <div className="py-10 text-center text-sm text-slate-600 animate-pulse">
               Loading task details…
             </div>
           ) : error ? (
@@ -203,7 +203,7 @@ function TaskDetailModal({
                   task.repo ? { label: 'Repo', value: task.repo.name } : null,
                 ].filter(Boolean).map((item) => (
                   <div key={item!.label} className="bg-slate-50 rounded-xl p-3">
-                    <p className="text-xs text-slate-500 mb-0.5">{item!.label}</p>
+                    <p className="text-xs text-slate-700 mb-0.5">{item!.label}</p>
                     <div className="text-sm font-medium text-slate-800">{item!.value}</div>
                   </div>
                 ))}
@@ -211,7 +211,7 @@ function TaskDetailModal({
 
               {/* Prompt */}
               <div>
-                <p className="text-xs text-slate-500 mb-1 font-medium">Prompt</p>
+                <p className="text-xs text-slate-700 mb-1 font-medium">Prompt</p>
                 <div className="bg-slate-50 rounded-xl p-3 text-sm text-slate-700 whitespace-pre-wrap break-words">
                   {task.prompt}
                 </div>
@@ -227,11 +227,11 @@ function TaskDetailModal({
 
               {/* Event Timeline */}
               <div>
-                <p className="text-xs text-slate-500 mb-2 font-medium uppercase tracking-wide">
+                <p className="text-xs text-slate-700 mb-2 font-medium uppercase tracking-wide">
                   Event Timeline ({task.events.length})
                 </p>
                 {task.events.length === 0 ? (
-                  <p className="text-xs text-slate-400">No events recorded</p>
+                  <p className="text-xs text-slate-600">No events recorded</p>
                 ) : (
                   <div className="space-y-1 max-h-80 overflow-y-auto pr-1">
                     {task.events.map((ev) => (
@@ -245,14 +245,14 @@ function TaskDetailModal({
                             {ev.type.replace(/_/g, ' ')}
                           </span>
                           {ev.data && (
-                            <p className="text-xs text-slate-500 mt-0.5 break-words">
+                            <p className="text-xs text-slate-700 mt-0.5 break-words">
                               {typeof ev.data === 'string'
                                 ? ev.data
                                 : ev.data.message ?? ev.data.path ?? JSON.stringify(ev.data).slice(0, 120)}
                             </p>
                           )}
                         </div>
-                        <span className="text-[10px] text-slate-400 shrink-0 mt-0.5">
+                        <span className="text-[10px] text-slate-600 shrink-0 mt-0.5">
                           {new Date(ev.createdAt).toLocaleTimeString()}
                         </span>
                       </div>
@@ -310,7 +310,7 @@ export default function AdminTasksPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-[#1E1B4B]">Task Monitor</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-700 mt-0.5">
             {data?.total ?? '—'} tasks
             {isLive && ' · auto-refresh 10s'}
           </p>
@@ -332,7 +332,7 @@ export default function AdminTasksPage() {
                 'px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors',
                 statusFilter === s
                   ? 'bg-white text-indigo-700 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700',
+                  : 'text-slate-700 hover:text-slate-700',
               )}
             >
               {s}
@@ -357,17 +357,17 @@ export default function AdminTasksPage() {
       {/* Table */}
       <div className="bg-white rounded-2xl border border-surface-border shadow-card overflow-hidden">
         {isLoading ? (
-          <div className="py-16 text-center text-sm text-slate-400 animate-pulse">
+          <div className="py-16 text-center text-sm text-slate-600 animate-pulse">
             Loading tasks…
           </div>
         ) : tasks.length === 0 ? (
-          <div className="py-16 text-center text-sm text-slate-400">
+          <div className="py-16 text-center text-sm text-slate-600">
             No tasks found.
           </div>
         ) : (
           <>
             {/* Table header */}
-            <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+            <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-700 uppercase tracking-wide">
               <span>User</span>
               <span>Category</span>
               <span>Status</span>
@@ -385,7 +385,7 @@ export default function AdminTasksPage() {
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-slate-800 truncate">{task.user.email}</p>
-                    <p className="text-xs text-slate-400 truncate mt-0.5 max-w-xs">
+                    <p className="text-xs text-slate-600 truncate mt-0.5 max-w-xs">
                       {task.prompt.length > 55 ? task.prompt.slice(0, 55) + '…' : task.prompt}
                     </p>
                   </div>
@@ -397,7 +397,7 @@ export default function AdminTasksPage() {
                       : `~${formatCredits(task.creditsEstimatedMax)}`}
                   </span>
                   <span className="text-sm text-slate-600">{getDuration(task)}</span>
-                  <span className="text-xs text-slate-500">{formatDate(task.createdAt)}</span>
+                  <span className="text-xs text-slate-700">{formatDate(task.createdAt)}</span>
 
                   {/* Actions */}
                   <div className="flex items-center gap-1.5">
@@ -428,7 +428,7 @@ export default function AdminTasksPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-700">
             Page {page} of {totalPages} · {data?.total ?? 0} tasks
           </p>
           <div className="flex items-center gap-2">

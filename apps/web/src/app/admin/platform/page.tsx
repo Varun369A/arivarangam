@@ -79,7 +79,7 @@ function LatencyGauge({ ms, label }: { ms: number | null | undefined; label: str
     <div className="space-y-1">
       <div className="flex items-center justify-between text-xs">
         <span className="text-slate-600 font-medium">{label}</span>
-        <span className="text-slate-500">{ms != null ? `${ms}ms` : 'N/A'}</span>
+        <span className="text-slate-700">{ms != null ? `${ms}ms` : 'N/A'}</span>
       </div>
       <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
         <div
@@ -142,22 +142,22 @@ function LogEntryRow({
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-slate-800">{log.title}</p>
-          <p className="text-xs text-slate-500 mt-0.5 truncate">{log.description}</p>
+          <p className="text-xs text-slate-700 mt-0.5 truncate">{log.description}</p>
           {log.filePath && (
-            <p className="text-[11px] text-slate-400 font-mono mt-0.5">{log.filePath}</p>
+            <p className="text-[11px] text-slate-600 font-mono mt-0.5">{log.filePath}</p>
           )}
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <span className="text-xs text-slate-400">{formatDateTime(log.createdAt)}</span>
+          <span className="text-xs text-slate-600">{formatDateTime(log.createdAt)}</span>
           {!log.approved ? (
             <span className="badge bg-amber-100 text-amber-700">Pending</span>
           ) : (
             <span className="badge bg-emerald-100 text-emerald-700">Applied</span>
           )}
           {expanded ? (
-            <ChevronUp className="w-4 h-4 text-slate-400" />
+            <ChevronUp className="w-4 h-4 text-slate-600" />
           ) : (
-            <ChevronDown className="w-4 h-4 text-slate-400" />
+            <ChevronDown className="w-4 h-4 text-slate-600" />
           )}
         </div>
       </div>
@@ -182,7 +182,7 @@ function LogEntryRow({
             </div>
           )}
           {log.approved && log.approvedAt && (
-            <p className="text-xs text-slate-400 mt-2">
+            <p className="text-xs text-slate-600 mt-2">
               Applied {formatDateTime(log.approvedAt)}
             </p>
           )}
@@ -262,7 +262,7 @@ export default function AdminPlatformPage() {
       {/* Header */}
       <div>
         <h1 className="text-xl font-bold text-[#1E1B4B]">Platform Self-Improvement</h1>
-        <p className="text-xs text-slate-500 mt-0.5">Monitor AI models, review fixes, track performance</p>
+        <p className="text-xs text-slate-700 mt-0.5">Monitor AI models, review fixes, track performance</p>
       </div>
 
       {/* Tabs */}
@@ -275,7 +275,7 @@ export default function AdminPlatformPage() {
               'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
               tab === t.id
                 ? 'bg-white text-indigo-700 shadow-sm'
-                : 'text-slate-500 hover:text-slate-700',
+                : 'text-slate-700 hover:text-slate-700',
             )}
           >
             {t.label}
@@ -287,7 +287,7 @@ export default function AdminPlatformPage() {
       {tab === 'health' && (
         <div className="space-y-5">
           {healthQ.isLoading ? (
-            <div className="py-10 text-center text-sm text-slate-400 animate-pulse">
+            <div className="py-10 text-center text-sm text-slate-600 animate-pulse">
               Checking model health…
             </div>
           ) : health ? (
@@ -309,7 +309,7 @@ export default function AdminPlatformPage() {
                     { label: 'Database', value: health.database.status },
                   ].map((s) => (
                     <div key={s.label} className="bg-slate-50 rounded-xl p-3">
-                      <p className="text-xs text-slate-500">{s.label}</p>
+                      <p className="text-xs text-slate-700">{s.label}</p>
                       <p className="text-base font-bold text-slate-900 mt-0.5">{s.value}</p>
                     </div>
                   ))}
@@ -360,11 +360,11 @@ export default function AdminPlatformPage() {
 
           <div className="bg-white rounded-2xl border border-surface-border shadow-card overflow-hidden">
             {logsQ.isLoading ? (
-              <div className="py-10 text-center text-sm text-slate-400 animate-pulse">
+              <div className="py-10 text-center text-sm text-slate-600 animate-pulse">
                 Loading improvement log…
               </div>
             ) : logs.length === 0 ? (
-              <div className="py-10 text-center text-sm text-slate-400">
+              <div className="py-10 text-center text-sm text-slate-600">
                 No platform logs found.
               </div>
             ) : (
@@ -391,7 +391,7 @@ export default function AdminPlatformPage() {
               >
                 ← Prev
               </button>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-slate-700">
                 {logPage} / {logTotalPages}
               </span>
               <button
@@ -411,7 +411,7 @@ export default function AdminPlatformPage() {
         <div className="space-y-5">
           {/* Summary by model */}
           {perfQ.isLoading ? (
-            <div className="py-10 text-center text-sm text-slate-400 animate-pulse">
+            <div className="py-10 text-center text-sm text-slate-600 animate-pulse">
               Loading performance data…
             </div>
           ) : perfQ.data ? (
@@ -425,7 +425,7 @@ export default function AdminPlatformPage() {
                     <p className="text-sm font-semibold text-slate-800 mb-3">{model}</p>
                     <div className="space-y-2">
                       <div className="flex justify-between text-xs">
-                        <span className="text-slate-500">Avg Success Rate</span>
+                        <span className="text-slate-700">Avg Success Rate</span>
                         <span
                           className={cn(
                             'font-semibold',
@@ -451,7 +451,7 @@ export default function AdminPlatformPage() {
                       </div>
                       <LatencyGauge ms={Math.round(stats.avgLatency)} label="Avg Latency" />
                       <div className="flex justify-between text-xs">
-                        <span className="text-slate-500">Sample Size</span>
+                        <span className="text-slate-700">Sample Size</span>
                         <span className="font-medium text-slate-700">{stats.totalSamples}</span>
                       </div>
                     </div>
@@ -471,7 +471,7 @@ export default function AdminPlatformPage() {
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-100">
                         {['Model', 'Category', 'Prompt Version', 'Success Rate', 'Avg Latency', 'Avg Cost', 'Samples', 'Recorded'].map((h) => (
-                          <th key={h} className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">
+                          <th key={h} className="px-4 py-2.5 text-left text-xs font-semibold text-slate-700 uppercase tracking-wide whitespace-nowrap">
                             {h}
                           </th>
                         ))}
@@ -482,7 +482,7 @@ export default function AdminPlatformPage() {
                         <tr key={p.id} className="hover:bg-slate-50 transition-colors">
                           <td className="px-4 py-3 text-sm text-slate-800 font-medium">{p.model}</td>
                           <td className="px-4 py-3 text-sm text-slate-600 capitalize">{p.taskCategory}</td>
-                          <td className="px-4 py-3 text-xs text-slate-500 font-mono">{p.promptVersion}</td>
+                          <td className="px-4 py-3 text-xs text-slate-700 font-mono">{p.promptVersion}</td>
                           <td className="px-4 py-3">
                             <span
                               className={cn(
@@ -497,7 +497,7 @@ export default function AdminPlatformPage() {
                           <td className="px-4 py-3 text-sm text-slate-700">{p.avgLatencyMs}ms</td>
                           <td className="px-4 py-3 text-sm text-slate-700">${p.avgCostUsd.toFixed(4)}</td>
                           <td className="px-4 py-3 text-sm text-slate-700">{p.sampleSize}</td>
-                          <td className="px-4 py-3 text-xs text-slate-400">{formatDateTime(p.createdAt)}</td>
+                          <td className="px-4 py-3 text-xs text-slate-600">{formatDateTime(p.createdAt)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -506,7 +506,7 @@ export default function AdminPlatformPage() {
               </div>
             </>
           ) : (
-            <div className="py-10 text-center text-sm text-slate-400">
+            <div className="py-10 text-center text-sm text-slate-600">
               No performance data available.
             </div>
           )}

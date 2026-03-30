@@ -70,13 +70,13 @@ function GalleryCard({ task, index }: { task: any; index: number }) {
             {cat.icon} {cat.label}
           </span>
           {task.user?.name && (
-            <span className="text-[10px] text-slate-400 truncate max-w-[100px]">by {task.user.name}</span>
+            <span className="text-[10px] text-slate-600 truncate max-w-[100px]">by {task.user.name}</span>
           )}
         </div>
 
         <p className="text-sm font-semibold text-slate-800 line-clamp-2 flex-1 leading-snug">{title}</p>
 
-        <div className="flex items-center justify-between text-[10px] text-slate-400">
+        <div className="flex items-center justify-between text-[10px] text-slate-600">
           <span>{task.completedAt ? formatDate(task.completedAt) : ''}</span>
           {task.creditsActuallyUsed && <span>{task.creditsActuallyUsed} credits</span>}
         </div>
@@ -140,11 +140,11 @@ export default function GalleryPage() {
           <motion.h1 variants={fadeUp} className="text-3xl font-bold text-[#1E1B4B]">
             Community Gallery
           </motion.h1>
-          <motion.p variants={fadeUp} className="text-slate-500 max-w-xl mx-auto">
+          <motion.p variants={fadeUp} className="text-slate-700 max-w-xl mx-auto">
             Apps, agents, and tools built by the Arivarangam community. Get inspired and build your own.
           </motion.p>
           <motion.div variants={fadeUp} className="flex items-center justify-center gap-3 pt-1">
-            <span className="text-sm text-slate-400">{total.toLocaleString()} projects published</span>
+            <span className="text-sm text-slate-600">{total.toLocaleString()} projects published</span>
             <span className="text-slate-300">·</span>
             <Link href="/dashboard" className="text-sm font-semibold text-[#4F46E5] hover:text-[#4338CA] transition-colors">
               Build yours →
@@ -196,7 +196,7 @@ export default function GalleryPage() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 space-y-4">
             <div className="text-6xl opacity-30">🌐</div>
             <p className="text-slate-600 font-semibold">No public projects yet in this category.</p>
-            <p className="text-slate-400 text-sm">Complete a task and publish it to the gallery!</p>
+            <p className="text-slate-600 text-sm">Complete a task and publish it to the gallery!</p>
             <Link href="/dashboard"
               className="inline-flex px-5 py-2 text-white text-sm font-semibold rounded-xl transition-colors"
               style={{ background: 'linear-gradient(135deg, #4F46E5, #7C3AED)', boxShadow: '0 4px 15px rgba(79,70,229,0.3)' }}>
@@ -226,7 +226,7 @@ export default function GalleryPage() {
             >
               ← Prev
             </button>
-            <span className="text-sm text-slate-500 px-3 font-medium">
+            <span className="text-sm text-slate-700 px-3 font-medium">
               Page {page} of {totalPages}
             </span>
             <button

@@ -164,7 +164,7 @@ export default function VerifyEmailPage() {
   return (
     <Suspense fallback={
       <div style={{ textAlign: 'center', padding: '40px 0' }}>
-        <Loader2 style={{ width: '28px', height: '28px', margin: '0 auto' }} className="animate-spin text-slate-400" />
+        <Loader2 style={{ width: '28px', height: '28px', margin: '0 auto' }} className="animate-spin text-slate-600" />
       </div>
     }>
       <VerifyEmailContent />

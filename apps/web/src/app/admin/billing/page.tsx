@@ -86,12 +86,12 @@ function RevenueCard({
   return (
     <div className="bg-white rounded-2xl border border-surface-border shadow-card p-5">
       <div className="flex items-start justify-between mb-1">
-        <p className="text-xs text-slate-500 font-medium">{label}</p>
+        <p className="text-xs text-slate-700 font-medium">{label}</p>
         {trend === 'up' && <TrendingUp className="w-4 h-4 text-emerald-500" />}
         {trend === 'down' && <TrendingDown className="w-4 h-4 text-red-400" />}
       </div>
       <p className="text-2xl font-bold text-slate-900">{value}</p>
-      <p className="text-xs text-slate-400 mt-0.5">{sub}</p>
+      <p className="text-xs text-slate-600 mt-0.5">{sub}</p>
     </div>
   );
 }
@@ -112,12 +112,12 @@ function DailyBreakdownTable({
         <h3 className="text-sm font-semibold text-slate-800">Revenue Trend (last 14 days)</h3>
       </div>
       {sorted.length === 0 ? (
-        <div className="py-8 text-center text-sm text-slate-400">No revenue data yet.</div>
+        <div className="py-8 text-center text-sm text-slate-600">No revenue data yet.</div>
       ) : (
         <div className="divide-y divide-slate-50">
           {sorted.map((row) => (
             <div key={row.date} className="px-5 py-2.5 flex items-center gap-4">
-              <span className="text-xs text-slate-500 w-24 shrink-0">{row.date}</span>
+              <span className="text-xs text-slate-700 w-24 shrink-0">{row.date}</span>
               <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-indigo-400 to-violet-500 rounded-full transition-all duration-500"
@@ -213,7 +213,7 @@ export default function AdminBillingPage() {
       {/* Header */}
       <div>
         <h1 className="text-xl font-bold text-[#1E1B4B]">Revenue & Billing</h1>
-        <p className="text-xs text-slate-500 mt-0.5">Track revenue, transactions, and credit pack performance</p>
+        <p className="text-xs text-slate-700 mt-0.5">Track revenue, transactions, and credit pack performance</p>
       </div>
 
       {/* Revenue Cards */}
@@ -288,7 +288,7 @@ export default function AdminBillingPage() {
               </span>
             </div>
           </div>
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] text-slate-600">
             * AI cost estimate assumes ~12% of revenue. Actual costs vary by usage.
           </p>
         </div>
@@ -300,11 +300,11 @@ export default function AdminBillingPage() {
           <h3 className="text-sm font-semibold text-slate-800">Credit Pack Performance</h3>
         </div>
         {packQ.isLoading ? (
-          <div className="py-8 text-center text-sm text-slate-400 animate-pulse">
+          <div className="py-8 text-center text-sm text-slate-600 animate-pulse">
             Loading pack stats…
           </div>
         ) : packs.length === 0 ? (
-          <div className="py-8 text-center text-sm text-slate-400">
+          <div className="py-8 text-center text-sm text-slate-600">
             No pack data available.
           </div>
         ) : (
@@ -316,7 +316,7 @@ export default function AdminBillingPage() {
                     (h) => (
                       <th
                         key={h}
-                        className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap"
+                        className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wide whitespace-nowrap"
                       >
                         {h}
                       </th>
@@ -337,7 +337,7 @@ export default function AdminBillingPage() {
                       <span
                         className={cn(
                           'text-sm font-semibold',
-                          p.totalPurchases > 0 ? 'text-indigo-700' : 'text-slate-400',
+                          p.totalPurchases > 0 ? 'text-indigo-700' : 'text-slate-600',
                         )}
                       >
                         {p.totalPurchases}
@@ -401,7 +401,7 @@ export default function AdminBillingPage() {
             ))}
           </select>
           <div className="flex items-center gap-2">
-            <label className="text-xs text-slate-500 font-medium">From</label>
+            <label className="text-xs text-slate-700 font-medium">From</label>
             <input
               type="date"
               value={fromDate}
@@ -410,7 +410,7 @@ export default function AdminBillingPage() {
             />
           </div>
           <div className="flex items-center gap-2">
-            <label className="text-xs text-slate-500 font-medium">To</label>
+            <label className="text-xs text-slate-700 font-medium">To</label>
             <input
               type="date"
               value={toDate}
@@ -421,7 +421,7 @@ export default function AdminBillingPage() {
           {(txType || fromDate || toDate) && (
             <button
               onClick={() => { setTxType(''); setFromDate(''); setToDate(''); }}
-              className="text-xs text-slate-500 hover:text-slate-700 underline"
+              className="text-xs text-slate-700 hover:text-slate-700 underline"
             >
               Clear filters
             </button>
@@ -430,17 +430,17 @@ export default function AdminBillingPage() {
 
         <div className="bg-white rounded-2xl border border-surface-border shadow-card overflow-hidden">
           {txQ.isLoading ? (
-            <div className="py-16 text-center text-sm text-slate-400 animate-pulse">
+            <div className="py-16 text-center text-sm text-slate-600 animate-pulse">
               Loading transactions…
             </div>
           ) : transactions.length === 0 ? (
-            <div className="py-16 text-center text-sm text-slate-400">
+            <div className="py-16 text-center text-sm text-slate-600">
               No transactions found.
             </div>
           ) : (
             <>
               {/* Table header */}
-              <div className="grid grid-cols-[2fr_1fr_1fr_1fr_2fr_1fr] gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <div className="grid grid-cols-[2fr_1fr_1fr_1fr_2fr_1fr] gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-700 uppercase tracking-wide">
                 <span>User</span>
                 <span>Type</span>
                 <span>Amount</span>
@@ -464,7 +464,7 @@ export default function AdminBillingPage() {
                         <p className="text-sm font-medium text-slate-800 truncate">
                           {tx.user.email}
                         </p>
-                        <p className="text-xs text-slate-400 truncate">{tx.description}</p>
+                        <p className="text-xs text-slate-600 truncate">{tx.description}</p>
                       </div>
 
                       <TxTypeBadge type={tx.type} />
@@ -483,7 +483,7 @@ export default function AdminBillingPage() {
 
                       <TxStatusBadge status={tx.status} />
 
-                      <div className="text-xs text-slate-500 font-mono min-w-0">
+                      <div className="text-xs text-slate-700 font-mono min-w-0">
                         {tx.razorpayPaymentId ? (
                           <span className="truncate block">{tx.razorpayPaymentId}</span>
                         ) : tx.packId ? (
@@ -493,7 +493,7 @@ export default function AdminBillingPage() {
                         )}
                       </div>
 
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs text-slate-600">
                         {formatDateTime(tx.createdAt)}
                       </span>
                     </div>
@@ -507,7 +507,7 @@ export default function AdminBillingPage() {
         {/* Pagination */}
         {txTotalPages > 1 && (
           <div className="flex items-center justify-between">
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-700">
               Page {txPage} of {txTotalPages} · {txQ.data?.total ?? 0} transactions
             </p>
             <div className="flex items-center gap-2">

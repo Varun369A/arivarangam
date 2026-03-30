@@ -21,7 +21,7 @@ export default function AdminError({
           ⚠️
         </div>
         <h2 className="text-xl font-bold text-[#1E1B4B] mb-2">Something went wrong</h2>
-        <p className="text-sm text-slate-500 mb-6 leading-relaxed">
+        <p className="text-sm text-slate-700 mb-6 leading-relaxed">
           {error.message || 'An unexpected error occurred. Please try again.'}
         </p>
         <div className="flex items-center justify-center gap-3">

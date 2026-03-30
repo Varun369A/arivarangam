@@ -299,7 +299,7 @@ export default function LandingPage() {
               </span>
             </motion.h1>
 
-            <motion.p variants={fadeUp} className="text-lg text-slate-400 leading-relaxed mb-8 max-w-lg">
+            <motion.p variants={fadeUp} className="text-lg text-slate-200 leading-relaxed mb-8 max-w-lg">
               Code, research, images, agents — one platform powered by AI. Pay per credit. No subscription.{' '}
               <span className="text-white font-semibold">20–70× cheaper</span> than Lovable or Bolt.
             </motion.p>
@@ -308,7 +308,7 @@ export default function LandingPage() {
             <motion.div variants={fadeUp}
               className="mb-8 rounded-2xl p-4 border border-white/10 bg-white/5 backdrop-blur-sm"
               style={{ boxShadow: '0 0 40px rgba(99,102,241,0.1)' }}>
-              <div className="text-[11px] text-slate-500 uppercase tracking-wider mb-2">Try it</div>
+              <div className="text-[11px] text-slate-300 uppercase tracking-wider mb-2">Try it</div>
               <div className="text-sm text-slate-300 font-mono min-h-[1.5rem]">
                 {typedText}
                 <motion.span className="text-indigo-400" animate={{ opacity: [1, 0] }} transition={{ repeat: Infinity, duration: 0.6 }}>▊</motion.span>
@@ -329,7 +329,7 @@ export default function LandingPage() {
               </Link>
             </motion.div>
 
-            <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-5 text-sm text-slate-500">
+            <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-5 text-sm text-slate-200">
               {['100 free credits on signup', 'No subscription', 'Credits never expire'].map((t) => (
                 <div key={t} className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500" />{t}
@@ -362,7 +362,7 @@ export default function LandingPage() {
                   style={{ backgroundImage: 'linear-gradient(135deg, #6366f1, #a855f7)' }}>
                   <Counter to={s.value} suffix={s.suffix} />
                 </div>
-                <div className="text-xs text-slate-500 uppercase tracking-wider">{s.label}</div>
+                <div className="text-xs text-slate-700 uppercase tracking-wider">{s.label}</div>
               </motion.div>
             ))}
           </div>
@@ -377,7 +377,7 @@ export default function LandingPage() {
             <h2 className="text-4xl md:text-5xl font-black mb-4 text-[#1E1B4B]" style={{ letterSpacing: '-0.03em' }}>
               One prompt.<br /><span className="text-[#7C3AED]">Infinite outputs.</span>
             </h2>
-            <p className="text-slate-500 text-lg max-w-xl mx-auto">Eight AI-powered categories, each using the best model for that job.</p>
+            <p className="text-slate-700 text-lg max-w-xl mx-auto">Eight AI-powered categories, each using the best model for that job.</p>
           </motion.div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -395,7 +395,7 @@ export default function LandingPage() {
                     <Icon className="w-5 h-5 text-white/80" />
                   </div>
                   <h3 className="text-base font-bold text-[#1E1B4B] mb-2">{cat.label}</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">{cat.desc}</p>
+                  <p className="text-xs text-slate-700 leading-relaxed">{cat.desc}</p>
                   <div className="mt-4 flex items-center gap-1 text-xs text-indigo-400 font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
                     Try it <ChevronRight className="w-3 h-3" />
                   </div>
@@ -435,7 +435,7 @@ export default function LandingPage() {
                     <span className="absolute -top-2 -right-2 w-7 h-7 bg-white border-2 border-indigo-400 text-indigo-600 text-xs font-black rounded-full flex items-center justify-center">{i + 1}</span>
                   </div>
                   <h3 className="text-xl font-bold text-[#1E1B4B] mb-3">{step.title}</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed">{step.desc}</p>
+                  <p className="text-sm text-slate-700 leading-relaxed">{step.desc}</p>
                 </motion.div>
               );
             })}
@@ -470,7 +470,7 @@ export default function LandingPage() {
                 style={{ boxShadow: '0 2px 8px rgba(79,70,229,0.06)' }}>
                 <div className="text-3xl mb-3">{f.icon}</div>
                 <h3 className="text-base font-bold text-[#1E1B4B] mb-2">{f.title}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">{f.desc}</p>
+                <p className="text-sm text-slate-700 leading-relaxed">{f.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -483,7 +483,7 @@ export default function LandingPage() {
           <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }} className="text-center mb-16">
             <p className="text-xs font-bold uppercase tracking-widest text-indigo-500 mb-3">Pricing</p>
             <h2 className="text-4xl md:text-5xl font-black mb-4 text-[#1E1B4B]" style={{ letterSpacing: '-0.03em' }}>Simple, honest pricing</h2>
-            <p className="text-slate-500 text-lg">No subscriptions. Credits never expire. Pay only for what you use.</p>
+            <p className="text-slate-700 text-lg">No subscriptions. Credits never expire. Pay only for what you use.</p>
           </motion.div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
@@ -499,7 +499,7 @@ export default function LandingPage() {
                     Most Popular
                   </div>
                 )}
-                <div className="text-sm text-slate-500 mb-1">{p.desc}</div>
+                <div className="text-sm text-slate-700 mb-1">{p.desc}</div>
                 <div className="text-3xl font-black text-[#1E1B4B] mb-1">₹{p.price}</div>
                 <div className="text-sm text-indigo-600 font-semibold mb-5">{p.credits.toLocaleString('en-IN')} credits</div>
                 <ul className="space-y-2 mb-6 text-xs text-slate-600">
@@ -520,7 +520,7 @@ export default function LandingPage() {
           <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
             <h3 className="text-center text-xl font-bold text-[#1E1B4B] mb-6">Why Arivarangam wins</h3>
             <div className="rounded-2xl border border-[#E0E7FF] overflow-hidden bg-white">
-              <div className="grid grid-cols-3 px-6 py-3 bg-[#F8F7FF] text-xs font-bold uppercase tracking-wider text-slate-500">
+              <div className="grid grid-cols-3 px-6 py-3 bg-[#F8F7FF] text-xs font-bold uppercase tracking-wider text-slate-700">
                 <span>Platform</span><span className="text-center">Monthly cost</span><span className="text-center">Per 1000 credits</span>
               </div>
               {COMPARE.map((c, i) => (
@@ -528,8 +528,8 @@ export default function LandingPage() {
                   <span className={`font-semibold ${c.highlight ? 'text-indigo-600' : 'text-slate-600'}`}>
                     {c.highlight && '⚡ '}{c.name}
                   </span>
-                  <span className={`text-center ${c.highlight ? 'text-[#1E1B4B] font-bold' : 'text-slate-500'}`}>{c.monthly}</span>
-                  <span className={`text-center ${c.highlight ? 'text-emerald-600 font-bold' : 'text-slate-500'}`}>{c.per1k}</span>
+                  <span className={`text-center ${c.highlight ? 'text-[#1E1B4B] font-bold' : 'text-slate-700'}`}>{c.monthly}</span>
+                  <span className={`text-center ${c.highlight ? 'text-emerald-600 font-bold' : 'text-slate-700'}`}>{c.per1k}</span>
                 </div>
               ))}
             </div>
@@ -545,7 +545,7 @@ export default function LandingPage() {
             <motion.h2 variants={fadeUp} className="text-4xl md:text-6xl font-black mb-6 text-[#1E1B4B]" style={{ letterSpacing: '-0.04em' }}>
               Ready to build?
             </motion.h2>
-            <motion.p variants={fadeUp} className="text-xl text-slate-500 mb-10">
+            <motion.p variants={fadeUp} className="text-xl text-slate-700 mb-10">
               Join thousands of Indian builders. 100 free credits on signup — no card required.
             </motion.p>
             <motion.div variants={fadeUp}>
@@ -564,13 +564,13 @@ export default function LandingPage() {
       <footer className="py-12 border-t border-[#E0E7FF] bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <Logo size={28} showText={true} />
-          <div className="flex items-center gap-6 text-sm text-slate-500">
+          <div className="flex items-center gap-6 text-sm text-slate-700">
             <Link href="/terms" className="hover:text-[#4F46E5] transition-colors">Terms</Link>
             <Link href="/privacy" className="hover:text-[#4F46E5] transition-colors">Privacy</Link>
             <Link href="/gallery" className="hover:text-[#4F46E5] transition-colors">Gallery</Link>
             <Link href="/login" className="hover:text-[#4F46E5] transition-colors">Sign in</Link>
           </div>
-          <p className="text-xs text-slate-500">© 2025 Arivarangam. Made in India 🇮🇳</p>
+          <p className="text-xs text-slate-700">© 2025 Arivarangam. Made in India 🇮🇳</p>
         </div>
       </footer>
     </div>

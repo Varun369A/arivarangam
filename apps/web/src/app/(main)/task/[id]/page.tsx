@@ -689,7 +689,7 @@ const STATUS_TEXT: Record<string, string> = {
   failed: 'Failed', cancelled: 'Cancelled',
 };
 const STATUS_COLOR: Record<string, string> = {
-  pending: 'text-slate-500', queued: 'text-slate-500', analyzing: 'text-purple-600',
+  pending: 'text-slate-700', queued: 'text-slate-700', analyzing: 'text-purple-600',
   running: 'text-blue-600', done: 'text-emerald-600', completed: 'text-emerald-600',
   failed: 'text-red-600', cancelled: 'text-slate-400',
 };
@@ -913,7 +913,7 @@ export default function TaskPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
-          <p className="text-sm text-slate-500">Loading project…</p>
+          <p className="text-sm text-slate-700">Loading project…</p>
         </div>
       </div>
     );
@@ -959,7 +959,7 @@ export default function TaskPage() {
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full">
             <h3 className="text-base font-bold text-slate-900 mb-2">Delete task?</h3>
-            <p className="text-sm text-slate-500 mb-5">This will permanently delete the task and all generated files. This cannot be undone.</p>
+            <p className="text-sm text-slate-700 mb-5">This will permanently delete the task and all generated files. This cannot be undone.</p>
             <div className="flex gap-3">
               <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 btn-secondary py-2">Cancel</button>
               <button onClick={handleDelete} className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition-colors">Delete</button>
@@ -970,7 +970,7 @@ export default function TaskPage() {
 
       {/* ─── Header ─── */}
       <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 flex-shrink-0 shadow-sm">
-        <Link href="/task" className="text-slate-400 hover:text-slate-700 transition-colors p-1 rounded-lg hover:bg-slate-100 flex-shrink-0" aria-label="Back">
+        <Link href="/task" className="text-slate-600 hover:text-slate-700 transition-colors p-1 rounded-lg hover:bg-slate-100 flex-shrink-0" aria-label="Back">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
@@ -979,7 +979,7 @@ export default function TaskPage() {
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold text-slate-800 truncate leading-tight">{taskTitle}</p>
           <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-[10px] text-slate-400 capitalize font-medium">{task?.category}</span>
+            <span className="text-[10px] text-slate-600 capitalize font-medium">{task?.category}</span>
             <span className="text-slate-300">·</span>
             <div className={cn('flex items-center gap-1 text-[11px] font-semibold', STATUS_COLOR[taskStatus])}>
               <span className={cn('w-1.5 h-1.5 rounded-full', STATUS_DOT[taskStatus])} />
@@ -1035,7 +1035,7 @@ export default function TaskPage() {
                         className="w-full flex flex-col px-4 py-3 hover:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0"
                       >
                         <span className="text-xs font-semibold text-slate-800">{opt.label}</span>
-                        <span className="text-[10px] text-slate-400">{opt.desc}</span>
+                        <span className="text-[10px] text-slate-600">{opt.desc}</span>
                       </button>
                     ))}
                   </div>
@@ -1084,7 +1084,7 @@ export default function TaskPage() {
             </button>
           )}
           <button onClick={() => setShowDeleteConfirm(true)}
-            className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+            className="p-1.5 text-slate-600 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
             title="Delete task">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -1099,7 +1099,7 @@ export default function TaskPage() {
         {/* Panel 1: File Explorer */}
         <div className="w-52 flex-shrink-0 border-r border-slate-200 bg-white flex flex-col overflow-hidden">
           <div className="px-3 pt-3 pb-2 border-b border-slate-100 flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Files</span>
+            <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Files</span>
             {streamFiles.length > 0 && (
               <span className="text-[10px] bg-indigo-100 text-indigo-600 rounded-full px-1.5 font-semibold">{streamFiles.length}</span>
             )}
@@ -1110,12 +1110,12 @@ export default function TaskPage() {
                 {isRunning ? (
                   <>
                     <div className="w-6 h-6 border-2 border-slate-200 border-t-indigo-400 rounded-full animate-spin mb-2" />
-                    <p className="text-[11px] text-slate-400">Generating…</p>
+                    <p className="text-[11px] text-slate-600">Generating…</p>
                   </>
                 ) : (
                   <>
                     <span className="text-2xl mb-2">📂</span>
-                    <p className="text-[11px] text-slate-400">No files yet</p>
+                    <p className="text-[11px] text-slate-600">No files yet</p>
                   </>
                 )}
               </div>
@@ -1136,10 +1136,10 @@ export default function TaskPage() {
         {/* Panel 2: Chat / Activity */}
         <div className="w-80 flex-shrink-0 border-r border-slate-200 bg-white flex flex-col overflow-hidden">
           <div className="px-4 pt-3 pb-2 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Activity</span>
+            <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Activity</span>
             <div className="flex items-center gap-3">
               {(task as any).creditsActuallyUsed != null && (
-                <span className="text-[10px] text-slate-400 font-medium">
+                <span className="text-[10px] text-slate-600 font-medium">
                   {(task as any).creditsActuallyUsed} cr used
                 </span>
               )}
@@ -1157,7 +1157,7 @@ export default function TaskPage() {
           {/* Chat feed */}
           <div className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
             {events.length === 0 && (
-              <div className="flex flex-col items-center gap-2 py-12 text-slate-400">
+              <div className="flex flex-col items-center gap-2 py-12 text-slate-600">
                 <div className="w-8 h-8 border-2 border-slate-200 border-t-indigo-400 rounded-full animate-spin" />
                 <p className="text-xs">Connecting…</p>
               </div>
@@ -1201,7 +1201,7 @@ export default function TaskPage() {
                   taskStatus === 'failed' ? 'Task failed' : 'Waiting…'
                 }
                 disabled={!isCompleted || followUpSubmitting}
-                className="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent disabled:opacity-50 font-medium"
+                className="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent disabled:opacity-50 font-medium"
                 onKeyDown={e => { if (e.key === 'Enter') handleFollowUp(); }}
               />
               <button
@@ -1217,7 +1217,7 @@ export default function TaskPage() {
               </button>
             </div>
             {followUpError && <p className="text-[11px] text-red-500">{followUpError}</p>}
-            <div className="flex items-center gap-3 text-[10px] text-slate-400">
+            <div className="flex items-center gap-3 text-[10px] text-slate-600">
               <span>⏱ {elapsed((task as any).startedAt, (task as any).completedAt)}</span>
               <span>·</span>
               <span>{formatDate((task as any).createdAt)}</span>

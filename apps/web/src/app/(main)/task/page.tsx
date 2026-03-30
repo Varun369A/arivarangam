@@ -20,12 +20,12 @@ function StatusBadge({ status }: { status: string }) {
     done: 'bg-green-100 text-green-700',
     completed: 'bg-green-100 text-green-700',
     failed: 'bg-red-100 text-red-700',
-    cancelled: 'bg-slate-100 text-slate-400',
+    cancelled: 'bg-slate-100 text-slate-600',
     pending: 'bg-slate-100 text-slate-600',
     analyzing: 'bg-purple-100 text-purple-700',
   }
   return (
-    <span className={cn('badge capitalize', map[status] ?? 'bg-slate-100 text-slate-500')}>
+    <span className={cn('badge capitalize', map[status] ?? 'bg-slate-100 text-slate-700')}>
       {status === 'running' && <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse mr-1" />}
       {status}
     </span>
@@ -69,14 +69,14 @@ export default function TasksPage() {
           <h1 className="text-xl font-bold text-[#1E1B4B] flex items-center gap-2">
             <Zap className="w-5 h-5 text-indigo-500" /> Tasks
           </h1>
-          <p className="text-sm text-slate-500 mt-0.5">All your AI task runs</p>
+          <p className="text-sm text-slate-700 mt-0.5">All your AI task runs</p>
         </div>
         <Link href="/dashboard" className="btn-primary text-sm">+ New task</Link>
       </div>
 
       {/* Filters */}
       <div className="flex items-center gap-2 flex-wrap">
-        <Filter className="w-4 h-4 text-slate-400" />
+        <Filter className="w-4 h-4 text-slate-600" />
         {(['', 'running', 'queued', 'done', 'failed', 'cancelled'] as StatusFilter[]).map((s) => (
           <button
             key={s}
@@ -96,17 +96,17 @@ export default function TasksPage() {
       {/* Table */}
       <div className="bg-white rounded-2xl border border-surface-border shadow-card overflow-hidden">
         {isLoading ? (
-          <div className="py-16 text-center text-sm text-slate-400 animate-pulse">Loading tasks…</div>
+          <div className="py-16 text-center text-sm text-slate-600 animate-pulse">Loading tasks…</div>
         ) : tasks.length === 0 ? (
           <div className="py-16 text-center">
             <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center text-3xl mx-auto mb-4">🚀</div>
             <p className="text-sm font-medium text-slate-700 mb-1">No tasks yet</p>
-            <p className="text-xs text-slate-400 mb-4">Go to the dashboard to run your first AI task.</p>
+            <p className="text-xs text-slate-600 mb-4">Go to the dashboard to run your first AI task.</p>
             <Link href="/dashboard" className="btn-primary text-sm">Go to dashboard</Link>
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-[2rem_1fr_6rem_6rem_7rem_5rem_2rem] gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+            <div className="grid grid-cols-[2rem_1fr_6rem_6rem_7rem_5rem_2rem] gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-700 uppercase tracking-wide">
               <span />
               <span>Prompt</span>
               <span>Category</span>
@@ -126,10 +126,10 @@ export default function TasksPage() {
                     <p className="text-sm text-slate-800 truncate font-medium">
                       {task.prompt.split('\n')[0].slice(0, 60)}
                     </p>
-                    <span className="text-xs text-slate-500 capitalize">{task.category}</span>
+                    <span className="text-xs text-slate-700 capitalize">{task.category}</span>
                     <StatusBadge status={task.status} />
-                    <span className="text-xs text-slate-400">{formatDate(task.createdAt)}</span>
-                    <span className="text-xs text-slate-500 font-mono">
+                    <span className="text-xs text-slate-600">{formatDate(task.createdAt)}</span>
+                    <span className="text-xs text-slate-700 font-mono">
                       {task.creditsActuallyUsed ?? task.creditsUsed ?? '—'}
                     </span>
                     <button
@@ -155,7 +155,7 @@ export default function TasksPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-xs text-slate-500">Page {page} of {totalPages} · {data?.total ?? 0} tasks</p>
+          <p className="text-xs text-slate-700">Page {page} of {totalPages} · {data?.total ?? 0} tasks</p>
           <div className="flex items-center gap-2">
             <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
               className="btn-secondary py-1.5 px-3 disabled:opacity-40">

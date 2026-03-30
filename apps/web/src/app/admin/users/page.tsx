@@ -75,7 +75,7 @@ function StatusBadge({ status }: { status: UserStatus }) {
   const map: Record<UserStatus, string> = {
     ACTIVE: 'bg-emerald-100 text-emerald-700',
     SUSPENDED: 'bg-red-100 text-red-700',
-    DELETED: 'bg-slate-100 text-slate-500 line-through',
+    DELETED: 'bg-slate-100 text-slate-700 line-through',
   };
   return <span className={cn('badge', map[status])}>{status}</span>;
 }
@@ -163,7 +163,7 @@ function GrantCreditsModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
         <h3 className="text-base font-semibold text-slate-900 mb-1">Grant / Deduct Credits</h3>
-        <p className="text-sm text-slate-500 mb-5">
+        <p className="text-sm text-slate-700 mb-5">
           Target: <span className="font-medium text-slate-800">{user.email}</span> — Current:{' '}
           <span className="font-semibold text-indigo-600">{formatCredits(user.credits)} cr</span>
         </p>
@@ -225,7 +225,7 @@ function UserDetailPanel({
   return (
     <div className="border-t border-slate-100 bg-slate-50 px-6 py-4">
       {isLoading ? (
-        <div className="py-4 text-center text-sm text-slate-400 animate-pulse">Loading details…</div>
+        <div className="py-4 text-center text-sm text-slate-600 animate-pulse">Loading details…</div>
       ) : error ? (
         <p className="text-xs text-red-600 py-4">{getApiError(error)}</p>
       ) : data ? (
@@ -239,7 +239,7 @@ function UserDetailPanel({
             ].map((s) => (
               <div key={s.label} className="bg-white rounded-xl border border-slate-200 p-3">
                 <p className="text-lg font-bold text-slate-900">{s.value}</p>
-                <p className="text-xs text-slate-500">{s.label}</p>
+                <p className="text-xs text-slate-700">{s.label}</p>
               </div>
             ))}
           </div>
@@ -247,20 +247,20 @@ function UserDetailPanel({
           <div>
             <h4 className="text-xs font-semibold text-slate-600 uppercase mb-2">Recent Tasks</h4>
             {data.recentTasks.length === 0 ? (
-              <p className="text-xs text-slate-400">No tasks yet</p>
+              <p className="text-xs text-slate-600">No tasks yet</p>
             ) : (
               <div className="space-y-1.5">
                 {data.recentTasks.map((t) => (
                   <div key={t.id} className="flex items-center gap-3 bg-white rounded-xl border border-slate-200 px-3 py-2">
                     <TaskStatusPill status={t.status} />
-                    <span className="text-xs text-slate-500 capitalize">{t.category}</span>
+                    <span className="text-xs text-slate-700 capitalize">{t.category}</span>
                     <span className="text-xs text-slate-700 flex-1 truncate">{t.prompt}</span>
                     {t.creditsActuallyUsed != null && (
                       <span className="text-xs text-violet-600 font-medium shrink-0">
                         {formatCredits(t.creditsActuallyUsed)} cr
                       </span>
                     )}
-                    <span className="text-xs text-slate-400 shrink-0">{formatDate(t.createdAt)}</span>
+                    <span className="text-xs text-slate-600 shrink-0">{formatDate(t.createdAt)}</span>
                   </div>
                 ))}
               </div>
@@ -349,7 +349,7 @@ export default function AdminUsersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-[#1E1B4B]">User Management</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-700 mt-0.5">
             {data?.total ?? '—'} total users
           </p>
         </div>
@@ -358,7 +358,7 @@ export default function AdminUsersPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[240px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
           <input
             type="text"
             placeholder="Search by name or email…"
@@ -392,17 +392,17 @@ export default function AdminUsersPage() {
       {/* Table */}
       <div className="bg-white rounded-2xl border border-surface-border shadow-card overflow-hidden">
         {isLoading ? (
-          <div className="py-16 text-center text-sm text-slate-400 animate-pulse">
+          <div className="py-16 text-center text-sm text-slate-600 animate-pulse">
             Loading users…
           </div>
         ) : users.length === 0 ? (
-          <div className="py-16 text-center text-sm text-slate-400">
+          <div className="py-16 text-center text-sm text-slate-600">
             No users found matching your filters.
           </div>
         ) : (
           <div>
             {/* Table header */}
-            <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1.5fr] gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+            <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1.5fr] gap-4 px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-700 uppercase tracking-wide">
               <span>User</span>
               <span>Tier</span>
               <span>Credits</span>
@@ -424,7 +424,7 @@ export default function AdminUsersPage() {
                       <UserAvatar user={user} />
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-slate-900 truncate">{user.name}</p>
-                        <p className="text-xs text-slate-400 truncate">{user.email}</p>
+                        <p className="text-xs text-slate-600 truncate">{user.email}</p>
                       </div>
                     </div>
                     <TierBadge tier={user.tier} />
@@ -432,7 +432,7 @@ export default function AdminUsersPage() {
                       {formatCredits(user.credits)}
                     </span>
                     <span className="text-sm text-slate-700">{user._count.tasks}</span>
-                    <span className="text-xs text-slate-500">{formatDate(user.createdAt)}</span>
+                    <span className="text-xs text-slate-700">{formatDate(user.createdAt)}</span>
                     <StatusBadge status={user.status} />
 
                     {/* Actions */}
@@ -482,7 +482,7 @@ export default function AdminUsersPage() {
                       {/* Expand */}
                       <button
                         onClick={() => setExpandedId(expandedId === user.id ? null : user.id)}
-                        className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                        className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-slate-600 transition-colors"
                         title="View Details"
                       >
                         {expandedId === user.id ? (
@@ -511,7 +511,7 @@ export default function AdminUsersPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-700">
             Page {page} of {totalPages} · {data?.total ?? 0} users
           </p>
           <div className="flex items-center gap-2">

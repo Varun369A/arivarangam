@@ -58,7 +58,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       </div>
 
       {/* Footer links */}
-      <div className="relative z-10 mt-8 flex items-center gap-4 text-xs text-slate-500"
+      <div className="relative z-10 mt-8 flex items-center gap-4 text-xs text-slate-700"
         style={{ animation: 'authCardIn 0.5s 0.2s cubic-bezier(0.16,1,0.3,1) both' }}>
         <Link href="/terms" className="hover:text-[#4F46E5] transition-colors font-medium">Terms</Link>
         <span className="text-slate-300">·</span>

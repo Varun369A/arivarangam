@@ -34,8 +34,8 @@
     @apply font-sans;
     background: linear-gradient(135deg, #EEF2FF 0%, #F5F0FF 50%, #EEF6FF 100%);
     background-attachment: fixed;
-    color: #374151;
-    font-weight: 450;
+    color: #111827;
+    font-weight: 500;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -53,8 +53,8 @@
   }
 
   label {
-    font-weight: 500;
-    color: #374151;
+    font-weight: 600;
+    color: #111827;
   }
 }
 
@@ -125,12 +125,12 @@
 
   .input {
     @apply w-full px-3 py-2 rounded-xl border border-[#DDD6FE] bg-white text-[#1E1B4B] text-sm font-medium
-           placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-[#4F46E5]
+           placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-[#4F46E5]
            transition-all duration-150;
   }
 
   .label {
-    @apply block text-sm font-semibold text-[#374151] mb-1.5;
+    @apply block text-sm font-semibold text-[#1E1B4B] mb-1.5;
   }
 
   .card {

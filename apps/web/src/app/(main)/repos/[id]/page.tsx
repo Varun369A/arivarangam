@@ -44,7 +44,7 @@ function tokeniseLine(line: string, lang: string): React.ReactNode[] {
 
   // Comment detection
   if (/^\s*(\/\/|#|--\s)/.test(line)) {
-    return [<span key={0} className="text-slate-400 italic">{line}</span>];
+    return [<span key={0} className="text-slate-600 italic">{line}</span>];
   }
 
   // String detection (rough)
@@ -87,7 +87,7 @@ function SyntaxHighlighter({ content, language }: { content: string; language: s
     <pre className="text-xs font-mono leading-relaxed text-slate-700 p-0 m-0">
       {lines.map((line, i) => (
         <div key={i} className="flex hover:bg-indigo-50/40 group">
-          <span className="select-none text-slate-300 text-right pr-4 pl-3 py-0.5 min-w-[2.5rem] flex-shrink-0 group-hover:text-slate-400 transition-colors">
+          <span className="select-none text-slate-300 text-right pr-4 pl-3 py-0.5 min-w-[2.5rem] flex-shrink-0 group-hover:text-slate-600 transition-colors">
             {i + 1}
           </span>
           <span className="flex-1 pr-4 py-0.5 break-all whitespace-pre-wrap">
@@ -156,10 +156,10 @@ function FileTreeNode({
         <button
           type="button"
           onClick={() => setOpen(o => !o)}
-          className="flex items-center gap-1 w-full text-left py-1 hover:bg-slate-50 rounded text-xs text-slate-500 font-medium"
+          className="flex items-center gap-1 w-full text-left py-1 hover:bg-slate-50 rounded text-xs text-slate-700 font-medium"
           style={{ paddingLeft: 8 + depth * 14 }}
         >
-          <span className="text-slate-400 w-3">{open ? '▾' : '▸'}</span>
+          <span className="text-slate-600 w-3">{open ? '▾' : '▸'}</span>
           <span>📁</span>
           <span className="truncate">{node.name}/</span>
         </button>
@@ -337,7 +337,7 @@ export default function RepoPage() {
       <div className="min-h-screen bg-surface flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
-          <p className="text-slate-500 text-sm">Loading repo...</p>
+          <p className="text-slate-700 text-sm">Loading repo...</p>
         </div>
       </div>
     );
@@ -360,7 +360,7 @@ export default function RepoPage() {
       <div className="bg-white border-b border-surface-border px-4 sm:px-6 py-3 flex items-center gap-3 flex-shrink-0">
         <Link
           href="/repos"
-          className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors flex-shrink-0"
+          className="flex items-center gap-1.5 text-sm text-slate-700 hover:text-slate-700 transition-colors flex-shrink-0"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -383,7 +383,7 @@ export default function RepoPage() {
               type="text"
               value={editDesc}
               onChange={e => setEditDesc(e.target.value)}
-              className="input py-1 text-sm text-slate-500 max-w-sm"
+              className="input py-1 text-sm text-slate-700 max-w-sm"
               placeholder="Description (optional)"
             />
             <button
@@ -407,7 +407,7 @@ export default function RepoPage() {
             <div className="flex items-center gap-2 min-w-0">
               <h1 className="font-semibold text-slate-900 text-base truncate">{repo.name}</h1>
               {repo.description && (
-                <span className="text-sm text-slate-400 truncate hidden sm:block">{repo.description}</span>
+                <span className="text-sm text-slate-600 truncate hidden sm:block">{repo.description}</span>
               )}
             </div>
           </div>
@@ -445,13 +445,13 @@ export default function RepoPage() {
         <div className="w-56 flex-shrink-0 border-r border-surface-border bg-white flex flex-col overflow-hidden">
           <div className="px-3 pt-3 pb-2 border-b border-surface-border flex-shrink-0">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Files</p>
-              <span className="text-xs text-slate-400">{currentFiles.length}</span>
+              <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Files</p>
+              <span className="text-xs text-slate-600">{currentFiles.length}</span>
             </div>
           </div>
           <div className="flex-1 overflow-y-auto py-2 px-1">
             {currentFiles.length === 0 ? (
-              <div className="text-center py-8 text-xs text-slate-400 px-3">
+              <div className="text-center py-8 text-xs text-slate-600 px-3">
                 <div className="text-2xl mb-2">📂</div>
                 No files in this repo
               </div>
@@ -482,7 +482,7 @@ export default function RepoPage() {
                   <code className="text-sm font-mono font-medium text-slate-700 truncate">
                     {selectedFile.path}
                   </code>
-                  <span className="badge bg-slate-100 text-slate-500 text-xs hidden sm:inline-flex">
+                  <span className="badge bg-slate-100 text-slate-700 text-xs hidden sm:inline-flex">
                     {selectedLanguage}
                   </span>
                 </div>
@@ -546,7 +546,7 @@ export default function RepoPage() {
               </div>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center gap-4 text-slate-400 p-8">
+            <div className="flex-1 flex flex-col items-center justify-center gap-4 text-slate-600 p-8">
               <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-3xl">
                 📄
               </div>
@@ -564,9 +564,9 @@ export default function RepoPage() {
       {/* Bottom Bar — Versions */}
       <div className="bg-white border-t border-surface-border px-4 sm:px-6 py-3 flex items-center justify-between gap-4 flex-shrink-0">
         <div className="flex items-center gap-2 flex-wrap min-w-0">
-          <span className="text-xs font-medium text-slate-500 flex-shrink-0">Versions:</span>
+          <span className="text-xs font-medium text-slate-700 flex-shrink-0">Versions:</span>
           {allVersions.length === 0 ? (
-            <span className="text-xs text-slate-400">No versions saved yet</span>
+            <span className="text-xs text-slate-600">No versions saved yet</span>
           ) : (
             allVersions.map((v: any) => (
               <button
@@ -591,7 +591,7 @@ export default function RepoPage() {
         </div>
 
         <div className="flex items-center gap-3 flex-shrink-0">
-          <span className="text-xs text-slate-400 hidden sm:block">
+          <span className="text-xs text-slate-600 hidden sm:block">
             Updated {repo.updatedAt ? formatDate(repo.updatedAt) : '—'}
           </span>
           <button

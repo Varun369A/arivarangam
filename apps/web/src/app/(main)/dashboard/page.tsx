@@ -134,9 +134,9 @@ function StatusBadge({ status }: { status: string }) {
     completed: { label: 'Done',      cls: 'bg-green-100 text-green-700' },
     done:      { label: 'Done',      cls: 'bg-green-100 text-green-700' },
     failed:    { label: 'Failed',    cls: 'bg-red-100 text-red-700' },
-    cancelled: { label: 'Cancelled', cls: 'bg-slate-100 text-slate-500' },
+    cancelled: { label: 'Cancelled', cls: 'bg-slate-100 text-slate-700' },
   };
-  const { label, cls } = map[status] ?? { label: status, cls: 'bg-slate-100 text-slate-500' };
+  const { label, cls } = map[status] ?? { label: status, cls: 'bg-slate-100 text-slate-700' };
   return (
     <span className={cn('badge', cls)}>
       {status === 'running' && (
@@ -177,7 +177,7 @@ function InfoTooltip({ text }: { text: string }) {
     <span className="relative inline-block">
       <button
         type="button"
-        className="text-slate-400 hover:text-slate-600 transition-colors align-middle"
+        className="text-slate-600 hover:text-slate-600 transition-colors align-middle"
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
         onFocus={() => setOpen(true)}
@@ -318,7 +318,7 @@ export default function DashboardPage() {
             <h1 className="text-2xl font-bold text-[#1E1B4B]">
               {user ? `Hey, ${user.name.split(' ')[0]} 👋` : 'Dashboard'}
             </h1>
-            <p className="text-slate-500 text-sm mt-0.5">What will you build today?</p>
+            <p className="text-slate-700 text-sm mt-0.5">What will you build today?</p>
           </div>
           {balance !== null && (
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
@@ -407,18 +407,18 @@ export default function DashboardPage() {
 
           {/* Estimate + submit row */}
           <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-2 text-sm text-slate-500 min-h-[22px]">
+            <div className="flex items-center gap-2 text-sm text-slate-700 min-h-[22px]">
               <AnimatePresence mode="wait">
                 {estimating ? (
                   <motion.span key="est" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    className="flex items-center gap-1.5 text-slate-400 text-sm">
+                    className="flex items-center gap-1.5 text-slate-600 text-sm">
                     <span className="inline-block w-3.5 h-3.5 border-2 border-slate-200 border-t-indigo-500 rounded-full animate-spin" />
                     Estimating...
                   </motion.span>
                 ) : estimate ? (
                   <motion.span key="show" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
                     className="flex items-center gap-1.5">
-                    <span className="text-slate-400 text-sm">Credit estimate:</span>
+                    <span className="text-slate-600 text-sm">Credit estimate:</span>
                     <span className="font-semibold text-slate-700 text-sm">
                       ~{estimate.min}–{estimate.max} credits
                     </span>
@@ -509,7 +509,7 @@ export default function DashboardPage() {
                 🚀
               </motion.div>
               <p className="font-semibold text-slate-700">Start your first project</p>
-              <p className="text-sm text-slate-400 text-center max-w-xs">
+              <p className="text-sm text-slate-600 text-center max-w-xs">
                 Describe what you want to build above and let AI agents do the work.
               </p>
             </motion.div>
@@ -551,7 +551,7 @@ export default function DashboardPage() {
               className="bg-white rounded-xl2 border-2 border-dashed border-slate-200 py-12 flex flex-col items-center gap-3">
               <div className="w-14 h-14 rounded-2xl bg-violet-50 flex items-center justify-center text-2xl">📁</div>
               <p className="font-semibold text-slate-700">No repos yet</p>
-              <p className="text-sm text-slate-400 text-center max-w-xs">
+              <p className="text-sm text-slate-600 text-center max-w-xs">
                 Complete a code task and save it as a repo for version control.
               </p>
             </motion.div>
@@ -585,7 +585,7 @@ function TaskCard({ task }: { task: any }) {
         <StatusBadge status={task.status} />
       </div>
       <p className="text-sm font-semibold text-slate-800 line-clamp-2 flex-1 leading-snug">{title}</p>
-      <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
+      <div className="flex items-center justify-between text-xs text-slate-700 font-medium">
         <span>{task.createdAt ? formatDate(task.createdAt) : '—'}</span>
         <span className="text-indigo-600 font-semibold">{credits !== '—' ? `${credits} cr` : '—'}</span>
       </div>
@@ -619,11 +619,11 @@ function RepoRow({ repo }: { repo: any }) {
       </motion.div>
       <div className="flex-1 min-w-0">
         <p className="font-medium text-slate-800 truncate">{repo.name}</p>
-        <p className="text-xs text-slate-400 truncate mt-0.5">
+        <p className="text-xs text-slate-600 truncate mt-0.5">
           {repo.description ?? 'No description'}{fileCount > 0 ? ` · ${fileCount} file${fileCount !== 1 ? 's' : ''}` : ''}
         </p>
       </div>
-      <span className="text-xs text-slate-400 whitespace-nowrap hidden sm:block">
+      <span className="text-xs text-slate-600 whitespace-nowrap hidden sm:block">
         {repo.updatedAt ? formatDate(repo.updatedAt) : ''}
       </span>
       <div className="flex gap-2 flex-shrink-0">
@@ -753,10 +753,10 @@ function TemplateGallery({ onSelect }: { onSelect: (t: Template) => void }) {
             >
               <div className="flex items-center gap-2 mb-2">
                 <motion.span className="text-xl" whileHover={{ scale: 1.2 }} transition={{ type: 'spring', stiffness: 400 }}>{tmpl.icon}</motion.span>
-                <span className="text-[10px] font-semibold text-slate-400">{tmpl.tag}</span>
+                <span className="text-[10px] font-semibold text-slate-600">{tmpl.tag}</span>
               </div>
               <p className="text-sm font-semibold text-slate-800 mb-1 group-hover:text-indigo-700 transition-colors">{tmpl.title}</p>
-              <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">{tmpl.prompt}</p>
+              <p className="text-[11px] text-slate-700 line-clamp-2 leading-relaxed">{tmpl.prompt}</p>
             </motion.button>
           ))}
         </motion.div>

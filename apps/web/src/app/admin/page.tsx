@@ -258,7 +258,7 @@ export default function AdminOverviewPage() {
             <motion.span className="inline-block w-2 h-2 rounded-full bg-emerald-500"
               animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 2, repeat: Infinity }} />
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">Auto-refresh every 30s</p>
+          <p className="text-xs text-slate-700 mt-0.5">Auto-refresh every 30s</p>
         </div>
         <div className="flex items-center gap-3">
           <motion.button
@@ -341,7 +341,7 @@ export default function AdminOverviewPage() {
           <AnimatePresence>
             <div className="divide-y divide-slate-50">
               {runningTasks.length === 0 ? (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="px-5 py-10 text-center text-sm text-slate-400">
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="px-5 py-10 text-center text-sm text-slate-600">
                   No active tasks right now
                 </motion.div>
               ) : (
@@ -363,7 +363,7 @@ export default function AdminOverviewPage() {
           {/* Model Health */}
           <div className="bg-white rounded-2xl border border-surface-border shadow-card p-5">
             <h2 className="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
-              <Cpu className="w-4 h-4 text-slate-400" />
+              <Cpu className="w-4 h-4 text-slate-600" />
               MODEL HEALTH
             </h2>
             {health ? (
@@ -381,7 +381,7 @@ export default function AdminOverviewPage() {
                     </span>
                     <div className="flex items-center gap-2">
                       {info.latencyMs != null && (
-                        <span className="text-xs text-slate-400">{info.latencyMs}ms</span>
+                        <span className="text-xs text-slate-600">{info.latencyMs}ms</span>
                       )}
                       <span
                         className={cn(
@@ -396,7 +396,7 @@ export default function AdminOverviewPage() {
                     </div>
                   </div>
                 ))}
-                <div className="pt-2 border-t border-slate-100 flex gap-4 text-xs text-slate-500">
+                <div className="pt-2 border-t border-slate-100 flex gap-4 text-xs text-slate-700">
                   <span>
                     Redis:{' '}
                     <span className={cn('font-medium', health.redis.status === 'ok' ? 'text-emerald-600' : 'text-red-600')}>
@@ -418,7 +418,7 @@ export default function AdminOverviewPage() {
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-slate-400">Loading…</p>
+              <p className="text-sm text-slate-600">Loading…</p>
             )}
           </div>
 
@@ -431,7 +431,7 @@ export default function AdminOverviewPage() {
               </Link>
             </div>
             {(securityData?.events ?? []).length === 0 ? (
-              <p className="text-xs text-slate-400 flex items-center gap-1.5">
+              <p className="text-xs text-slate-600 flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
                 No unresolved alerts
               </p>
@@ -470,7 +470,7 @@ export default function AdminOverviewPage() {
         </div>
         <div className="divide-y divide-slate-50">
           {(logsData?.logs ?? []).length === 0 ? (
-            <div className="px-5 py-6 text-sm text-center text-slate-400">
+            <div className="px-5 py-6 text-sm text-center text-slate-600">
               No recent platform logs
             </div>
           ) : (
@@ -479,11 +479,11 @@ export default function AdminOverviewPage() {
                 <LogStatusBadge approved={log.approved} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-slate-800 truncate">{log.title}</p>
-                  <p className="text-xs text-slate-500 truncate">{log.description}</p>
+                  <p className="text-xs text-slate-700 truncate">{log.description}</p>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   {log.approvedAt && (
-                    <span className="text-xs text-slate-400">{formatDateTime(log.approvedAt)}</span>
+                    <span className="text-xs text-slate-600">{formatDateTime(log.approvedAt)}</span>
                   )}
                   <Link
                     href={`/admin/platform?tab=improvements`}
@@ -581,7 +581,7 @@ function StatCard({
         {value}
       </motion.p>
       <p className="text-xs text-slate-600 mt-0.5 font-semibold">{label}</p>
-      <p className="text-xs text-slate-500">{sub}</p>
+      <p className="text-xs text-slate-700">{sub}</p>
     </motion.div>
   );
 }
@@ -604,14 +604,14 @@ function LiveTaskRow({
       className="px-5 py-3.5 flex items-center gap-4 hover:bg-indigo-50/40 transition-colors">
       <div className="flex-1 min-w-0">
         <p className="text-xs font-medium text-slate-800 truncate">{task.user.email}</p>
-        <p className="text-xs text-slate-400 mt-0.5 truncate max-w-xs">
+        <p className="text-xs text-slate-600 mt-0.5 truncate max-w-xs">
           {task.prompt.length > 70 ? task.prompt.slice(0, 70) + '…' : task.prompt}
         </p>
       </div>
       <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
-        <span className="text-xs text-slate-500 capitalize font-medium">{task.category}</span>
+        <span className="text-xs text-slate-700 capitalize font-medium">{task.category}</span>
         <TaskStatusBadge status={task.status} />
-        <span className="text-xs text-slate-400">{getRunningDuration(task.startedAt)}</span>
+        <span className="text-xs text-slate-600">{getRunningDuration(task.startedAt)}</span>
         <span className="text-xs font-medium text-violet-700">
           {formatCredits(task.creditsEstimatedMax)} cr
         </span>
