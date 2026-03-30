@@ -62,12 +62,36 @@ export class ResearchEngine {
         timestamp: new Date().toISOString(),
       });
 
+      const sources = this.extractSources(rawResults);
       const creditsUsed = 12; // Research is 10-15 credits
+
+      // Emit files so the task page can display and download them
+      await emit({
+        type: 'file_created',
+        data: { path: 'report.md', content: report, language: 'markdown' },
+        timestamp: new Date().toISOString(),
+      });
+
+      if (sources.length > 0) {
+        const sourcesContent = `# Sources\n\n${sources.map((s, i) => `${i + 1}. ${s}`).join('\n')}`;
+        await emit({
+          type: 'file_created',
+          data: { path: 'sources.md', content: sourcesContent, language: 'markdown' },
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      const readmeSummary = `# Research Report\n\n**Query:** ${task.prompt}\n\n**Search term:** ${searchQuery}\n\n**Word count:** ${report.split(/\s+/).length}\n\n**Sources found:** ${sources.length}\n`;
+      await emit({
+        type: 'file_created',
+        data: { path: 'README.md', content: readmeSummary, language: 'markdown' },
+        timestamp: new Date().toISOString(),
+      });
 
       const metadata = {
         report,
         searchQuery,
-        sources: this.extractSources(rawResults),
+        sources,
         wordCount: report.split(/\s+/).length,
       };
 

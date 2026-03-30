@@ -19,10 +19,13 @@ const CATEGORY_LABELS: Record<string, { label: string; icon: string; color: stri
   image:        { label: 'Image',        icon: '🎨', color: 'bg-orange-100 text-orange-700' },
 };
 
+// Remove voice from fallback lookup so old gallery items show a generic label
+const CATEGORY_LABELS_SAFE = (cat: string) => CATEGORY_LABELS[cat] ?? CATEGORY_LABELS.code;
+
 function GalleryCard({ task }: { task: any }) {
   const [publishing, setPublishing] = useState(false);
   const title = (task.prompt ?? '').split('\n')[0].slice(0, 80) || 'Untitled';
-  const cat = CATEGORY_LABELS[task.category] ?? CATEGORY_LABELS.code;
+  const cat = CATEGORY_LABELS_SAFE(task.category);
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col">
