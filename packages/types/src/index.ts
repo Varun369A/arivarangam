@@ -8,7 +8,7 @@ export type AIModel =
   | 'perplexity-sonar'
   | 'elevenlabs';
 
-export type TaskCategory = 'code' | 'research' | 'image' | 'voice' | 'content' | 'mobile' | 'presentation' | 'agent' | 'workflow';
+export type TaskCategory = 'code' | 'research' | 'image' | 'content' | 'mobile' | 'presentation' | 'agent' | 'workflow';
 
 export type TaskStatus =
   | 'pending'
