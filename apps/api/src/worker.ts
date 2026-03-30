@@ -55,9 +55,20 @@ async function dispatchToEngine(task: any): Promise<void> {
   const onEvent = async (event: TaskEvent) => emitEvent(task.id, event);
 
   switch (task.category) {
-    case 'code':
+    // ── Web: Three.js + GSAP + Lenis + tsParticles + Vanta + Lottie + Swiper ─
+    case 'code': {
+      const { WebEngine } = await import('./engines/WebEngine');
+      await new WebEngine().execute(task, onEvent);
+      break;
+    }
+    // ── Mobile: Expo + Reanimated + Moti + Lottie + LinearGradient ───────────
+    case 'mobile': {
+      const { MobileEngine } = await import('./engines/MobileEngine');
+      await new MobileEngine().execute(task, onEvent);
+      break;
+    }
+    // ── Code-adjacent: upgraded CodeEngine (presentations, agents, workflows) ─
     case 'content':
-    case 'mobile':
     case 'presentation':
     case 'agent':
     case 'workflow': {
