@@ -468,7 +468,7 @@ export default function DashboardPage() {
               <Link href="/settings?tab=credits" className="underline font-medium">Top up →</Link>
             </p>
           )}
-        </div>
+        </motion.div>
 
         {/* India Templates */}
         <TemplateGallery onSelect={(tmpl) => {
