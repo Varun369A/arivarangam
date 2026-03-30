@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { motion, useInView, AnimatePresence } from 'motion/react';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
 import {
   Code2, Search, Image, ArrowRight, CheckCircle2, Sparkles, Zap, Brain,
   Globe, Smartphone, Monitor, Bot, GitMerge, ChevronRight,

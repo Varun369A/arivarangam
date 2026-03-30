@@ -2,7 +2,7 @@
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
-  transpilePackages: ['@arivarangam/types', '@arivarangam/config', 'motion', 'framer-motion'],
+  transpilePackages: ['@arivarangam/types', '@arivarangam/config'],
   images: {
     domains: ['avatars.githubusercontent.com', 'oaidalleapiprodscus.blob.core.windows.net'],
   },
