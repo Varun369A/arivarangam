@@ -106,7 +106,10 @@ export function useTaskStream(taskId: string | null): UseTaskStreamReturn {
     (id: string) => {
       closeConnection()
 
-      const url = `/api/v1/stream/tasks/${id}`
+      const token = typeof document !== 'undefined'
+        ? document.cookie.split('; ').find(r => r.startsWith('accessToken='))?.split('=')[1]
+        : undefined
+      const url = `/api/v1/stream/tasks/${id}${token ? `?token=${encodeURIComponent(token)}` : ''}`
       const es = new EventSource(url, { withCredentials: true })
       esRef.current = es
 

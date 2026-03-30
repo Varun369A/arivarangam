@@ -314,6 +314,7 @@ export async function authRoutes(fastify: FastifyInstance): Promise<void> {
       return reply.code(400).send({ success: false, error: 'Verification token is required' })
     }
 
+    const config = getConfig()
     const user = await prisma.user.findFirst({ where: { emailVerifyToken: parsed.data.token } })
 
     if (!user) {
