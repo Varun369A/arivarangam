@@ -1,8 +1,7 @@
 import { prisma } from '@arivarangam/db';
 import type { TaskEvent } from '@arivarangam/types';
 import { callClaudeHaiku } from '../connectors/claude';
-import { textToSpeech, estimateAudioMinutes } from '../connectors/elevenlabs';
-import { sarvamTTS, translateText, isIndianLanguage, getLangLabel, isSarvamConfigured } from '../connectors/sarvam';
+import { sarvamTTS, translateText, getLangLabel, isSarvamConfigured, type SarvamLanguageCode } from '../connectors/sarvam';
 import { uploadFile } from '../connectors/storage';
 import { taskService } from '../services/TaskService';
 
@@ -14,51 +13,41 @@ export class VoiceEngine {
 
     await prisma.task.update({ where: { id: task.id }, data: { status: 'running' } });
 
+    if (!isSarvamConfigured()) {
+      await emit({ type: 'error', data: { message: 'Voice generation is not configured on this server.' }, timestamp: new Date().toISOString() });
+      throw new Error('SARVAM_API_KEY not set');
+    }
+
     try {
-      // Detect language from task context (stored in metadata.context or task.context)
       const taskContext = (task.metadata as any)?.context ?? task.context;
       const language = this.detectLanguage(task.prompt, taskContext);
-      const useIndianLang = isIndianLanguage(language) && isSarvamConfigured();
+      const langLabel = getLangLabel(language);
 
       await emit({
         type: 'log',
-        data: { message: useIndianLang
-          ? `Preparing speech in ${getLangLabel(language)}...`
-          : 'Preparing speech text...' },
+        data: { message: `Preparing speech in ${langLabel}...` },
         timestamp: new Date().toISOString(),
       });
 
-      // Step 1: Prepare script
-      const speechText = await this.prepareSpeechText(task.prompt, language, useIndianLang);
-      const estimatedMinutes = estimateAudioMinutes(speechText);
+      // Step 1: Generate script
+      const speechText = await this.prepareSpeechText(task.prompt, language);
+      const wordCount = speechText.split(/\s+/).length;
+      const estimatedMinutes = wordCount / 130; // ~130 wpm
 
       await emit({
         type: 'log',
-        data: { message: `Script ready (~${estimatedMinutes.toFixed(1)} min, ${speechText.split(/\s+/).length} words)` },
+        data: { message: `Script ready (~${estimatedMinutes.toFixed(1)} min, ${wordCount} words)` },
         timestamp: new Date().toISOString(),
       });
 
-      // Step 2: Generate audio
-      let audioBuffer: Buffer;
-      let audioMime = 'audio/mpeg';
+      // Step 2: Generate audio via Sarvam
+      await emit({
+        type: 'log',
+        data: { message: `Generating voice in ${langLabel}...` },
+        timestamp: new Date().toISOString(),
+      });
 
-      if (useIndianLang) {
-        await emit({
-          type: 'log',
-          data: { message: `Generating voice in ${getLangLabel(language)}...` },
-          timestamp: new Date().toISOString(),
-        });
-        audioBuffer = await this.sarvamTTSChunked(speechText, language as any);
-        audioMime = 'audio/wav';
-      } else {
-        const voiceId = this.selectVoice(task.prompt);
-        await emit({
-          type: 'log',
-          data: { message: `Converting text to speech...` },
-          timestamp: new Date().toISOString(),
-        });
-        audioBuffer = await textToSpeech(speechText, voiceId);
-      }
+      const audioBuffer = await this.sarvamTTSChunked(speechText, language as SarvamLanguageCode);
 
       await emit({
         type: 'log',
@@ -66,16 +55,15 @@ export class VoiceEngine {
         timestamp: new Date().toISOString(),
       });
 
-      // Step 3: Upload to R2
-      const ext = audioMime === 'audio/wav' ? 'wav' : 'mp3';
-      const r2Key = `tasks/${task.id}/audio.${ext}`;
-      const audioUrl = await uploadFile(r2Key, audioBuffer, audioMime);
+      // Step 3: Upload
+      const r2Key = `tasks/${task.id}/audio.wav`;
+      const audioUrl = await uploadFile(r2Key, audioBuffer, 'audio/wav');
 
       await prisma.task.update({ where: { id: task.id }, data: { previewUrl: audioUrl } });
 
       await emit({
         type: 'preview_ready',
-        data: { audioUrl, audioSize: audioBuffer.length, format: audioMime },
+        data: { audioUrl, audioSize: audioBuffer.length, format: 'audio/wav' },
         timestamp: new Date().toISOString(),
       });
 
@@ -94,10 +82,9 @@ export class VoiceEngine {
     }
   }
 
-  // ─── Sarvam TTS with chunking (500-char limit per request) ────────────────
+  // ─── Sarvam TTS with chunking (500-char limit per request) ───────────────────
 
-  private async sarvamTTSChunked(text: string, language: any): Promise<Buffer> {
-    // Split into sentences, batch into ≤500-char chunks
+  private async sarvamTTSChunked(text: string, language: SarvamLanguageCode): Promise<Buffer> {
     const sentences = text.match(/[^.!?\n]+[.!?\n]+/g) ?? [text];
     const chunks: string[] = [];
     let current = '';
@@ -116,52 +103,48 @@ export class VoiceEngine {
     for (const chunk of chunks) {
       buffers.push(await sarvamTTS(chunk, language));
     }
-
-    // Concatenate WAV buffers (simple concatenation — good enough for single-speaker)
     return Buffer.concat(buffers);
   }
 
-  // ─── Detect language from prompt / context ────────────────────────────────
+  // ─── Detect language from prompt / context ───────────────────────────────────
 
-  private detectLanguage(prompt: string, context?: string): string {
-    // Context JSON may carry { language: 'hi-IN' }
+  private detectLanguage(prompt: string, context?: string): SarvamLanguageCode {
     if (context) {
       try {
         const ctx = JSON.parse(context);
-        if (ctx.language && typeof ctx.language === 'string') return ctx.language;
+        if (ctx.language && typeof ctx.language === 'string') return ctx.language as SarvamLanguageCode;
       } catch { /* ignore */ }
     }
 
-    // Keyword detection in prompt
     const lower = prompt.toLowerCase();
-    if (lower.includes('hindi') || lower.includes('हिंदी')) return 'hi-IN';
-    if (lower.includes('tamil') || lower.includes('தமிழ்')) return 'ta-IN';
-    if (lower.includes('telugu') || lower.includes('తెలుగు')) return 'te-IN';
-    if (lower.includes('kannada') || lower.includes('ಕನ್ನಡ')) return 'kn-IN';
-    if (lower.includes('malayalam') || lower.includes('മലയാളം')) return 'ml-IN';
-    if (lower.includes('marathi') || lower.includes('मराठी')) return 'mr-IN';
-    if (lower.includes('bengali') || lower.includes('বাংলা')) return 'bn-IN';
-    if (lower.includes('gujarati') || lower.includes('ગુજરાતી')) return 'gu-IN';
-    if (lower.includes('punjabi') || lower.includes('ਪੰਜਾਬੀ')) return 'pa-IN';
-    if (lower.includes('odia') || lower.includes('ओड़िया')) return 'od-IN';
+    if (lower.includes('hindi')     || lower.includes('हिंदी'))    return 'hi-IN';
+    if (lower.includes('tamil')     || lower.includes('தமிழ்'))    return 'ta-IN';
+    if (lower.includes('telugu')    || lower.includes('తెలుగు'))   return 'te-IN';
+    if (lower.includes('kannada')   || lower.includes('ಕನ್ನಡ'))   return 'kn-IN';
+    if (lower.includes('malayalam') || lower.includes('മലയാളം'))  return 'ml-IN';
+    if (lower.includes('marathi')   || lower.includes('मराठी'))    return 'mr-IN';
+    if (lower.includes('bengali')   || lower.includes('বাংলা'))    return 'bn-IN';
+    if (lower.includes('gujarati')  || lower.includes('ગુજરાતી')) return 'gu-IN';
+    if (lower.includes('punjabi')   || lower.includes('ਪੰਜਾਬੀ'))  return 'pa-IN';
+    if (lower.includes('odia')      || lower.includes('ओड़िया'))    return 'od-IN';
 
-    return 'en'; // Default: English via ElevenLabs
+    return 'en-IN'; // Default: English via Sarvam
   }
 
-  // ─── Prepare Speech Text ──────────────────────────────────────────────────
+  // ─── Prepare Speech Text ──────────────────────────────────────────────────────
 
-  private async prepareSpeechText(prompt: string, language: string, isIndian: boolean): Promise<string> {
+  private async prepareSpeechText(prompt: string, language: SarvamLanguageCode): Promise<string> {
+    const isEnglish = language === 'en-IN';
+
+    // Already a long script — just translate if not English
     if (prompt.length > 200 && !prompt.toLowerCase().startsWith('generate') && !prompt.toLowerCase().startsWith('create')) {
-      // Already a script — just translate if needed
-      if (isIndian && isSarvamConfigured()) {
-        try {
-          return await translateText(prompt, language as any);
-        } catch { return prompt; }
+      if (!isEnglish) {
+        try { return await translateText(prompt, language); } catch { return prompt; }
       }
       return prompt;
     }
 
-    const langNote = isIndian ? ` Write in ${getLangLabel(language)}.` : '';
+    const langNote = isEnglish ? '' : ` Write in English — it will be translated to ${getLangLabel(language)}.`;
     const systemPrompt = `You are a professional voice script writer. Create a natural-sounding speech script based on the user's request.${langNote}
 Rules:
 - Write naturally spoken language
@@ -173,27 +156,12 @@ Rules:
     try {
       const script = await callClaudeHaiku(prompt, systemPrompt, 1024);
       const trimmed = script.trim();
-
-      // If script is in English but Indian language requested, translate it
-      if (isIndian && isSarvamConfigured()) {
-        try {
-          return await translateText(trimmed, language as any);
-        } catch { return trimmed; }
+      if (!isEnglish) {
+        try { return await translateText(trimmed, language); } catch { return trimmed; }
       }
       return trimmed;
     } catch {
       return prompt;
     }
-  }
-
-  // ─── Select ElevenLabs Voice ──────────────────────────────────────────────
-
-  private selectVoice(prompt: string): string {
-    const lower = prompt.toLowerCase();
-    if (lower.includes('male') || lower.includes('man') || lower.includes('deep')) return 'VR6AewLTigWG4xSOukaG';
-    if (lower.includes('child') || lower.includes('young'))                         return 'AZnzlk1XvdvUeBnXmlld';
-    if (lower.includes('british') || lower.includes('uk'))                          return 'CYw3kZ02Hs0563khs1Fj';
-    if (lower.includes('news') || lower.includes('professional'))                   return 'ErXwobaYiN019PkySvjV';
-    return '21m00Tcm4TlvDq8ikWAM'; // Rachel (default)
   }
 }
