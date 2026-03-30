@@ -22,11 +22,11 @@ export default function LegalLayout({ children }: { children: React.ReactNode })
             <Logo size={26} showText={true} />
           </Link>
           <div className="flex items-center gap-5 text-xs font-medium" style={{ color: '#6B7280' }}>
-            <Link href="/" className="hover:text-[#1E3461] transition-colors">
+            <Link href="/" className="hover:text-[#4F46E5] transition-colors">
               ← Back to home
             </Link>
-            <Link href="/terms" className="hover:text-[#1E3461] transition-colors">Terms</Link>
-            <Link href="/privacy" className="hover:text-[#1E3461] transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-[#4F46E5] transition-colors">Terms</Link>
+            <Link href="/privacy" className="hover:text-[#4F46E5] transition-colors">Privacy</Link>
           </div>
         </div>
       </header>

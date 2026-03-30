@@ -228,11 +228,11 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#05061a] text-white overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden" style={{ background: 'linear-gradient(135deg, #EEF2FF 0%, #F5F0FF 50%, #EEF6FF 100%)' }}>
 
       {/* ── Navbar ── */}
       <motion.nav
-        className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-[#05061a]/95 backdrop-blur-xl border-b border-white/5' : 'bg-transparent'}`}
+        className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-xl border-b border-[#E0E7FF] shadow-sm' : 'bg-white/70 backdrop-blur-sm border-b border-[#E0E7FF]/50'}`}
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -241,16 +241,16 @@ export default function LandingPage() {
           <Link href="/" className="flex items-center">
             <Logo size={30} showText={true} />
           </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
             {['How it works', 'Pricing', 'Why us', 'Gallery'].map((t) => (
               <Link key={t} href={t === 'Gallery' ? '/gallery' : `#${t.toLowerCase().replace(/ /g, '-')}`}
-                className="hover:text-white transition-colors flex items-center gap-1">
+                className="hover:text-[#4F46E5] transition-colors flex items-center gap-1">
                 {t === 'Gallery' && <Globe className="w-3.5 h-3.5" />}{t}
               </Link>
             ))}
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm font-medium text-slate-400 hover:text-white transition-colors">Sign in</Link>
+            <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-[#4F46E5] transition-colors">Sign in</Link>
             <Link href="/signup"
               className="text-sm font-semibold px-4 py-2 rounded-xl text-white transition-all duration-200 hover:scale-105"
               style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 0 20px rgba(99,102,241,0.4)' }}>
@@ -261,7 +261,8 @@ export default function LandingPage() {
       </motion.nav>
 
       {/* ── Hero ── */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden text-white"
+        style={{ background: 'linear-gradient(135deg, #1E1B4B 0%, #4F46E5 45%, #7C3AED 75%, #0EA5E9 100%)' }}>
         {/* Background orbs */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <motion.div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full opacity-30"
@@ -283,7 +284,7 @@ export default function LandingPage() {
           <motion.div variants={stagger} initial="hidden" animate="show">
             <motion.div variants={fadeUp}
               className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border"
-              style={{ borderColor: 'rgba(99,102,241,0.4)', color: '#a5b4fc', background: 'rgba(99,102,241,0.1)' }}>
+              style={{ borderColor: 'rgba(165,180,252,0.5)', color: '#c7d2fe', background: 'rgba(79,70,229,0.2)' }}>
               <motion.span animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>●</motion.span>
               India&apos;s Autonomous AI Platform
             </motion.div>
@@ -322,7 +323,7 @@ export default function LandingPage() {
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link href="#how-it-works"
-                className="inline-flex items-center gap-2 font-semibold px-6 py-3.5 rounded-2xl text-slate-300 border border-white/10 bg-white/5 hover:bg-white/10 transition-all">
+                className="inline-flex items-center gap-2 font-semibold px-6 py-3.5 rounded-2xl text-white border border-white/20 bg-white/10 hover:bg-white/20 transition-all">
                 See how it works
                 <ChevronRight className="w-4 h-4" />
               </Link>
@@ -352,7 +353,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Stats strip ── */}
-      <section className="py-12 border-y border-white/5 bg-white/[0.02]">
+      <section className="py-12 border-y border-[#E0E7FF] bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {STATS.map((s, i) => (
@@ -372,11 +373,11 @@ export default function LandingPage() {
       <section id="capabilities" className="py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }} className="text-center mb-16">
-            <p className="text-xs font-bold uppercase tracking-widest text-indigo-400 mb-3">Capabilities</p>
-            <h2 className="text-4xl md:text-5xl font-black mb-4" style={{ letterSpacing: '-0.03em' }}>
-              One prompt.<br /><span className="text-slate-400">Infinite outputs.</span>
+            <p className="text-xs font-bold uppercase tracking-widest text-indigo-500 mb-3">Capabilities</p>
+            <h2 className="text-4xl md:text-5xl font-black mb-4 text-[#1E1B4B]" style={{ letterSpacing: '-0.03em' }}>
+              One prompt.<br /><span className="text-[#7C3AED]">Infinite outputs.</span>
             </h2>
-            <p className="text-slate-400 text-lg max-w-xl mx-auto">Eight AI-powered categories, each using the best model for that job.</p>
+            <p className="text-slate-500 text-lg max-w-xl mx-auto">Eight AI-powered categories, each using the best model for that job.</p>
           </motion.div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -386,13 +387,14 @@ export default function LandingPage() {
                 <motion.div key={cat.label}
                   variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }} custom={i * 0.07}
                   whileHover={{ y: -6, scale: 1.02 }}
-                  className={`group relative rounded-2xl p-6 border border-white/5 bg-white/[0.03] cursor-pointer overflow-hidden transition-all duration-300 hover:border-white/10 hover:bg-white/[0.06] ring-1 ring-transparent hover:${cat.ring}`}>
+                  className={`group relative rounded-2xl p-6 border border-[#E0E7FF] bg-white cursor-pointer overflow-hidden transition-all duration-300 hover:border-[#C7D2FE] hover:shadow-lg ring-1 ring-transparent hover:${cat.ring}`}
+                  style={{ boxShadow: '0 2px 8px rgba(79,70,229,0.06)' }}>
                   {/* Hover glow */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${cat.color} opacity-0 group-hover:opacity-[0.08] transition-opacity duration-500`} />
+                  <div className={`absolute inset-0 bg-gradient-to-br ${cat.color} opacity-0 group-hover:opacity-[0.05] transition-opacity duration-500`} />
                   <div className={`${cat.bg} w-11 h-11 rounded-xl flex items-center justify-center mb-4 ring-1 ${cat.ring}`}>
                     <Icon className="w-5 h-5 text-white/80" />
                   </div>
-                  <h3 className="text-base font-bold text-white mb-2">{cat.label}</h3>
+                  <h3 className="text-base font-bold text-[#1E1B4B] mb-2">{cat.label}</h3>
                   <p className="text-xs text-slate-500 leading-relaxed">{cat.desc}</p>
                   <div className="mt-4 flex items-center gap-1 text-xs text-indigo-400 font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
                     Try it <ChevronRight className="w-3 h-3" />
@@ -405,11 +407,11 @@ export default function LandingPage() {
       </section>
 
       {/* ── How it works ── */}
-      <section id="how-it-works" className="py-28 bg-white/[0.02] border-y border-white/5">
+      <section id="how-it-works" className="py-28 bg-white border-y border-[#E0E7FF]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }} className="text-center mb-16">
-            <p className="text-xs font-bold uppercase tracking-widest text-violet-400 mb-3">How it works</p>
-            <h2 className="text-4xl md:text-5xl font-black mb-4" style={{ letterSpacing: '-0.03em' }}>From idea to shipped<br /><span className="text-slate-400">in under 60 seconds</span></h2>
+            <p className="text-xs font-bold uppercase tracking-widest text-violet-500 mb-3">How it works</p>
+            <h2 className="text-4xl md:text-5xl font-black mb-4 text-[#1E1B4B]" style={{ letterSpacing: '-0.03em' }}>From idea to shipped<br /><span className="text-[#7C3AED]">in under 60 seconds</span></h2>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6 relative">
@@ -425,14 +427,15 @@ export default function LandingPage() {
               const Icon = step.icon;
               return (
                 <motion.div key={step.num} variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }} custom={i * 0.15}
-                  className="relative flex flex-col items-center text-center p-8 rounded-2xl border border-white/5 bg-white/[0.03]">
+                  className="relative flex flex-col items-center text-center p-8 rounded-2xl border border-[#E0E7FF] bg-[#F8F7FF]"
+                  style={{ boxShadow: '0 4px 20px rgba(79,70,229,0.08)' }}>
                   <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center mb-5 relative z-10 shadow-lg`}
-                    style={{ boxShadow: `0 0 30px rgba(139,92,246,0.3)` }}>
+                    style={{ boxShadow: `0 8px 24px rgba(139,92,246,0.35)` }}>
                     <Icon className="w-8 h-8 text-white" />
-                    <span className="absolute -top-2 -right-2 w-7 h-7 bg-slate-900 border-2 border-indigo-500 text-indigo-400 text-xs font-black rounded-full flex items-center justify-center">{i + 1}</span>
+                    <span className="absolute -top-2 -right-2 w-7 h-7 bg-white border-2 border-indigo-400 text-indigo-600 text-xs font-black rounded-full flex items-center justify-center">{i + 1}</span>
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-3">{step.title}</h3>
-                  <p className="text-sm text-slate-400 leading-relaxed">{step.desc}</p>
+                  <h3 className="text-xl font-bold text-[#1E1B4B] mb-3">{step.title}</h3>
+                  <p className="text-sm text-slate-500 leading-relaxed">{step.desc}</p>
                 </motion.div>
               );
             })}
@@ -447,8 +450,8 @@ export default function LandingPage() {
             <div className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full text-sm font-bold border border-orange-500/30 bg-orange-500/10 text-orange-400">
               🇮🇳 Built for India
             </div>
-            <h2 className="text-4xl md:text-5xl font-black mb-4" style={{ letterSpacing: '-0.03em' }}>
-              Made in India.<br /><span className="text-slate-400">Built for Indian builders.</span>
+            <h2 className="text-4xl md:text-5xl font-black mb-4 text-[#1E1B4B]" style={{ letterSpacing: '-0.03em' }}>
+              Made in India.<br /><span className="text-[#7C3AED]">Built for Indian builders.</span>
             </h2>
           </motion.div>
 
@@ -462,10 +465,11 @@ export default function LandingPage() {
               { icon: '🔒', title: 'Data stays in India', desc: 'Your prompts and outputs stay secure. No data shared with third parties.' },
             ].map((f, i) => (
               <motion.div key={f.title} variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }} custom={i * 0.1}
-                whileHover={{ y: -4 }}
-                className="rounded-2xl p-6 border border-white/5 bg-white/[0.03] hover:bg-white/[0.06] hover:border-orange-500/20 transition-all">
+                whileHover={{ y: -4, boxShadow: '0 8px 24px rgba(79,70,229,0.12)' }}
+                className="rounded-2xl p-6 border border-[#E0E7FF] bg-white hover:border-orange-200 transition-all"
+                style={{ boxShadow: '0 2px 8px rgba(79,70,229,0.06)' }}>
                 <div className="text-3xl mb-3">{f.icon}</div>
-                <h3 className="text-base font-bold text-white mb-2">{f.title}</h3>
+                <h3 className="text-base font-bold text-[#1E1B4B] mb-2">{f.title}</h3>
                 <p className="text-sm text-slate-500 leading-relaxed">{f.desc}</p>
               </motion.div>
             ))}
@@ -474,12 +478,12 @@ export default function LandingPage() {
       </section>
 
       {/* ── Pricing ── */}
-      <section id="pricing" className="py-28 bg-white/[0.02] border-y border-white/5">
+      <section id="pricing" className="py-28 bg-white border-y border-[#E0E7FF]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }} className="text-center mb-16">
-            <p className="text-xs font-bold uppercase tracking-widest text-indigo-400 mb-3">Pricing</p>
-            <h2 className="text-4xl md:text-5xl font-black mb-4" style={{ letterSpacing: '-0.03em' }}>Simple, honest pricing</h2>
-            <p className="text-slate-400 text-lg">No subscriptions. Credits never expire. Pay only for what you use.</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-indigo-500 mb-3">Pricing</p>
+            <h2 className="text-4xl md:text-5xl font-black mb-4 text-[#1E1B4B]" style={{ letterSpacing: '-0.03em' }}>Simple, honest pricing</h2>
+            <p className="text-slate-500 text-lg">No subscriptions. Credits never expire. Pay only for what you use.</p>
           </motion.div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
@@ -487,25 +491,25 @@ export default function LandingPage() {
               <motion.div key={p.name}
                 variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }} custom={i * 0.1}
                 whileHover={{ y: -6, scale: 1.02 }}
-                className={`relative rounded-2xl p-6 border transition-all ${p.popular ? 'border-indigo-500/60 bg-indigo-500/5' : 'border-white/5 bg-white/[0.03]'}`}
-                style={p.popular ? { boxShadow: '0 0 40px rgba(99,102,241,0.15)' } : {}}>
+                className={`relative rounded-2xl p-6 border transition-all ${p.popular ? 'border-indigo-400' : 'border-[#E0E7FF]'}`}
+                style={p.popular ? { background: 'linear-gradient(135deg, #F0F4FF, #F5F0FF)', boxShadow: '0 8px 32px rgba(79,70,229,0.15)' } : { background: '#FFFFFF', boxShadow: '0 2px 8px rgba(79,70,229,0.06)' }}>
                 {p.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-bold text-white"
-                    style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
+                    style={{ background: 'linear-gradient(135deg, #4F46E5, #7C3AED)', boxShadow: '0 2px 8px rgba(79,70,229,0.4)' }}>
                     Most Popular
                   </div>
                 )}
                 <div className="text-sm text-slate-500 mb-1">{p.desc}</div>
-                <div className="text-3xl font-black text-white mb-1">₹{p.price}</div>
-                <div className="text-sm text-indigo-400 font-semibold mb-5">{p.credits.toLocaleString('en-IN')} credits</div>
-                <ul className="space-y-2 mb-6 text-xs text-slate-400">
+                <div className="text-3xl font-black text-[#1E1B4B] mb-1">₹{p.price}</div>
+                <div className="text-sm text-indigo-600 font-semibold mb-5">{p.credits.toLocaleString('en-IN')} credits</div>
+                <ul className="space-y-2 mb-6 text-xs text-slate-600">
                   {['Credits never expire', 'All 8 AI categories', 'Download outputs', 'Community support'].map(f => (
                     <li key={f} className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />{f}</li>
                   ))}
                 </ul>
                 <Link href="/signup"
-                  className={`block text-center text-sm font-bold py-2.5 rounded-xl transition-all hover:scale-105 ${p.popular ? 'text-white' : 'text-slate-300 bg-white/5 hover:bg-white/10'}`}
-                  style={p.popular ? { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 0 20px rgba(99,102,241,0.3)' } : {}}>
+                  className={`block text-center text-sm font-bold py-2.5 rounded-xl transition-all hover:scale-105 ${p.popular ? 'text-white' : 'text-[#4F46E5] border border-[#C7D2FE] hover:bg-[#EEF2FF]'}`}
+                  style={p.popular ? { background: 'linear-gradient(135deg, #4F46E5, #7C3AED)', boxShadow: '0 4px 15px rgba(79,70,229,0.3)' } : { background: '#F5F0FF' }}>
                   Get started →
                 </Link>
               </motion.div>
@@ -514,18 +518,18 @@ export default function LandingPage() {
 
           {/* Comparison table */}
           <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{ once: true }}>
-            <h3 className="text-center text-xl font-bold text-white mb-6">Why Arivarangam wins</h3>
-            <div className="rounded-2xl border border-white/5 overflow-hidden">
-              <div className="grid grid-cols-3 px-6 py-3 bg-white/5 text-xs font-bold uppercase tracking-wider text-slate-500">
+            <h3 className="text-center text-xl font-bold text-[#1E1B4B] mb-6">Why Arivarangam wins</h3>
+            <div className="rounded-2xl border border-[#E0E7FF] overflow-hidden bg-white">
+              <div className="grid grid-cols-3 px-6 py-3 bg-[#F8F7FF] text-xs font-bold uppercase tracking-wider text-slate-500">
                 <span>Platform</span><span className="text-center">Monthly cost</span><span className="text-center">Per 1000 credits</span>
               </div>
               {COMPARE.map((c, i) => (
-                <div key={c.name} className={`grid grid-cols-3 px-6 py-4 text-sm border-t border-white/5 ${c.highlight ? 'bg-indigo-500/10' : ''}`}>
-                  <span className={`font-semibold ${c.highlight ? 'text-indigo-400' : 'text-slate-300'}`}>
+                <div key={c.name} className={`grid grid-cols-3 px-6 py-4 text-sm border-t border-[#E0E7FF] ${c.highlight ? 'bg-[#EEF2FF]' : ''}`}>
+                  <span className={`font-semibold ${c.highlight ? 'text-indigo-600' : 'text-slate-600'}`}>
                     {c.highlight && '⚡ '}{c.name}
                   </span>
-                  <span className={`text-center ${c.highlight ? 'text-white font-bold' : 'text-slate-400'}`}>{c.monthly}</span>
-                  <span className={`text-center ${c.highlight ? 'text-emerald-400 font-bold' : 'text-slate-400'}`}>{c.per1k}</span>
+                  <span className={`text-center ${c.highlight ? 'text-[#1E1B4B] font-bold' : 'text-slate-500'}`}>{c.monthly}</span>
+                  <span className={`text-center ${c.highlight ? 'text-emerald-600 font-bold' : 'text-slate-500'}`}>{c.per1k}</span>
                 </div>
               ))}
             </div>
@@ -538,10 +542,10 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}>
             <motion.div variants={fadeUp} className="text-6xl mb-6">🚀</motion.div>
-            <motion.h2 variants={fadeUp} className="text-4xl md:text-6xl font-black mb-6" style={{ letterSpacing: '-0.04em' }}>
+            <motion.h2 variants={fadeUp} className="text-4xl md:text-6xl font-black mb-6 text-[#1E1B4B]" style={{ letterSpacing: '-0.04em' }}>
               Ready to build?
             </motion.h2>
-            <motion.p variants={fadeUp} className="text-xl text-slate-400 mb-10">
+            <motion.p variants={fadeUp} className="text-xl text-slate-500 mb-10">
               Join thousands of Indian builders. 100 free credits on signup — no card required.
             </motion.p>
             <motion.div variants={fadeUp}>
@@ -557,16 +561,16 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="py-12 border-t border-white/5">
+      <footer className="py-12 border-t border-[#E0E7FF] bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <Logo size={28} showText={true} />
           <div className="flex items-center gap-6 text-sm text-slate-500">
-            <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
-            <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
-            <Link href="/gallery" className="hover:text-white transition-colors">Gallery</Link>
-            <Link href="/login" className="hover:text-white transition-colors">Sign in</Link>
+            <Link href="/terms" className="hover:text-[#4F46E5] transition-colors">Terms</Link>
+            <Link href="/privacy" className="hover:text-[#4F46E5] transition-colors">Privacy</Link>
+            <Link href="/gallery" className="hover:text-[#4F46E5] transition-colors">Gallery</Link>
+            <Link href="/login" className="hover:text-[#4F46E5] transition-colors">Sign in</Link>
           </div>
-          <p className="text-xs text-slate-600">© 2025 Arivarangam. Made in India 🇮🇳</p>
+          <p className="text-xs text-slate-500">© 2025 Arivarangam. Made in India 🇮🇳</p>
         </div>
       </footer>
     </div>

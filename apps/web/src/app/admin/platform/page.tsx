@@ -261,8 +261,8 @@ export default function AdminPlatformPage() {
     <div className="space-y-5">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-white">Platform Self-Improvement</h1>
-        <p className="text-xs text-slate-400 mt-0.5">Monitor AI models, review fixes, track performance</p>
+        <h1 className="text-xl font-bold text-[#1E1B4B]">Platform Self-Improvement</h1>
+        <p className="text-xs text-slate-500 mt-0.5">Monitor AI models, review fixes, track performance</p>
       </div>
 
       {/* Tabs */}

@@ -1027,8 +1027,8 @@ function SettingsContent() {
     <div className="max-w-5xl mx-auto">
       {/* Page header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-extrabold text-white">Settings</h1>
-        <p className="text-slate-400 mt-1">Manage your account, security, and billing preferences.</p>
+        <h1 className="text-2xl font-extrabold text-[#1E1B4B]">Settings</h1>
+        <p className="text-slate-500 mt-1">Manage your account, security, and billing preferences.</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
@@ -1042,11 +1042,11 @@ function SettingsContent() {
                 className={cn(
                   'flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 text-left',
                   activeTab === id
-                    ? 'bg-indigo-500/20 text-indigo-200 shadow-sm border border-indigo-400/30'
-                    : 'text-slate-300 hover:bg-white/10 hover:text-white',
+                    ? 'bg-[#EEF2FF] text-[#4F46E5] shadow-sm border border-[#C7D2FE]'
+                    : 'text-slate-600 hover:bg-[#F5F0FF] hover:text-[#4F46E5]',
                 )}
               >
-                <Icon className={cn('w-4 h-4', activeTab === id ? 'text-indigo-400' : 'text-slate-500')} />
+                <Icon className={cn('w-4 h-4', activeTab === id ? 'text-[#4F46E5]' : 'text-slate-400')} />
                 {label}
               </button>
             ))}
