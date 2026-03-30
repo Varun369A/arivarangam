@@ -89,7 +89,7 @@ export class CodeEngine {
         }
       }
 
-      const creditsUsed = Math.min(60, Math.max(20, 15 + fixedFiles.length * 3));
+      const creditsUsed = Math.min(200, Math.max(80, 50 + fixedFiles.length * 12));
       const metadata = { files: fixedFiles, techStack: plan.techStack, fileCount: fixedFiles.length };
 
       await taskService.completeTask(task.id, creditsUsed, metadata);
@@ -255,7 +255,7 @@ ${existing?.content ?? '(new file)'}`;
         });
       }
 
-      const creditsUsed = Math.min(30, Math.max(10, 8 + totalChanges * 2));
+      const creditsUsed = Math.min(100, Math.max(40, 30 + totalChanges * 8));
       const metadata = { files: updatedFiles, techStack: plan.techStack, fileCount: updatedFiles.length };
 
       await taskService.completeTask(task.id, creditsUsed, metadata);

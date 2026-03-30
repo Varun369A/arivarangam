@@ -117,7 +117,7 @@ export class MobileEngine {
         }
       }
 
-      const creditsUsed = Math.min(80, Math.max(25, 20 + fixedFiles.length * 3));
+      const creditsUsed = Math.min(220, Math.max(100, 60 + fixedFiles.length * 14));
       await taskService.completeTask(task.id, creditsUsed, {
         files: fixedFiles, techStack: plan.techStack, fileCount: fixedFiles.length,
       });

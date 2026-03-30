@@ -145,7 +145,7 @@ export class WebEngine {
         }
       }
 
-      const creditsUsed = Math.min(80, Math.max(25, 20 + fixedFiles.length * 4));
+      const creditsUsed = Math.min(200, Math.max(80, 50 + fixedFiles.length * 12));
       await taskService.completeTask(task.id, creditsUsed, {
         files: fixedFiles, techStack: plan.techStack, fileCount: fixedFiles.length,
       });

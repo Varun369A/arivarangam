@@ -63,7 +63,7 @@ export class ResearchEngine {
       });
 
       const sources = this.extractSources(rawResults);
-      const creditsUsed = 12; // Research is 10-15 credits
+      const creditsUsed = 60; // Research is 50-80 credits (web search + LLM synthesis)
 
       // Emit files so the task page can display and download them
       await emit({

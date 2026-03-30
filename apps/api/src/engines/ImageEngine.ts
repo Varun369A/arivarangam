@@ -67,7 +67,7 @@ export class ImageEngine {
         timestamp: new Date().toISOString(),
       });
 
-      const creditsUsed = 25; // Fixed for image generation
+      const creditsUsed = 80; // Fixed for image generation (DALL-E 3 HD + platform margin)
 
       const metadata = {
         imageUrl,

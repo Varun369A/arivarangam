@@ -67,7 +67,7 @@ export class VoiceEngine {
         timestamp: new Date().toISOString(),
       });
 
-      const creditsUsed = Math.max(8, Math.ceil(estimatedMinutes * 8));
+      const creditsUsed = Math.max(30, Math.ceil(estimatedMinutes * 30));
       const metadata = { speechText, language, audioSizeBytes: audioBuffer.length, estimatedMinutes, audioUrl };
       await taskService.completeTask(task.id, creditsUsed, metadata);
 

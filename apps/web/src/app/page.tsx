@@ -291,7 +291,7 @@ export default function LandingPage() {
 
             <motion.h1 variants={fadeUp}
               className="mb-6 font-black leading-[1.05]"
-              style={{ fontSize: 'clamp(42px, 6vw, 72px)', letterSpacing: '-0.04em' }}>
+              style={{ fontSize: 'clamp(42px, 6vw, 72px)', letterSpacing: '-0.04em', color: 'white' }}>
               Build anything.<br />
               <span className="bg-clip-text text-transparent"
                 style={{ backgroundImage: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)' }}>
@@ -391,8 +391,8 @@ export default function LandingPage() {
                   style={{ boxShadow: '0 2px 8px rgba(79,70,229,0.06)' }}>
                   {/* Hover glow */}
                   <div className={`absolute inset-0 bg-gradient-to-br ${cat.color} opacity-0 group-hover:opacity-[0.05] transition-opacity duration-500`} />
-                  <div className={`${cat.bg} w-11 h-11 rounded-xl flex items-center justify-center mb-4 ring-1 ${cat.ring}`}>
-                    <Icon className="w-5 h-5 text-white/80" />
+                  <div className={`bg-gradient-to-br ${cat.color} w-12 h-12 rounded-xl flex items-center justify-center mb-4 shadow-md`}>
+                    <Icon className="w-5 h-5 text-white" />
                   </div>
                   <h3 className="text-base font-bold text-[#1E1B4B] mb-2">{cat.label}</h3>
                   <p className="text-xs text-slate-700 leading-relaxed">{cat.desc}</p>

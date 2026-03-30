@@ -45,7 +45,7 @@ export function Logo({
       {showText && (
         <span
           className={`font-bold text-lg tracking-tight leading-none ${
-            inverted ? 'text-[#0A0D14]' : 'text-white'
+            inverted ? 'text-white' : 'text-[#1E1B4B]'
           }`}
         >
           arivarangam

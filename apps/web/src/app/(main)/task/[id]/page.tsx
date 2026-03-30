@@ -939,14 +939,14 @@ export default function TaskPage() {
   const selectedFile = streamFiles.find(f => f.path === selectedFilePath) ?? null;
 
   return (
-    <div className="h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden bg-slate-50" style={{ fontFamily: 'var(--font-inter)' }}>
+    <div className="h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden" style={{ fontFamily: 'var(--font-inter)', background: 'linear-gradient(135deg, #EEF2FF 0%, #F5F0FF 100%)' }}>
 
       {/* Deploy error banner */}
       {deployError && (
         <div className="fixed bottom-4 right-4 z-50 max-w-sm bg-red-50 border border-red-200 rounded-xl shadow-lg p-4 flex items-start gap-3">
           <span className="text-red-500 mt-0.5">✗</span>
           <div className="flex-1">
-            <p className="text-xs font-semibold text-red-800">Deploy failed</p>
+            <p className="text-xs font-bold text-red-800">Deploy failed</p>
             <p className="text-xs text-red-600 mt-0.5">{deployError}</p>
             <a href="/settings" className="text-xs text-indigo-600 underline mt-1 block">Add API keys in Settings →</a>
           </div>
@@ -957,94 +957,82 @@ export default function TaskPage() {
       {/* Delete confirm dialog */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full">
-            <h3 className="text-base font-bold text-slate-900 mb-2">Delete task?</h3>
-            <p className="text-sm text-slate-700 mb-5">This will permanently delete the task and all generated files. This cannot be undone.</p>
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full border border-[#E0E7FF]">
+            <h3 className="text-base font-bold text-[#1E1B4B] mb-2">Delete task?</h3>
+            <p className="text-sm text-slate-600 mb-5">This will permanently delete the task and all generated files. This cannot be undone.</p>
             <div className="flex gap-3">
               <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 btn-secondary py-2">Cancel</button>
-              <button onClick={handleDelete} className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition-colors">Delete</button>
+              <button onClick={handleDelete} className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-xl transition-colors">Delete</button>
             </div>
           </div>
         </div>
       )}
 
       {/* ─── Header ─── */}
-      <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 flex-shrink-0 shadow-sm">
-        <Link href="/task" className="text-slate-600 hover:text-slate-700 transition-colors p-1 rounded-lg hover:bg-slate-100 flex-shrink-0" aria-label="Back">
+      <header className="bg-white border-b border-[#E0E7FF] px-5 py-3.5 flex items-center gap-4 flex-shrink-0" style={{ boxShadow: '0 1px 8px rgba(79,70,229,0.06)' }}>
+        <Link href="/task" className="text-slate-600 hover:text-[#4F46E5] transition-colors p-1.5 rounded-lg hover:bg-[#EEF2FF] flex-shrink-0" aria-label="Back">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
         </Link>
-
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-slate-800 truncate leading-tight">{taskTitle}</p>
+          <p className="text-sm font-bold text-[#1E1B4B] truncate">{taskTitle}</p>
           <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-[10px] text-slate-600 capitalize font-medium">{task?.category}</span>
+            <span className="text-[11px] font-semibold text-indigo-600 capitalize bg-[#EEF2FF] px-1.5 py-0.5 rounded-md">{task?.category}</span>
             <span className="text-slate-300">·</span>
-            <div className={cn('flex items-center gap-1 text-[11px] font-semibold', STATUS_COLOR[taskStatus])}>
+            <div className={cn('flex items-center gap-1 text-[11px] font-bold', STATUS_COLOR[taskStatus])}>
               <span className={cn('w-1.5 h-1.5 rounded-full', STATUS_DOT[taskStatus])} />
               {STATUS_TEXT[taskStatus] ?? taskStatus}
             </div>
             {isConnected && (
               <>
                 <span className="text-slate-300">·</span>
-                <span className="text-[10px] text-blue-600 font-medium flex items-center gap-1">
-                  <span className="w-1 h-1 bg-blue-500 rounded-full animate-pulse" />Live
+                <span className="text-[11px] text-blue-600 font-bold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />Live
                 </span>
               </>
             )}
           </div>
         </div>
-
         <div className="flex items-center gap-2 flex-shrink-0">
           {isRunning && (
             <button onClick={handleCancelTask} disabled={cancelling}
-              className="px-3 py-1.5 text-xs font-semibold border border-red-200 text-red-600 hover:bg-red-50 rounded-xl transition-colors disabled:opacity-50">
-              {cancelling ? '…' : 'Cancel'}
+              className="px-3 py-1.5 text-xs font-bold border border-red-200 text-red-600 hover:bg-red-50 rounded-xl transition-colors disabled:opacity-50">
+              {cancelling ? '…' : 'Stop'}
             </button>
           )}
           {isCompleted && streamFiles.length > 0 && (
             <>
-              {/* Deploy dropdown */}
               <div className="relative">
-                <button
-                  onClick={() => setShowDeployMenu(m => !m)}
-                  disabled={!!deploying}
-                  className="px-3 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-colors flex items-center gap-1.5 disabled:opacity-60"
-                >
+                <button onClick={() => setShowDeployMenu(m => !m)} disabled={!!deploying}
+                  className="px-3 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-colors flex items-center gap-1.5 disabled:opacity-60">
                   {deploying ? (
                     <><span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Deploying…</>
-                  ) : (
-                    <>🚀 Deploy</>
-                  )}
+                  ) : <>🚀 Deploy</>}
                 </button>
                 {showDeployMenu && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowDeployMenu(false)} />
-                    <div className="absolute right-0 top-full mt-1 w-52 bg-white rounded-xl shadow-lg border border-slate-200 z-50 overflow-hidden">
-                    {[
-                      { id: 'vercel', label: '▲ Vercel', desc: 'Web apps (free tier)', cats: ['code', 'presentation'] },
-                      { id: 'github', label: '🐙 GitHub', desc: 'Push to repo', cats: ['code', 'mobile', 'agent', 'workflow', 'research'] },
-                      { id: 'railway', label: '🚂 Railway', desc: 'Node/Python backend', cats: ['agent', 'code'] },
-                      { id: 'cloudflare', label: '🌐 Cloudflare', desc: 'Edge Workers', cats: ['agent', 'workflow'] },
-                    ].map(opt => (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        onClick={() => handleDeploy(opt.id)}
-                        className="w-full flex flex-col px-4 py-3 hover:bg-slate-50 transition-colors text-left border-b border-slate-100 last:border-0"
-                      >
-                        <span className="text-xs font-semibold text-slate-800">{opt.label}</span>
-                        <span className="text-[10px] text-slate-600">{opt.desc}</span>
-                      </button>
-                    ))}
-                  </div>
+                    <div className="absolute right-0 top-full mt-1 w-52 bg-white rounded-xl shadow-lg border border-[#E0E7FF] z-50 overflow-hidden">
+                      {[
+                        { id: 'vercel', label: '▲ Vercel', desc: 'Web apps (free tier)' },
+                        { id: 'github', label: '🐙 GitHub', desc: 'Push to repo' },
+                        { id: 'railway', label: '🚂 Railway', desc: 'Node/Python backend' },
+                        { id: 'cloudflare', label: '🌐 Cloudflare', desc: 'Edge Workers' },
+                      ].map(opt => (
+                        <button key={opt.id} type="button" onClick={() => handleDeploy(opt.id)}
+                          className="w-full flex flex-col px-4 py-3 hover:bg-[#F5F0FF] transition-colors text-left border-b border-[#F0EDFF] last:border-0">
+                          <span className="text-xs font-bold text-[#1E1B4B]">{opt.label}</span>
+                          <span className="text-[10px] text-slate-600">{opt.desc}</span>
+                        </button>
+                      ))}
+                    </div>
                   </>
                 )}
               </div>
               {deployResult && (
                 <a href={deployResult.url} target="_blank" rel="noreferrer"
-                  className="px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 rounded-xl border border-emerald-200 flex items-center gap-1">
+                  className="px-3 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 rounded-xl border border-emerald-200 flex items-center gap-1">
                   ✓ {deployResult.label} ↗
                 </a>
               )}
@@ -1052,40 +1040,35 @@ export default function TaskPage() {
           )}
           {isCodeTask && isCompleted && !savedRepo && streamFiles.length > 0 && (
             <button onClick={handleSaveRepo}
-              className="px-3 py-1.5 text-xs font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-xl transition-colors border border-indigo-200">
+              className="px-3 py-1.5 text-xs font-bold bg-[#EEF2FF] text-[#4F46E5] hover:bg-[#E0E7FF] rounded-xl transition-colors border border-[#C7D2FE]">
               💾 Save
             </button>
           )}
           {savedRepo && (
             <Link href={`/repos/${savedRepo.id}`}
-              className="px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 rounded-xl border border-emerald-200">
+              className="px-3 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 rounded-xl border border-emerald-200">
               ✓ Saved
             </Link>
           )}
           {isCompleted && !isPublished && (
-            <button
-              onClick={handlePublishToGallery}
-              disabled={publishing}
-              className="px-3 py-1.5 text-xs font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-xl transition-colors border border-violet-200 disabled:opacity-50"
-              title="Publish to public gallery"
-            >
+            <button onClick={handlePublishToGallery} disabled={publishing}
+              className="px-3 py-1.5 text-xs font-bold text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-xl transition-colors border border-violet-200 disabled:opacity-50">
               {publishing ? '…' : '🌐 Publish'}
             </button>
           )}
           {isPublished && (
-            <Link href="/gallery" className="px-3 py-1.5 text-xs font-semibold text-violet-700 bg-violet-50 rounded-xl border border-violet-200">
+            <Link href="/gallery" className="px-3 py-1.5 text-xs font-bold text-violet-700 bg-violet-50 rounded-xl border border-violet-200">
               ✓ In Gallery
             </Link>
           )}
           {streamFiles.length > 0 && (
             <button onClick={handleDownload}
-              className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors border border-slate-200">
+              className="px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-[#F5F0FF] rounded-xl transition-colors border border-[#E0E7FF]">
               ↓ Export
             </button>
           )}
           <button onClick={() => setShowDeleteConfirm(true)}
-            className="p-1.5 text-slate-600 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-            title="Delete task">
+            className="p-1.5 text-slate-600 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete task">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
@@ -1093,73 +1076,42 @@ export default function TaskPage() {
         </div>
       </header>
 
-      {/* ─── Main 3-panel area ─── */}
+      {/* ─── 2-Panel Main Area ─── */}
       <div className="flex-1 flex overflow-hidden">
 
-        {/* Panel 1: File Explorer */}
-        <div className="w-52 flex-shrink-0 border-r border-slate-200 bg-white flex flex-col overflow-hidden">
-          <div className="px-3 pt-3 pb-2 border-b border-slate-100 flex items-center justify-between">
-            <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Files</span>
-            {streamFiles.length > 0 && (
-              <span className="text-[10px] bg-indigo-100 text-indigo-600 rounded-full px-1.5 font-semibold">{streamFiles.length}</span>
-            )}
-          </div>
-          <div className="flex-1 overflow-y-auto py-1.5 px-1">
-            {streamFiles.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-                {isRunning ? (
-                  <>
-                    <div className="w-6 h-6 border-2 border-slate-200 border-t-indigo-400 rounded-full animate-spin mb-2" />
-                    <p className="text-[11px] text-slate-600">Generating…</p>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-2xl mb-2">📂</span>
-                    <p className="text-[11px] text-slate-600">No files yet</p>
-                  </>
-                )}
-              </div>
-            ) : (
-              treeNodes.map(node => (
-                <FileTreeNode
-                  key={node.path}
-                  node={node}
-                  depth={0}
-                  selectedPath={selectedFilePath}
-                  onSelect={(p) => { setSelectedFilePath(p); setRightTab('code'); }}
-                />
-              ))
-            )}
-          </div>
-        </div>
+        {/* ── LEFT: Activity / Chat Panel (420px) ── */}
+        <div className="w-[420px] flex-shrink-0 bg-white border-r border-[#E0E7FF] flex flex-col overflow-hidden">
 
-        {/* Panel 2: Chat / Activity */}
-        <div className="w-80 flex-shrink-0 border-r border-slate-200 bg-white flex flex-col overflow-hidden">
-          <div className="px-4 pt-3 pb-2 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
-            <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">Activity</span>
-            <div className="flex items-center gap-3">
+          {/* Task prompt card */}
+          <div className="px-5 py-4 border-b border-[#E0E7FF] flex-shrink-0" style={{ background: 'linear-gradient(135deg, #F8F7FF, #EEF2FF)' }}>
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">Task Prompt</p>
               {(task as any).creditsActuallyUsed != null && (
-                <span className="text-[10px] text-slate-600 font-medium">
+                <span className="text-[10px] bg-white text-indigo-600 border border-[#C7D2FE] rounded-full px-2 py-0.5 font-bold flex-shrink-0 shadow-sm">
                   {(task as any).creditsActuallyUsed} cr used
                 </span>
               )}
-              {isRunning && (
-                <div className="flex gap-1">
-                  {[0, 150, 300].map(d => (
-                    <span key={d} className="w-1 h-1 bg-blue-400 rounded-full animate-bounce"
-                      style={{ animationDelay: `${d}ms` }} />
-                  ))}
-                </div>
+            </div>
+            <p className="text-sm font-semibold text-[#1E1B4B] leading-relaxed line-clamp-4">{(task as any)?.prompt ?? taskTitle}</p>
+            <div className="flex items-center gap-3 mt-3 text-xs text-slate-600 font-medium">
+              <span>⏱ {elapsed((task as any).startedAt, (task as any).completedAt)}</span>
+              <span className="text-slate-300">·</span>
+              <span>{formatDate((task as any).createdAt)}</span>
+              {streamFiles.length > 0 && (
+                <>
+                  <span className="text-slate-300">·</span>
+                  <span className="text-indigo-600 font-bold">{streamFiles.length} files</span>
+                </>
               )}
             </div>
           </div>
 
-          {/* Chat feed */}
-          <div className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
+          {/* Activity feed */}
+          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-1">
             {events.length === 0 && (
-              <div className="flex flex-col items-center gap-2 py-12 text-slate-600">
-                <div className="w-8 h-8 border-2 border-slate-200 border-t-indigo-400 rounded-full animate-spin" />
-                <p className="text-xs">Connecting…</p>
+              <div className="flex flex-col items-center gap-3 py-16 text-slate-600">
+                <div className="w-9 h-9 rounded-full animate-spin" style={{ border: '3px solid #E0E7FF', borderTopColor: '#818cf8' }} />
+                <p className="text-sm font-semibold">Connecting to task…</p>
               </div>
             )}
             {events.map((evt, i) => (
@@ -1169,92 +1121,123 @@ export default function TaskPage() {
           </div>
 
           {/* Follow-up input */}
-          <div className="border-t border-slate-100 p-3 flex-shrink-0 space-y-2">
-            {/* Fix mode quick buttons */}
+          <div className="border-t border-[#E0E7FF] p-4 flex-shrink-0" style={{ background: '#FAFAFE' }}>
             {isCompleted && (
-              <div className="flex gap-1.5 flex-wrap">
+              <div className="flex gap-1.5 flex-wrap mb-3">
                 {[
                   { label: '🔧 Fix errors', prompt: 'Fix all errors, bugs, and issues in the code. Make sure everything works correctly.' },
-                  { label: '📱 Make responsive', prompt: 'Make the UI fully responsive for mobile, tablet, and desktop screens.' },
+                  { label: '📱 Responsive', prompt: 'Make the UI fully responsive for mobile, tablet, and desktop screens.' },
                   { label: '🎨 Improve UI', prompt: 'Improve the visual design — make it more polished, modern, and professional.' },
-                  { label: '📝 Add comments', prompt: 'Add clear comments and documentation to all code files.' },
+                  { label: '📝 Add docs', prompt: 'Add clear comments and documentation to all code files.' },
                 ].map(q => (
-                  <button
-                    key={q.label}
-                    type="button"
-                    onClick={() => setFollowUp(q.prompt)}
-                    className="px-2 py-1 text-[10px] font-medium bg-slate-50 border border-slate-200 text-slate-600 rounded-lg hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 transition-colors"
-                  >
+                  <button key={q.label} type="button" onClick={() => setFollowUp(q.prompt)}
+                    className="px-2.5 py-1 text-xs font-semibold bg-white border border-[#E0E7FF] text-slate-700 rounded-lg hover:bg-[#EEF2FF] hover:border-[#C7D2FE] hover:text-[#4F46E5] transition-colors">
                     {q.label}
                   </button>
                 ))}
               </div>
             )}
             <div className="flex gap-2">
-              <input
-                type="text"
-                value={followUp}
-                onChange={e => setFollowUp(e.target.value)}
+              <input type="text" value={followUp} onChange={e => setFollowUp(e.target.value)}
                 placeholder={
                   isCompleted ? 'Ask for changes or paste an error…' :
-                  isRunning ? 'Working on it…' :
-                  taskStatus === 'failed' ? 'Task failed' : 'Waiting…'
+                  isRunning ? 'AI is working…' :
+                  taskStatus === 'failed' ? 'Task failed — ask for fix' : 'Waiting…'
                 }
                 disabled={!isCompleted || followUpSubmitting}
-                className="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent disabled:opacity-50 font-medium"
+                className="flex-1 text-sm px-4 py-2.5 rounded-xl border border-[#DDD6FE] bg-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-[#4F46E5] disabled:opacity-50 font-medium text-[#1E1B4B]"
                 onKeyDown={e => { if (e.key === 'Enter') handleFollowUp(); }}
               />
-              <button
-                type="button"
-                onClick={handleFollowUp}
+              <button type="button" onClick={handleFollowUp}
                 disabled={!isCompleted || !followUp.trim() || followUpSubmitting}
-                className="w-8 h-8 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white rounded-xl flex items-center justify-center transition-colors flex-shrink-0"
-              >
+                className="w-10 h-10 disabled:opacity-40 text-white rounded-xl flex items-center justify-center transition-all flex-shrink-0 hover:scale-105"
+                style={{ background: 'linear-gradient(135deg, #4F46E5, #7C3AED)' }}>
                 {followUpSubmitting
-                  ? <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  : <span className="text-sm">→</span>
+                  ? <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  : <span className="text-base font-bold">→</span>
                 }
               </button>
             </div>
-            {followUpError && <p className="text-[11px] text-red-500">{followUpError}</p>}
-            <div className="flex items-center gap-3 text-[10px] text-slate-600">
-              <span>⏱ {elapsed((task as any).startedAt, (task as any).completedAt)}</span>
-              <span>·</span>
-              <span>{formatDate((task as any).createdAt)}</span>
-            </div>
+            {followUpError && <p className="text-xs text-red-500 mt-1.5 font-semibold">{followUpError}</p>}
           </div>
         </div>
 
-        {/* Panel 3: Code / Preview */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-slate-900">
+        {/* ── RIGHT: Code + Preview Panel ── */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+
           {/* Tab bar */}
-          <div className="flex items-center gap-0 bg-slate-800 border-b border-slate-700 flex-shrink-0 px-3">
+          <div className="h-12 bg-white border-b border-[#E0E7FF] flex items-center px-4 gap-1 flex-shrink-0" style={{ boxShadow: '0 1px 4px rgba(79,70,229,0.06)' }}>
             {(['code', 'preview'] as const).map(tab => (
-              <button
-                key={tab}
-                type="button"
-                onClick={() => setRightTab(tab)}
+              <button key={tab} type="button" onClick={() => setRightTab(tab)}
                 className={cn(
-                  'px-4 py-2.5 text-xs font-semibold capitalize transition-colors border-b-2',
+                  'px-4 py-2 text-sm font-bold rounded-lg transition-all',
                   rightTab === tab
-                    ? 'text-white border-indigo-400'
-                    : 'text-slate-500 border-transparent hover:text-slate-300'
-                )}
-              >
+                    ? 'bg-[#EEF2FF] text-[#4F46E5] shadow-sm'
+                    : 'text-slate-600 hover:text-[#4F46E5] hover:bg-[#F8F7FF]'
+                )}>
                 {tab === 'code' ? '◻ Code' : '◪ Preview'}
               </button>
             ))}
             {selectedFile && rightTab === 'code' && (
-              <span className="ml-3 text-[10px] text-slate-600 font-mono truncate">
+              <span className="ml-3 text-xs text-slate-600 font-mono bg-[#F5F0FF] border border-[#E0E7FF] px-2 py-1 rounded-lg truncate max-w-xs">
                 {selectedFile.path}
               </span>
             )}
+            {isRunning && (
+              <div className="ml-auto flex gap-1.5 items-center">
+                {[0, 150, 300].map(d => (
+                  <span key={d} className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"
+                    style={{ animationDelay: `${d}ms` }} />
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Panel content */}
-          {rightTab === 'code' ? (
-            <CodeViewer file={selectedFile} />
-          ) : (
+          {/* Code tab: file tree + code viewer side by side */}
+          {rightTab === 'code' && (
+            <div className="flex-1 flex overflow-hidden">
+              {/* File tree */}
+              <div className="w-56 flex-shrink-0 bg-white border-r border-[#E0E7FF] flex flex-col overflow-hidden">
+                <div className="px-3 pt-3 pb-2 border-b border-[#F0EDFF] flex items-center justify-between flex-shrink-0">
+                  <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">Files</span>
+                  {streamFiles.length > 0 && (
+                    <span className="text-[10px] bg-[#EEF2FF] text-indigo-600 rounded-full px-1.5 font-bold">{streamFiles.length}</span>
+                  )}
+                </div>
+                <div className="flex-1 overflow-y-auto py-1.5 px-1">
+                  {streamFiles.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                      {isRunning ? (
+                        <>
+                          <div className="w-6 h-6 border-2 border-[#E0E7FF] border-t-indigo-400 rounded-full animate-spin mb-3" />
+                          <p className="text-xs text-slate-600 font-semibold">Generating files…</p>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-2xl mb-2">📂</span>
+                          <p className="text-xs text-slate-600 font-semibold">No files yet</p>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    treeNodes.map(node => (
+                      <FileTreeNode key={node.path} node={node} depth={0}
+                        selectedPath={selectedFilePath}
+                        onSelect={(p) => { setSelectedFilePath(p); setRightTab('code'); }}
+                      />
+                    ))
+                  )}
+                </div>
+              </div>
+              {/* Code viewer */}
+              <div className="flex-1 overflow-hidden bg-slate-900">
+                <CodeViewer file={selectedFile} />
+              </div>
+            </div>
+          )}
+
+          {/* Preview tab */}
+          {rightTab === 'preview' && (
             <div className="flex-1 flex flex-col overflow-hidden bg-white">
               <PreviewContent task={task} previewUrl={previewUrl} streamFiles={streamFiles} />
             </div>
