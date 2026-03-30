@@ -201,9 +201,10 @@ Rules:
         });
 
         const existing = previousFiles.find(f => f.path === fileMeta.path);
-        const systemPrompt = `You are an expert developer. Update the following file based on the refinement request.
+        const systemPrompt = `You are a world-class creative developer. Update the following file based on the refinement request.
 Output ONLY the complete updated file content — no explanations, no markdown fences.
-Keep all existing functionality unless explicitly asked to change it.`;
+Keep all existing functionality and visual quality (GSAP animations, Lenis scroll, glassmorphism, hover effects) unless explicitly asked to change it.
+ENHANCE any plain sections you touch — no flat colors, no missing hover states, no unanimated sections.`;
 
         const filePrompt = `${combinedPrompt}
 
@@ -283,29 +284,78 @@ ${existing?.content ?? '(new file)'}`;
 
   private async planStructure(prompt: string, category: string): Promise<FilePlan> {
     const categoryGuidance: Record<string, string> = {
-      code: `Generate a complete web application that runs directly in a browser WITHOUT any build step. Rules:
-- ALWAYS include a self-contained index.html that works when opened directly in a browser
-- Use React via CDN (https://unpkg.com/react@18/umd/react.development.js + react-dom) NOT npm
-- Use Tailwind CSS via CDN (<script src="https://cdn.tailwindcss.com"></script>) NOT npm
-- Use Babel standalone for JSX: <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script> and <script type="text/babel">
-- Put ALL JavaScript inline in index.html or in a separate script.js that is loaded via <script src="./script.js">
-- Include style.css for custom styles
-- The app must be fully functional with NO npm install required
-- Include a README.md with description
-- NEVER use import/require in files loaded in the browser — use CDN globals only`,
-      research: `Generate a structured research report. Include: README.md (executive summary), report.md (full report with sections), sources.md (citations/links), data/ folder with any JSON data files.`,
-      image: `Generate SVG artwork or an HTML canvas animation. Include: index.html (with embedded SVG or canvas), style.css, and a README.md.`,
-      voice: `Generate a voice script and TTS configuration. Include: script.md (voice script with SSML markup), config.json (TTS settings), README.md.`,
-      content: `Generate content files. Include: content.md (main content), outline.md, style-guide.md, README.md.`,
-      mobile: `Generate a React Native (Expo) mobile app. Include: App.tsx, package.json (with expo dependencies), app.json (Expo config), src/screens/ folder with screen components, src/components/ folder, README.md with Expo Snack link instructions. Use TypeScript.`,
-      presentation: `Generate a Reveal.js HTML presentation. Include: index.html (complete Reveal.js presentation with CDN links), slides.md (slide content in Markdown), style.css (custom theme), README.md. The index.html must be fully self-contained and work when opened in a browser.`,
-      agent: `Generate an AI agent using Python with LangChain or CrewAI. Include: agent.py (main agent), tools.py (custom tools), requirements.txt, .env.example, README.md with setup and run instructions. Use clear docstrings and type hints.`,
-      workflow: `Generate an n8n workflow. Include: workflow.json (complete n8n workflow export), README.md (setup and trigger instructions), nodes/ folder with any custom node configs.`,
+      code: `Generate an IMMERSIVE, enterprise-grade web application that runs directly in a browser WITHOUT any build step.
+
+MANDATORY CDN LIBRARIES — include ALL of these in index.html <head>:
+  React 18:        https://unpkg.com/react@18/umd/react.development.js
+  ReactDOM:        https://unpkg.com/react-dom@18/umd/react-dom.development.js
+  Babel Standalone: https://unpkg.com/@babel/standalone/babel.min.js
+  Tailwind CSS:    https://cdn.tailwindcss.com
+  GSAP:            https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js
+  ScrollTrigger:   https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js
+  Lenis:           https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js
+
+MANDATORY VISUAL QUALITY REQUIREMENTS — every generated site MUST have:
+1. IMMERSIVE HERO: Full-viewport hero (min-height:100vh) with animated gradient background or canvas particle system, large bold headline with gradient text (background-clip:text), animated subtitle, glowing CTA button
+2. SCROLL ANIMATIONS: GSAP ScrollTrigger on EVERY section — elements must slide up / fade in / scale on scroll. Register ScrollTrigger plugin: gsap.registerPlugin(ScrollTrigger)
+3. SMOOTH SCROLL: Initialize Lenis for buttery smooth page scrolling. Connect Lenis RAF to GSAP ticker
+4. GLASSMORPHISM CARDS: All cards must use backdrop-filter:blur(12px), semi-transparent backgrounds (rgba(255,255,255,0.06) on dark, rgba(255,255,255,0.8) on light), border:1px solid rgba(255,255,255,0.12)
+5. MICRO-INTERACTIONS: Every button/card/link must transform on hover — scale(1.04), box-shadow glow, color transition 0.3s ease
+6. 3D DEPTH ON CARDS: CSS transform-style:preserve-3d with JS mousemove tilt effect (rotateX + rotateY) on feature/product cards
+7. ANIMATED COUNTERS: Numbers count up with GSAP when scrolled into view
+8. GRADIENT EVERYWHERE: Use linear-gradient or radial-gradient — never flat solid colors for backgrounds. Rich color pairs: indigo→violet, cyan→blue, rose→orange, emerald→teal
+9. STAGGER ANIMATIONS: Lists, cards, features must stagger-animate in using GSAP stagger (0.1s–0.15s between items)
+10. TYPOGRAPHY: Large headings use font-size:clamp(48px,8vw,96px), letter-spacing:-0.04em, font-weight:900. Gradient clip text on key phrases
+11. CUSTOM CURSOR: If applicable, add a custom cursor dot that follows mouse with GSAP quickTo
+12. FLOATING ELEMENTS: Hero background must have 2-3 floating orbs/blobs animated with GSAP (x/y oscillation, opacity pulse)
+13. DARK THEME: Default to a premium dark theme (#050714 or #0a0a1a base) with light text. Add a data-theme switcher if relevant
+14. LOADING ANIMATION: Add a brief page-load animation (GSAP timeline, 0.8s) that reveals content
+
+FILE STRUCTURE RULES:
+- index.html: complete self-contained file that WORKS when opened in browser
+- style.css: all custom CSS (glassmorphism mixins, 3D card styles, keyframe animations, gradient meshes, custom scrollbar)
+- app.js OR <script type="text/babel"> in index.html: ALL React components + GSAP animations + Lenis init
+- animations.js (optional): separate GSAP animation sequences if complex
+- README.md: preview instructions and feature list
+
+TECHNICAL RULES:
+- Use <script type="text/babel"> for JSX — Babel CDN transpiles in browser
+- CDN globals only — NEVER use ES module import/require in browser scripts
+- All GSAP animations must initialize after DOM ready (DOMContentLoaded or React useEffect)
+- Lenis + GSAP ticker integration: lenis.on('scroll', ScrollTrigger.update); gsap.ticker.add((time)=>lenis.raf(time*1000))`,
+
+      research: `Generate a comprehensive, beautifully formatted research report with visual data presentation.
+Include: README.md (executive summary with key findings), report.md (full structured report: Abstract, Introduction, Methodology, Findings with subsections, Analysis, Conclusion, References), sources.md (annotated bibliography with URLs), data/stats.json (key statistics as JSON for potential chart use), insights.md (actionable insights and recommendations).
+Quality requirements: use proper markdown formatting (tables, blockquotes, bold key terms), include concrete data points, statistics, expert citations, real-world examples. Minimum 2000 words for report.md.`,
+
+      image: `Generate a stunning visual SVG artwork or interactive HTML canvas animation.
+Include: index.html (embedded SVG or canvas with animation), style.css (visual polish), README.md.
+Quality requirements: if SVG — use gradients, filters (feGaussianBlur, feColorMatrix), complex paths, animations. If canvas — particle systems, physics simulation, or generative art. Must be visually impressive and interactive (mouse/click events).`,
+
+      content: `Generate comprehensive, high-quality content ready for publishing.
+Include: content.md (main content — minimum 1500 words, well-structured with headers, lists, examples), outline.md (detailed outline with word counts per section), variations.md (3 alternative angles/tones for the same content), seo.md (SEO strategy: title tags, meta descriptions, keywords, internal linking ideas), style-guide.md (brand voice, tone, dos and don'ts), README.md.
+Quality requirements: professional tone, specific examples, concrete data, actionable advice, compelling headlines.`,
+
+      mobile: `Generate a complete React Native (Expo) mobile app with beautiful UI.
+Include: App.tsx (main app with navigation), package.json (expo + react-navigation + other deps), app.json (Expo config), src/screens/ (all screen components), src/components/ (reusable UI components), src/hooks/ (custom hooks), src/theme.ts (colors, typography, spacing), README.md with Expo Snack/Go instructions.
+Quality requirements: use React Navigation for routing, styled with StyleSheet (gradients via expo-linear-gradient), smooth animations with react-native Animated API or reanimated, proper loading states, error handling, TypeScript throughout.`,
+
+      presentation: `Generate a visually stunning Reveal.js HTML presentation with custom animations.
+Include: index.html (complete Reveal.js presentation — self-contained with CDN), style.css (custom premium theme: dark background, gradient accents, glassmorphism slide cards), slides.md (slide content outline), README.md.
+Quality requirements: 12-15 slides minimum, custom CSS transitions between slides, fragment animations on bullet points, data visualization slides (CSS/SVG charts), quote slides with large typography, full-bleed image slides with overlay text. Must impress an audience. Use Reveal.js CDN (https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/).`,
+
+      agent: `Generate a production-ready AI agent with clean architecture.
+Include: agent.py (main agent with LangChain/CrewAI), tools.py (all custom tool implementations with real logic), config.py (settings with pydantic BaseSettings), utils.py (helper functions), requirements.txt (pinned versions), .env.example (all required env vars), tests/test_agent.py (unit tests), README.md (detailed setup, usage examples, architecture diagram in ASCII).
+Quality requirements: proper error handling + retry logic, logging throughout, type hints everywhere, docstrings on all functions, async where appropriate, real working tool implementations (not stubs).`,
+
+      workflow: `Generate a complete, importable n8n workflow automation.
+Include: workflow.json (complete n8n workflow export with all nodes configured), setup.md (step-by-step import and configuration guide), nodes/ (any custom node configurations), credentials-template.json (credential structure needed), README.md (workflow description, trigger conditions, data flow diagram in ASCII, troubleshooting).
+Quality requirements: workflow must have proper error handling nodes, all node parameters filled with real values (not placeholders), data transformation steps, conditional branching where logical.`,
     };
 
     const guidance = categoryGuidance[category] ?? categoryGuidance.code;
 
-    const systemPrompt = `You are an expert software architect. Analyze the user's request and create a file structure plan.
+    const systemPrompt = `You are an expert software architect and creative technologist. Analyze the user's request and design a file structure plan that will result in an IMPRESSIVE, production-ready output that wows users.
 
 Return ONLY a valid JSON object (no markdown, no comments, no prose) with this exact structure:
 {
@@ -316,14 +366,13 @@ Return ONLY a valid JSON object (no markdown, no comments, no prose) with this e
   "notes": "any important architectural notes"
 }
 
-Category-specific guidance for "${category}":
+Category-specific requirements for "${category}":
 ${guidance}
 
 Rules:
-- Keep file count reasonable (3-20 files for code projects)
+- Keep file count reasonable (4-15 files for most projects)
 - Use relative paths from project root
-- Always generate separate individual files — never combine everything into one file
-- Include package.json, README.md for code projects
+- Always generate separate individual files — never combine everything into one massive file
 - Return ONLY the JSON — no text before or after`;
 
     const response = await callClaudeSonnet(
@@ -365,15 +414,34 @@ Rules:
         ).join('\n\n')}`
       : '';
 
-    const systemPrompt = `You are an expert developer. Generate complete, production-ready code for the requested file.
+    const systemPrompt = `You are a world-class creative developer and UI/UX engineer at a top-tier product studio. You build experiences that make users say "wow". Every line of code you write is production-ready, visually stunning, and technically excellent.
 
-Rules:
-- Output ONLY the file content, no explanations, no markdown fences
-- Write complete, working code — no TODOs, no stubs
-- Use proper error handling
+VISUAL QUALITY MANDATE (for HTML/CSS/JS files):
+- NEVER use flat solid colors for backgrounds — always use gradients (linear-gradient with 2-3 color stops)
+- Every interactive element (button, card, link, input) MUST have :hover/:focus transitions (transform, shadow, color) with 0.2s-0.4s ease
+- Use rich color palettes: deep dark base (#050714, #0a0a1a) with vibrant accent gradients (indigo→violet, cyan→blue, rose→orange)
+- Typography: headings use clamp() for fluid sizing, letter-spacing:-0.04em, font-weight:900, gradient clip text on key phrases
+- Spacing: generous padding (5-8rem vertical on sections), breathing room that feels premium
+- Glassmorphism on cards: background:rgba(255,255,255,0.05); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.1); box-shadow:0 8px 32px rgba(0,0,0,0.3)
+- GSAP animations: use ScrollTrigger for every section, stagger for lists/cards, timeline for hero entrance
+- Lenis smooth scroll: always initialize for premium scroll feel
+- 3D card tilt: mousemove listener → rotateX/rotateY with perspective on feature cards
+- Particle/orb backgrounds: 2-3 floating blurred orbs in hero using GSAP oscillation animation
+- Custom scrollbar: thin, styled with accent color
+
+COMPLETENESS MANDATE:
+- ZERO placeholders, ZERO TODOs, ZERO "insert content here" stubs
+- Every section has real content matching the user's actual prompt
+- All interactive features (forms, modals, tabs, accordions) must be fully functional
+- Minimum 5-8 sections for landing pages: Hero, Features/Capabilities, How It Works, Testimonials/Stats, CTA, Footer
+
+TECHNICAL RULES:
+- Output ONLY the raw file content — no explanations, no markdown fences, no prose
+- For HTML: complete from <!DOCTYPE html> to </html>, all CDN links included, all JS inline or via relative script src
 - For JSON files: NO comments (JSON doesn't support comments)
-- For TypeScript/JavaScript: include all necessary imports
-- Follow best practices for the language/framework`;
+- CDN globals only in browser files — NEVER ES6 import in HTML scripts
+- All animations initialize after DOMContentLoaded or in React useEffect
+- Lenis + GSAP integration: lenis.on('scroll', ScrollTrigger.update); gsap.ticker.add((time)=>lenis.raf(time*1000))`;
 
     const filePrompt = `Task: ${userPrompt}
 
@@ -399,20 +467,30 @@ Language: ${fileMeta.language}`;
       .map(f => `=== ${f.path} ===\n${f.content}`)
       .join('\n\n');
 
-    const systemPrompt = `You are a code reviewer. Review all files for common errors and return the corrected versions.
+    const systemPrompt = `You are an expert code reviewer and creative director. Review all files for errors AND visual quality, then return corrected versions.
 
 Return ONLY a valid JSON array (no markdown, no prose before or after) with this structure:
 [{"path": "file/path", "content": "complete file content", "fixed": true/false}]
 
-Check for:
-- Import/export mismatches
-- Missing dependencies in package.json
-- TypeScript type errors
+CHECK AND FIX — Technical:
+- CDN scripts loaded in correct order (Lenis → GSAP → ScrollTrigger → React → Babel → app code)
+- GSAP ScrollTrigger plugin registered: gsap.registerPlugin(ScrollTrigger)
+- Lenis initialized correctly and connected to GSAP ticker
+- Broken JS references between files
 - Invalid JSON syntax (NO comments in JSON files)
-- Missing required configuration
-- Broken references between files
+- Missing CDN libraries that are referenced in code
 
-Return ALL files, even unchanged ones.`;
+CHECK AND FIX — Visual Quality (for HTML/CSS/JS files):
+- If hero section lacks animated gradient background → add CSS keyframe gradient animation or GSAP orbs
+- If cards lack glassmorphism → add backdrop-filter:blur(12px) and semi-transparent background
+- If buttons lack hover effects → add transform:scale(1.05) and box-shadow glow on :hover
+- If page uses flat solid color backgrounds → replace with gradients
+- If GSAP ScrollTrigger animations are missing → add gsap.from() with scrollTrigger on each section
+- If any placeholder text like "Lorem ipsum" or "Insert content here" exists → replace with relevant real content
+- If animations are missing on page load → add GSAP timeline for hero entrance sequence
+- Ensure all interactive features (tabs, modals, accordions) are fully functional
+
+Return ALL files even if unchanged.`;
 
     let response: string;
     try {
