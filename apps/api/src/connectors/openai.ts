@@ -25,7 +25,7 @@ export async function generateImage(
       n: 1,
       size,
       quality: 'hd',
-      response_format: 'url',
+      response_format: 'b64_json',
     });
 
     const imageData = response.data?.[0];
@@ -34,12 +34,13 @@ export async function generateImage(
       throw new Error('No image data returned');
     }
 
-    if (imageData.url) {
-      return imageData.url;
-    }
-
     if ((imageData as any).b64_json) {
       return `data:image/png;base64,${(imageData as any).b64_json}`;
+    }
+
+    // Fallback to URL if b64_json not available
+    if (imageData.url) {
+      return imageData.url;
     }
 
     throw new Error('Image generation returned no output');
