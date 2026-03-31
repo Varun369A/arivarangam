@@ -112,7 +112,7 @@ const categories: CategoryTab[] = [
     },
   },
   {
-    value: 'design-system',
+    value: 'design_system',
     label: 'Design System',
     icon: <Grid3X3 className="h-5 w-5" />,
     description: 'Tokens, components & docs',

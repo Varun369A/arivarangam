@@ -105,7 +105,7 @@ const categoryConfig: Record<TaskCategory, {
     iconColor: 'text-pink-600',
     accent: 'group-hover:border-pink-200',
   },
-  'design-system': {
+  'design_system': {
     icon: <Grid3X3 className="h-4 w-4" />,
     iconBg: 'bg-slate-100',
     iconColor: 'text-slate-600',

@@ -80,7 +80,7 @@ export class TaskOrchestrator {
     await charSpeak(onEvent, 'claude', `Got it — ${analysis.domain}. Let me plan this out.`, 3000);
 
     // ── Phase 2: Design Spec (visual blueprint) ───────────────────────────────
-    const VISUAL_CATEGORIES = ['web', 'animation', 'presentation', 'banner', 'brand', 'design-system', 'dataviz', 'logo', 'mobile', 'content', 'code'];
+    const VISUAL_CATEGORIES = ['web', 'animation', 'presentation', 'banner', 'brand', 'design_system', 'dataviz', 'logo', 'mobile', 'content', 'code'];
     let designSpec = null;
     if (VISUAL_CATEGORIES.includes(category)) {
       // Call Perplexity for research/design reference if complex

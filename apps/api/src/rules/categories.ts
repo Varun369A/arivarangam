@@ -312,7 +312,7 @@ brand-preview.html should be a premium-looking style guide, not just a plain lis
 // ─── DESIGN SYSTEM ────────────────────────────────────────────────────────────
 
 export const DESIGN_SYSTEM_RULES: CategoryRuleSet = {
-  id: 'design-system',
+  id: 'design_system',
   name: 'Design System',
   appliedRuleSets: ['design'],
   qualityThreshold: 7,
@@ -447,7 +447,7 @@ export const CATEGORY_RULES: Record<string, CategoryRuleSet> = {
   logo:           LOGO_RULES,
   banner:         BANNER_RULES,
   brand:          BRAND_RULES,
-  'design-system': DESIGN_SYSTEM_RULES,
+  'design_system': DESIGN_SYSTEM_RULES,
   mcp:            MCP_RULES,
   bot:            BOT_RULES,
   image:          IMAGE_RULES,
