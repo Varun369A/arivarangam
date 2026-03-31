@@ -2,9 +2,21 @@
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
-  transpilePackages: ['@arivarangam/types', '@arivarangam/config'],
+  transpilePackages: [
+    '@arivarangam/types',
+    '@arivarangam/config',
+    'three',
+    '@react-three/fiber',
+    '@react-three/drei',
+    '@react-three/postprocessing',
+  ],
   images: {
     domains: ['avatars.githubusercontent.com', 'oaidalleapiprodscus.blob.core.windows.net'],
+  },
+  webpack(config) {
+    // Three.js needs these to be excluded from SSR bundle
+    config.externals = config.externals || []
+    return config
   },
   async rewrites() {
     return [

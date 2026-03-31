@@ -2,7 +2,7 @@
 
 import { useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { Stars, Environment, Float } from '@react-three/drei'
+import { Stars, Float } from '@react-three/drei'
 import * as THREE from 'three'
 import { CharacterFigure, type CharacterState } from './CharacterFigure'
 import { CHARACTERS, CHARACTER_ORDER } from '@/lib/characters'
@@ -54,6 +54,17 @@ function ArenaFloor() {
 
 // ─── Ambient Particles ────────────────────────────────────────────────────────
 
+const PARTICLE_COUNT = 600
+const PARTICLE_POSITIONS = (() => {
+  const arr = new Float32Array(PARTICLE_COUNT * 3)
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    arr[i * 3]     = (Math.random() - 0.5) * 28
+    arr[i * 3 + 1] = Math.random() * 12
+    arr[i * 3 + 2] = (Math.random() - 0.5) * 28
+  }
+  return arr
+})()
+
 function AmbientParticles() {
   const points = useRef<THREE.Points>(null)
 
@@ -64,18 +75,18 @@ function AmbientParticles() {
     }
   })
 
-  const count = 600
-  const positions = new Float32Array(count * 3)
-  for (let i = 0; i < count; i++) {
-    positions[i * 3]     = (Math.random() - 0.5) * 28
-    positions[i * 3 + 1] = Math.random() * 12
-    positions[i * 3 + 2] = (Math.random() - 0.5) * 28
-  }
+  const count = PARTICLE_COUNT
+  const positions = PARTICLE_POSITIONS
 
   return (
     <points ref={points}>
       <bufferGeometry>
-        <bufferAttribute args={[positions, 3]} attach="attributes-position" />
+        <bufferAttribute
+          attach="attributes-position"
+          count={count}
+          array={positions}
+          itemSize={3}
+        />
       </bufferGeometry>
       <pointsMaterial
         size={0.035}
@@ -172,9 +183,6 @@ export function ArenaCanvas({ characterStates }: ArenaCanvasProps) {
 
       {/* Lighting */}
       <SceneLighting />
-
-      {/* Environment (subtle HDRI for reflections) */}
-      <Environment preset="night" />
 
       {/* Starfield background */}
       <Stars radius={35} depth={25} count={2500} factor={2.2} fade speed={0.4} />
