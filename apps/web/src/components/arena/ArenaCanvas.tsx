@@ -1,8 +1,8 @@
 'use client'
 
-import { useRef, Suspense } from 'react'
+import { useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { Stars, Float, MeshReflectorMaterial } from '@react-three/drei'
+import { Stars, Float } from '@react-three/drei'
 
 import * as THREE from 'three'
 import { CharacterFigure, type CharacterState } from './CharacterFigure'
@@ -13,22 +13,10 @@ import { CHARACTERS, CHARACTER_ORDER } from '@/lib/characters'
 function ArenaFloor() {
   return (
     <group>
-      {/* Reflective floor plane */}
+      {/* Main floor plane */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
         <planeGeometry args={[40, 40]} />
-        <MeshReflectorMaterial
-          blur={[300, 100]}
-          resolution={512}
-          mixBlur={0.8}
-          mixStrength={20}
-          roughness={1}
-          depthScale={1.2}
-          minDepthThreshold={0.4}
-          maxDepthThreshold={1.4}
-          color="#050510"
-          metalness={0.6}
-          mirror={0}
-        />
+        <meshStandardMaterial color="#06060F" roughness={0.9} metalness={0.3} />
       </mesh>
 
       {/* Grid overlay */}
@@ -190,10 +178,7 @@ export function ArenaCanvas({ characterStates }: ArenaCanvasProps) {
 
       <AmbientParticles />
 
-      {/* Suspense boundary for MeshReflectorMaterial (uses render target) */}
-      <Suspense fallback={null}>
-        <ArenaFloor />
-      </Suspense>
+      <ArenaFloor />
 
       {CHARACTER_ORDER.map(id => (
         <CharacterFigure
