@@ -97,8 +97,16 @@ export class TaskOrchestrator {
     let files = await buildFiles(prompt, category, analysis, plan, categoryRules, onEvent, meter, designSpec);
 
     // ── Phase 5: Review ──────────────────────────────────────────────────────
-    await charThink(onEvent, 'claude', 'Reviewing the output…', 2500);
+    if (process.env.GEMINI_API_KEY) {
+      await charCall(onEvent, 'claude', 'gemini', 'Gemini — can you review this output for me?', 2000);
+      await charSpeak(onEvent, 'gemini', `Reviewing your ${analysis.domain} — checking quality and consistency…`, 3000);
+    } else {
+      await charThink(onEvent, 'claude', 'Reviewing the output…', 2500);
+    }
     const review = await reviewFiles(files, categoryRules, onEvent, meter);
+    if (process.env.GEMINI_API_KEY) {
+      await charReturn(onEvent, 'gemini', `Review done — scored ${review.score}/10. ${review.passed ? 'Looks solid!' : 'Found a few things to fix.'}`, 2500);
+    }
 
     // ── Phase 6: Repair (if needed) ──────────────────────────────────────────
     if (!review.passed && categoryRules.maxRepairAttempts > 0) {

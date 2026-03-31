@@ -45,6 +45,7 @@ export interface AppConfig {
   ANTHROPIC_API_KEY: string;
   OPENAI_API_KEY: string;
   PERPLEXITY_API_KEY: string;
+  GEMINI_API_KEY: string;
   ELEVENLABS_API_KEY: string;
 
   // Razorpay
@@ -100,6 +101,7 @@ function loadConfig(): AppConfig {
     ANTHROPIC_API_KEY: isTest ? optionalEnv('ANTHROPIC_API_KEY', 'test-key') : requireEnv('ANTHROPIC_API_KEY'),
     OPENAI_API_KEY: isTest ? optionalEnv('OPENAI_API_KEY', 'test-key') : requireEnv('OPENAI_API_KEY'),
     PERPLEXITY_API_KEY: isTest ? optionalEnv('PERPLEXITY_API_KEY', 'test-key') : requireEnv('PERPLEXITY_API_KEY'),
+    GEMINI_API_KEY: optionalEnv('GEMINI_API_KEY', ''), // optional — Gemini reviewer
     ELEVENLABS_API_KEY: isTest ? optionalEnv('ELEVENLABS_API_KEY', 'test-key') : requireEnv('ELEVENLABS_API_KEY'),
 
     // Razorpay (optional — configure before enabling billing)
