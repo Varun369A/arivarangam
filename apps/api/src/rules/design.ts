@@ -4,6 +4,33 @@
 export const DESIGN_RULES = `
 ═══ SENIOR DESIGNER STANDARDS — NON-NEGOTIABLE ═══
 
+MANDATORY CSS BASE — Copy EXACTLY at top of every CSS file:
+\`\`\`css
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --color-bg:           #0a0a0f;
+  --color-surface:      #1a1a2e;
+  --color-surface-alt:  #0f0f23;
+  --color-text:         #f1f5f9;
+  --color-text-muted:   #94a3b8;
+  --color-primary:      #6366f1;
+  --color-secondary:    #8b5cf6;
+  --color-accent:       #a855f7;
+  --color-border:       rgba(255, 255, 255, 0.08);
+}
+html, body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+\`\`\`
+
+CRITICAL: color: var(--color-text) on body is MANDATORY. Without it text is invisible on dark backgrounds.
+NEVER set opacity: 0 in CSS — only use GSAP for that. Elements must be visible without JavaScript.
+
 COLOR SYSTEM:
 • Apply the 60-30-10 rule: 60% base, 30% secondary, 10% accent
 • Always define CSS custom properties at :root:

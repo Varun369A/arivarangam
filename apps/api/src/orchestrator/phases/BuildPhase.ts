@@ -72,16 +72,35 @@ ${depContext ? `\nReference files already built:${depContext}` : ''}
 Output ONLY the complete file content for ${filePlan.path}.`;
 
     let content = '';
+    let streamTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const flushCodeStream = () => {
+      const lines = content.split('\n');
+      const snippet = lines.slice(Math.max(0, lines.length - 10)).join('\n');
+      // fire-and-forget stream event (Redis only, no DB write)
+      onEvent({
+        type: 'log',
+        data: { streamOnly: true, isCodeStream: true, path: filePlan.path, snippet },
+        timestamp: new Date().toISOString(),
+      }).catch(() => {});
+    };
 
     try {
       await callClaudeSonnet(
         userMsg,
         systemBase,
         8192,
-        (token: string) => { content += token; },
+        (token: string) => {
+          content += token;
+          // debounce: emit live code snippet every 300ms
+          if (streamTimer) clearTimeout(streamTimer);
+          streamTimer = setTimeout(flushCodeStream, 300);
+        },
         meter
       );
+      if (streamTimer) clearTimeout(streamTimer);
     } catch (err: any) {
+      if (streamTimer) clearTimeout(streamTimer);
       await onEvent({
         type: 'log',
         data: { message: `⚠️ Error building ${filePlan.path}: ${err.message}` },

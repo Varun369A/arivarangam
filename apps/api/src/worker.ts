@@ -41,9 +41,13 @@ function getPublisher(): Redis {
 
 async function emitEvent(taskId: string, event: TaskEvent): Promise<void> {
   try {
-    await prisma.taskEvent.create({
-      data: { taskId, type: event.type, data: event.data as any },
-    });
+    // streamOnly events (live code preview) skip DB — Redis pub/sub only
+    const isStreamOnly = (event.data as any)?.streamOnly === true;
+    if (!isStreamOnly) {
+      await prisma.taskEvent.create({
+        data: { taskId, type: event.type, data: event.data as any },
+      });
+    }
     await getPublisher().publish(TASK_CHANNEL(taskId), JSON.stringify(event));
   } catch (err) {
     console.error(`[Worker] emitEvent failed for task ${taskId}:`, err);

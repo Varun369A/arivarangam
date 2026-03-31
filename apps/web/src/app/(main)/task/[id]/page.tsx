@@ -832,7 +832,7 @@ export default function TaskPage() {
   const streamActive = task !== null && confirmed;
   const {
     events, status: streamStatus, previewUrl, files: streamFiles,
-    isConnected, isComplete, forceReconnect,
+    streamingFile, isConnected, isComplete, forceReconnect,
   } = useTaskStream(streamActive ? taskId : null);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -1221,6 +1221,23 @@ export default function TaskPage() {
             {events.map((evt, i) => (
               <ActivityItem key={i} event={evt} />
             ))}
+
+            {/* Live code stream — shows code being written in real-time */}
+            {streamingFile && (
+              <div className="mb-2 mt-1">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse flex-shrink-0" />
+                  <span className="text-[10px] font-mono text-indigo-500 truncate">{streamingFile.path}</span>
+                  <span className="text-[10px] text-slate-500 ml-auto flex-shrink-0 animate-pulse">writing…</span>
+                </div>
+                <pre className="text-[10px] bg-slate-900 text-emerald-400 font-mono px-2.5 py-2 rounded-lg overflow-hidden leading-relaxed"
+                  style={{ maxHeight: 112, overflowY: 'hidden', wordBreak: 'break-all', whiteSpace: 'pre-wrap' }}>
+                  {streamingFile.snippet.slice(-400)}
+                  <span className="animate-pulse text-white">▋</span>
+                </pre>
+              </div>
+            )}
+
             <div ref={chatEndRef} />
           </div>
 

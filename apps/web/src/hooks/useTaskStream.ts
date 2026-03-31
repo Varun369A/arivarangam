@@ -34,11 +34,17 @@ export interface TaskStreamFile {
   language?: string
 }
 
+export interface StreamingFile {
+  path: string
+  snippet: string
+}
+
 export interface TaskStreamState {
   events: TaskEvent[]
   status: TaskStatus | null
   previewUrl: string | null
   files: TaskStreamFile[]
+  streamingFile: StreamingFile | null  // live code being written
   isConnected: boolean
   isComplete: boolean
   error: string | null
@@ -69,6 +75,7 @@ export function useTaskStream(taskId: string | null): UseTaskStreamReturn {
     status: null,
     previewUrl: null,
     files: [],
+    streamingFile: null,
     isConnected: false,
     isComplete: false,
     error: null,
@@ -136,7 +143,7 @@ export function useTaskStream(taskId: string | null): UseTaskStreamReturn {
           const files = exists
             ? prev.files.map((f) => (f.path === data.path ? { ...f, ...data } : f))
             : [...prev.files, { path: data.path as string, content: data.content as string, language: data.language as string }]
-          return { ...prev, files }
+          return { ...prev, files, streamingFile: null }  // clear code stream on file complete
         })
         addEvent('file_created', data)
       })
@@ -172,10 +179,18 @@ export function useTaskStream(taskId: string | null): UseTaskStreamReturn {
         addEvent('command_run', data)
       })
 
-      // log
+      // log (+ intercept code stream events)
       es.addEventListener('log', (e: MessageEvent) => {
         const data = parseData<Record<string, unknown>>(e.data)
         if (!data) return
+        if (data.isCodeStream) {
+          // live code stream — update streamingFile state, don't add to events
+          setState(prev => ({
+            ...prev,
+            streamingFile: { path: data.path as string, snippet: data.snippet as string },
+          }))
+          return
+        }
         addEvent('log', data)
       })
 
@@ -280,6 +295,7 @@ export function useTaskStream(taskId: string | null): UseTaskStreamReturn {
       status: null,
       previewUrl: null,
       files: [],
+      streamingFile: null,
       isConnected: false,
       isComplete: false,
       error: null,
