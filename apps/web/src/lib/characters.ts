@@ -26,7 +26,7 @@ export const CHARACTERS: Record<CharacterId, CharacterConfig> = {
     description: 'I design, plan, and build your entire project',
     color: '#D97706',           // warm amber — Anthropic brand
     glowColor: '#F59E0B',
-    skinColor: '#FBBF24',
+    skinColor: '#F5CBA7',
     homePosition: [0, 0, 0],
     meetPosition: [0, 0, 0],   // Claude stays at center
     greetings: [
@@ -53,7 +53,7 @@ export const CHARACTERS: Record<CharacterId, CharacterConfig> = {
     description: 'I find real-time information and deep research',
     color: '#0D9488',           // teal
     glowColor: '#14B8A6',
-    skinColor: '#5EEAD4',
+    skinColor: '#EBD5BC',
     homePosition: [55, 0, 8],   // off-screen right — walks in when called
     meetPosition: [2.2, 0, 0.5],
     greetings: [
@@ -79,7 +79,7 @@ export const CHARACTERS: Record<CharacterId, CharacterConfig> = {
     description: 'I provide ideas, suggestions, and creative directions',
     color: '#10B981',           // emerald green — OpenAI brand
     glowColor: '#34D399',
-    skinColor: '#6EE7B7',
+    skinColor: '#F0B07A',
     homePosition: [55, 0, -8],
     meetPosition: [2.2, 0, -0.5],
     greetings: [
@@ -105,7 +105,7 @@ export const CHARACTERS: Record<CharacterId, CharacterConfig> = {
     description: 'I handle visual, multimodal, and design tasks',
     color: '#8B5CF6',           // violet — Google brand
     glowColor: '#A78BFA',
-    skinColor: '#C4B5FD',
+    skinColor: '#D4A76A',
     homePosition: [-55, 0, -8],
     meetPosition: [-2.2, 0, -0.5],
     greetings: [
@@ -131,7 +131,7 @@ export const CHARACTERS: Record<CharacterId, CharacterConfig> = {
     description: 'I bridge all Indian languages with the team',
     color: '#F59E0B',           // saffron/gold
     glowColor: '#FBBF24',
-    skinColor: '#FCD34D',
+    skinColor: '#C47B3E',
     homePosition: [-55, 0, 8],
     meetPosition: [-2.2, 0, 0.5],
     greetings: [

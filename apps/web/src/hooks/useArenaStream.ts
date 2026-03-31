@@ -136,7 +136,7 @@ export function useArenaStream(taskId: string | null) {
     const action      = data.action as string
     const text        = data.text as string | undefined
     const targetChar  = data.targetCharacter as CharacterId | undefined
-    const duration    = (data.duration as number | undefined) ?? 4000
+    const duration    = (data.duration as number | undefined) ?? 7000
 
     if (!charId || !CHARACTERS[charId]) return
 
@@ -156,7 +156,7 @@ export function useArenaStream(taskId: string | null) {
       case 'wave':
         setCharacterAction(charId, 'waving')
         if (text) setSpeech(charId, text, duration)
-        setTimeout(() => setCharacterAction(charId, 'idle'), 2500)
+        setTimeout(() => setCharacterAction(charId, 'idle'), 6000)
         break
 
       case 'celebrate':
@@ -166,25 +166,37 @@ export function useArenaStream(taskId: string | null) {
         break
 
       case 'call': {
-        // Claude calls another character: Claude turns + calls, target walks to meet position
+        // Claude calls another character — they walk in slowly and have a real conversation
         setCharacterAction(charId, 'calling')
-        if (text) setSpeech(charId, text, 2500)
+        if (text) setSpeech(charId, text, 4500)
         if (targetChar && CHARACTERS[targetChar]) {
-          // Target character starts walking to their meet position
+          const tc = CHARACTERS[targetChar]
+          // Walk starts after call
           setTimeout(() => {
-            setCharacterAction(
-              targetChar,
-              'walking',
-              CHARACTERS[targetChar].meetPosition as [number, number, number]
-            )
-          }, 600)
-          // After arrival, target talks
+            setCharacterAction(targetChar, 'walking', tc.meetPosition as [number, number, number])
+          }, 800)
+          // Arrival greeting — after slow walk (~8.5s)
           setTimeout(() => {
             setCharacterAction(targetChar, 'talking')
-            setSpeech(targetChar, CHARACTERS[targetChar].greetings[0] ?? 'Here to help!', 3000)
-          }, 3000)
+            setSpeech(targetChar, tc.greetings[Math.floor(Math.random() * tc.greetings.length)] ?? 'Here to help!', 7000)
+          }, 8500)
+          // Claude responds
+          setTimeout(() => {
+            setCharacterAction(charId, 'talking')
+            setSpeech(charId, tc.thinkingPhrases[0] ?? 'Let\'s work on this together.', 6000)
+          }, 16000)
+          // Target continues working
+          setTimeout(() => {
+            setCharacterAction(targetChar, 'thinking')
+            setSpeech(targetChar, tc.workingPhrases[0] ?? 'On it...', 7000)
+          }, 22500)
+          // Claude listening to the result
+          setTimeout(() => {
+            setCharacterAction(charId, 'listening')
+            setCharacterAction(targetChar, 'talking')
+          }, 30000)
         }
-        setTimeout(() => setCharacterAction(charId, 'idle'), 2500)
+        setTimeout(() => setCharacterAction(charId, 'listening'), 5000)
         break
       }
 
@@ -196,12 +208,12 @@ export function useArenaStream(taskId: string | null) {
         break
 
       case 'return':
-        // Character walks back to home position
-        if (text) setSpeech(charId, text, 2000)
+        // Character says goodbye then slowly walks back off-screen
+        if (text) setSpeech(charId, text, 5000)
         setTimeout(() => {
           setCharacterAction(charId, 'walking', CHARACTERS[charId].homePosition as [number, number, number])
-        }, 2100)
-        setTimeout(() => setCharacterAction(charId, 'idle'), 4500)
+        }, 5500)
+        setTimeout(() => setCharacterAction(charId, 'idle'), 16000)
         break
 
       case 'point':
@@ -246,10 +258,10 @@ export function useArenaStream(taskId: string | null) {
           taskStatus: data.status ?? 'running',
           error: null,
         }))
-        // Claude waves and greets
-        setCharacterAction('claude', 'waving')
-        setSpeech('claude', "I'm on it — let me get started!", 3000)
-        setTimeout(() => setCharacterAction('claude', 'thinking'), 3000)
+        // Claude gets to work
+        setCharacterAction('claude', 'thinking')
+        setSpeech('claude', "Analyzing your request — let me build this for you!", 6000)
+        setTimeout(() => setCharacterAction('claude', 'thinking'), 6200)
       } catch { /* ignore */ }
     })
 

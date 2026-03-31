@@ -5,6 +5,8 @@ import { getRedis } from '../../redis';
 import { callClaudeHaiku } from '../../connectors/claude';
 import { pingOpenAI } from '../../connectors/openai';
 import { pingSarvam } from '../../connectors/sarvam';
+import { pingPerplexity } from '../../connectors/perplexity';
+import { pingGemini } from '../../connectors/gemini';
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 
@@ -103,7 +105,7 @@ export async function adminPlatformRoutes(fastify: FastifyInstance): Promise<voi
 
   // GET /health — model API status, error rates, active tasks count
   fastify.get('/health', async (request: FastifyRequest, reply: FastifyReply) => {
-    const [activeTasks, recentErrors, redisOk, claudeOk, openaiResult, sarvamResult] = await Promise.allSettled([
+    const [activeTasks, recentErrors, redisOk, claudeOk, openaiResult, sarvamResult, perplexityResult, geminiResult] = await Promise.allSettled([
       prisma.task.count({ where: { status: { in: ['running', 'analyzing'] } } }),
       prisma.taskEvent.count({
         where: {
@@ -119,6 +121,10 @@ export async function adminPlatformRoutes(fastify: FastifyInstance): Promise<voi
       pingOpenAI(),
       // Sarvam AI ping
       pingSarvam(),
+      // Perplexity ping (lightweight 1-token)
+      pingPerplexity(),
+      // Gemini ping
+      pingGemini(),
     ]);
 
     const activeTaskCount = activeTasks.status === 'fulfilled' ? activeTasks.value : 0;
@@ -143,6 +149,12 @@ export async function adminPlatformRoutes(fastify: FastifyInstance): Promise<voi
     const sarvamStatus = sarvamResult.status === 'fulfilled' && (sarvamResult.value as any)?.ok
       ? 'ok' : 'error';
 
+    const perplexityStatus = perplexityResult.status === 'fulfilled' && (perplexityResult.value as any)?.ok
+      ? 'ok' : 'error';
+
+    const geminiStatus = geminiResult.status === 'fulfilled' && (geminiResult.value as any)?.ok
+      ? 'ok' : 'error';
+
     const redisStatus = redisOk.status === 'fulfilled' && redisOk.value ? 'ok' : 'error';
 
     const overallStatus =
@@ -160,10 +172,17 @@ export async function adminPlatformRoutes(fastify: FastifyInstance): Promise<voi
             status: openaiStatus,
             latencyMs: openaiResult.status === 'fulfilled' ? (openaiResult.value as any)?.latencyMs : null,
           },
-          perplexity: { status: 'unknown' }, // Perplexity has no cheap ping
+          perplexity: {
+            status: perplexityStatus,
+            latencyMs: perplexityResult.status === 'fulfilled' ? (perplexityResult.value as any)?.latencyMs : null,
+          },
           sarvam: {
             status: sarvamStatus,
             latencyMs: sarvamResult.status === 'fulfilled' ? (sarvamResult.value as any)?.latencyMs : null,
+          },
+          gemini: {
+            status: geminiStatus,
+            latencyMs: geminiResult.status === 'fulfilled' ? (geminiResult.value as any)?.latencyMs : null,
           },
         },
         redis: { status: redisStatus },

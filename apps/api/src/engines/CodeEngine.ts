@@ -296,25 +296,37 @@ MANDATORY CDN LIBRARIES — include ALL of these in index.html <head>:
   ReactDOM:        https://unpkg.com/react-dom@18/umd/react-dom.development.js
   Babel Standalone: https://unpkg.com/@babel/standalone/babel.min.js
   Tailwind CSS:    https://cdn.tailwindcss.com
+  Three.js:        https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js
   GSAP:            https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js
   ScrollTrigger:   https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js
   Lenis:           https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js
 
 MANDATORY VISUAL QUALITY REQUIREMENTS — every generated site MUST have:
-1. IMMERSIVE HERO: Full-viewport hero (min-height:100vh) with animated gradient background or canvas particle system, large bold headline with gradient text (background-clip:text), animated subtitle, glowing CTA button
-2. SCROLL ANIMATIONS: GSAP ScrollTrigger on EVERY section — elements must slide up / fade in / scale on scroll. Register ScrollTrigger plugin: gsap.registerPlugin(ScrollTrigger)
-3. SMOOTH SCROLL: Initialize Lenis for buttery smooth page scrolling. Connect Lenis RAF to GSAP ticker
-4. GLASSMORPHISM CARDS: All cards must use backdrop-filter:blur(12px), semi-transparent backgrounds (rgba(255,255,255,0.06) on dark, rgba(255,255,255,0.8) on light), border:1px solid rgba(255,255,255,0.12)
-5. MICRO-INTERACTIONS: Every button/card/link must transform on hover — scale(1.04), box-shadow glow, color transition 0.3s ease
-6. 3D DEPTH ON CARDS: CSS transform-style:preserve-3d with JS mousemove tilt effect (rotateX + rotateY) on feature/product cards
-7. ANIMATED COUNTERS: Numbers count up with GSAP when scrolled into view
-8. GRADIENT EVERYWHERE: Use linear-gradient or radial-gradient — never flat solid colors for backgrounds. Rich color pairs: indigo→violet, cyan→blue, rose→orange, emerald→teal
-9. STAGGER ANIMATIONS: Lists, cards, features must stagger-animate in using GSAP stagger (0.1s–0.15s between items)
-10. TYPOGRAPHY: Large headings use font-size:clamp(48px,8vw,96px), letter-spacing:-0.04em, font-weight:900. Gradient clip text on key phrases
-11. CUSTOM CURSOR: If applicable, add a custom cursor dot that follows mouse with GSAP quickTo
-12. FLOATING ELEMENTS: Hero background must have 2-3 floating orbs/blobs animated with GSAP (x/y oscillation, opacity pulse)
-13. DARK THEME: Default to a premium dark theme (#050714 or #0a0a1a base) with light text. Add a data-theme switcher if relevant
-14. LOADING ANIMATION: Add a brief page-load animation (GSAP timeline, 0.8s) that reveals content
+1. THREE.JS 3D HERO: The hero section MUST use a Three.js WebGL canvas as background. Create a scene with: floating 3D geometric shapes (IcosahedronGeometry, TorusKnotGeometry, SphereGeometry) using MeshStandardMaterial with emissive color, dynamic PointLight that follows mouse, subtle camera orbit on mouse move (dampened lerp). Canvas fills the hero viewport behind HTML content via position:absolute and z-index:-1. Fallback gradient if WebGL unavailable.
+2. IMMERSIVE HERO: Full-viewport hero (min-height:100vh) with the Three.js canvas, large bold headline with gradient text (background-clip:text), animated subtitle, glowing CTA button
+3. SCROLL ANIMATIONS: GSAP ScrollTrigger on EVERY section — elements must slide up / fade in / scale on scroll. Register ScrollTrigger plugin: gsap.registerPlugin(ScrollTrigger)
+4. SMOOTH SCROLL: Initialize Lenis for buttery smooth page scrolling. Connect Lenis RAF to GSAP ticker
+5. GLASSMORPHISM CARDS: All cards must use backdrop-filter:blur(12px), semi-transparent backgrounds (rgba(255,255,255,0.06) on dark, rgba(255,255,255,0.8) on light), border:1px solid rgba(255,255,255,0.12)
+6. MICRO-INTERACTIONS: Every button/card/link must transform on hover — scale(1.04), box-shadow glow, color transition 0.3s ease
+7. 3D DEPTH ON CARDS: CSS transform-style:preserve-3d with JS mousemove tilt effect (rotateX + rotateY) on feature/product cards
+8. ANIMATED COUNTERS: Numbers count up with GSAP when scrolled into view
+9. GRADIENT EVERYWHERE: Use linear-gradient or radial-gradient — never flat solid colors for backgrounds. Rich color pairs: indigo→violet, cyan→blue, rose→orange, emerald→teal
+10. STAGGER ANIMATIONS: Lists, cards, features must stagger-animate in using GSAP stagger (0.1s–0.15s between items)
+11. TYPOGRAPHY: Large headings use font-size:clamp(48px,8vw,96px), letter-spacing:-0.04em, font-weight:900. Gradient clip text on key phrases
+12. CUSTOM CURSOR: Add a custom cursor dot that follows mouse with GSAP quickTo and scales on hover
+13. FLOATING ELEMENTS: Non-Three.js sections have 2-3 floating orbs/blobs animated with GSAP (x/y oscillation, opacity pulse)
+14. DARK THEME: Default to a premium dark theme (#050714 or #0a0a1a base) with light text
+15. LOADING ANIMATION: Add a brief page-load animation (GSAP timeline, 0.8s) that reveals content with Three.js scene fading in
+
+THREE.JS IMPLEMENTATION RULES (critical — use these patterns exactly):
+- THREE is available as window.THREE from CDN; use THREE.Scene, THREE.PerspectiveCamera, THREE.WebGLRenderer etc.
+- Renderer: renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+- Lighting: scene.add(new THREE.AmbientLight(0xffffff, 0.3)); add PointLight(color, intensity, distance) that moves toward mouse
+- Geometry options: IcosahedronGeometry(1, 1), TorusKnotGeometry(0.8, 0.3, 100, 16), OctahedronGeometry(1, 0), SphereGeometry(1, 32, 32)
+- Material: MeshStandardMaterial with color + emissive + emissiveIntensity (0.3-0.6) for glow effect; wireframe option for outer shell
+- Animation loop: requestAnimationFrame recursive loop, mesh.rotation.x/y += 0.003, renderer.render(scene, camera)
+- Mouse tracking: document.addEventListener('mousemove', e => { mouse.x = (e.clientX/window.innerWidth)*2-1; mouse.y = -(e.clientY/window.innerHeight)*2+1 })
+- Canvas placement: heroCanvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;'
 
 FILE STRUCTURE RULES:
 - index.html: complete self-contained file that WORKS when opened in browser

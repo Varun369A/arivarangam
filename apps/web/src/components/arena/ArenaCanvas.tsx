@@ -23,7 +23,7 @@ function parseSentences(text: string): string[] {
 }
 
 function sentenceDuration(s: string): number {
-  return Math.max(2200, Math.min(s.length * 65, 5500))
+  return Math.max(4500, Math.min(s.length * 90, 9500))
 }
 
 // ─── Rig type ─────────────────────────────────────────────────────────────────
@@ -50,79 +50,139 @@ interface Design {
   torsoH: number
   headR: number
   heightMult: number
+  pantsColor: string
+  innerColor: string
+  shoeColor: string
+  addHair: (g: THREE.Group, h: number, r: number) => void
   addAccessory: (g: THREE.Group, color: THREE.Color) => void
 }
 
 const DESIGNS: Record<string, Design> = {
   claude: {
-    torsoW: 0.36, torsoH: 0.52, headR: 0.2, heightMult: 1.0,
+    torsoW: 0.36, torsoH: 0.46, headR: 0.27, heightMult: 1.0,
+    pantsColor: '#1e293b', innerColor: '#f8fafc', shoeColor: '#f0f0f0',
+    addHair: (g, h, r) => {
+      const mat = new THREE.MeshStandardMaterial({ color: '#3D2B1A', roughness: 0.7 })
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(r + 0.012, 16, 8, 0, Math.PI * 2, 0, Math.PI * 0.58), mat)
+      cap.position.set(0, 1.72 * h, 0); g.add(cap)
+      ;[[-0.09, 0.14, -0.3], [0, 0, 0], [0.09, -0.14, -0.3]].forEach(([ox, rz, rx]) => {
+        const spike = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.2, 5), mat)
+        spike.position.set(ox, 1.93 * h, -r * 0.5)
+        spike.rotation.x = rx * 0.4; spike.rotation.z = rz; g.add(spike)
+      })
+      ;[-1, 1].forEach(s => {
+        const side = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 6), mat)
+        side.position.set(s * (r + 0.022), 1.7 * h, 0.02); g.add(side)
+      })
+    },
     addAccessory: (g, col) => {
-      // Crown — five pointed peaks
       const crownMat = new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.8 })
       for (let i = 0; i < 5; i++) {
-        const peak = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.1, 4), crownMat)
         const ang = (i / 5) * Math.PI * 2
-        peak.position.set(Math.cos(ang) * 0.14, 2.06, Math.sin(ang) * 0.14)
-        g.add(peak)
+        const peak = new THREE.Mesh(new THREE.ConeGeometry(0.036, 0.1, 4), crownMat)
+        peak.position.set(Math.cos(ang) * 0.21, 2.12, Math.sin(ang) * 0.21); g.add(peak)
       }
-      const band = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.025, 6, 24), crownMat)
-      band.position.set(0, 1.97, 0)
-      g.add(band)
+      const band = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.025, 6, 24), crownMat)
+      band.position.set(0, 2.03, 0); g.add(band)
     },
   },
   perplexity: {
-    torsoW: 0.3, torsoH: 0.54, headR: 0.19, heightMult: 1.05,
+    torsoW: 0.30, torsoH: 0.48, headR: 0.26, heightMult: 1.05,
+    pantsColor: '#374151', innerColor: '#d1d5db', shoeColor: '#111827',
+    addHair: (g, h, r) => {
+      const mat = new THREE.MeshStandardMaterial({ color: '#111827', roughness: 0.5 })
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(r + 0.01, 16, 8, 0, Math.PI * 2, 0, Math.PI * 0.55), mat)
+      cap.position.set(0, 1.72 * h, 0); g.add(cap)
+      const fringe = new THREE.Mesh(new THREE.BoxGeometry(r * 1.9, 0.045, 0.09), mat)
+      fringe.position.set(-0.03, (1.72 + r - 0.02) * h, -r * 0.55); g.add(fringe)
+      ;[-1, 1].forEach(s => {
+        const side = new THREE.Mesh(new THREE.BoxGeometry(0.042, 0.15, 0.065), mat)
+        side.position.set(s * (r + 0.015), 1.63 * h, 0.04); g.add(side)
+      })
+    },
     addAccessory: (g) => {
-      // Glasses
       const mat = new THREE.MeshStandardMaterial({ color: '#aaaaaa', metalness: 0.9, roughness: 0.1 })
-      const lensGeo = new THREE.BoxGeometry(0.1, 0.055, 0.012)
-      const lL = new THREE.Mesh(lensGeo, mat); lL.position.set(-0.09, 1.72, 0.2); g.add(lL)
-      const lR = new THREE.Mesh(lensGeo, mat); lR.position.set(0.09, 1.72, 0.2); g.add(lR)
-      const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.012, 0.01), mat)
-      bridge.position.set(0, 1.72, 0.2); g.add(bridge)
-      const lArm = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.01, 0.01), mat)
-      lArm.position.set(-0.19, 1.72, 0.1); lArm.rotation.y = 0.4; g.add(lArm)
-      const rArm = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.01, 0.01), mat)
-      rArm.position.set(0.19, 1.72, 0.1); rArm.rotation.y = -0.4; g.add(rArm)
+      const lensGeo = new THREE.BoxGeometry(0.115, 0.062, 0.013)
+      const lL = new THREE.Mesh(lensGeo, mat); lL.position.set(-0.105, 1.77, 0.26); g.add(lL)
+      const lR = new THREE.Mesh(lensGeo, mat); lR.position.set(0.105, 1.77, 0.26); g.add(lR)
+      const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.013, 0.011), mat)
+      bridge.position.set(0, 1.77, 0.26); g.add(bridge)
+      const lArm = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.011, 0.011), mat)
+      lArm.position.set(-0.21, 1.77, 0.17); lArm.rotation.y = 0.4; g.add(lArm)
+      const rArm = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.011, 0.011), mat)
+      rArm.position.set(0.21, 1.77, 0.17); rArm.rotation.y = -0.4; g.add(rArm)
     },
   },
   chatgpt: {
-    torsoW: 0.38, torsoH: 0.5, headR: 0.2, heightMult: 1.0,
+    torsoW: 0.38, torsoH: 0.46, headR: 0.27, heightMult: 1.0,
+    pantsColor: '#1e3a5f', innerColor: '#9ca3af', shoeColor: '#dc2626',
+    addHair: (g, h, r) => {
+      const mat = new THREE.MeshStandardMaterial({ color: '#5D4037', roughness: 0.65 })
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(r + 0.012, 16, 8, 0, Math.PI * 2, 0, Math.PI * 0.58), mat)
+      cap.position.set(0, 1.72 * h, 0); g.add(cap)
+      ;[[-0.1, 0.25], [0, 0], [0.1, -0.25]].forEach(([ox, rz]) => {
+        const wave = new THREE.Mesh(new THREE.CapsuleGeometry(0.042, 0.1, 4, 8), mat)
+        wave.position.set(ox, (1.87 + Math.abs(ox) * 0.15) * h, -r * 0.45)
+        wave.rotation.x = -0.2; wave.rotation.z = rz; g.add(wave)
+      })
+      ;[-1, 1].forEach(s => {
+        const side = new THREE.Mesh(new THREE.SphereGeometry(0.068, 8, 6), mat)
+        side.position.set(s * (r + 0.032), 1.69 * h, 0.02); g.add(side)
+      })
+    },
     addAccessory: (g, col) => {
-      // Tie
-      const tieMat = new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.3 })
-      const knot = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.07, 0.04), tieMat)
-      knot.position.set(0, 1.38, 0.12); g.add(knot)
-      const tie = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.22, 0.03), tieMat)
-      tie.position.set(0, 1.2, 0.12); g.add(tie)
+      const stripeMat = new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.25, roughness: 0.4 })
+      const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.04, 0.022), stripeMat)
+      stripe.position.set(0, 1.08, 0.12); g.add(stripe)
     },
   },
   gemini: {
-    torsoW: 0.31, torsoH: 0.51, headR: 0.19, heightMult: 0.96,
+    torsoW: 0.31, torsoH: 0.46, headR: 0.26, heightMult: 0.96,
+    pantsColor: '#1e1b4b', innerColor: '#c4b5fd', shoeColor: '#8B5CF6',
+    addHair: (g, h, r) => {
+      const mat = new THREE.MeshStandardMaterial({ color: '#1a1a2e', roughness: 0.6 })
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(r + 0.01, 16, 8, 0, Math.PI * 2, 0, Math.PI * 0.55), mat)
+      cap.position.set(0, 1.72 * h, 0); g.add(cap)
+      for (let i = 0; i < 3; i++) {
+        const sweep = new THREE.Mesh(new THREE.CapsuleGeometry(0.038 - i * 0.007, 0.14, 4, 8), mat)
+        sweep.position.set(-0.06 - i * 0.04, (1.91 - i * 0.04) * h, -0.06)
+        sweep.rotation.z = -0.55 + i * 0.12; sweep.rotation.x = -0.2; g.add(sweep)
+      }
+      const vol = new THREE.Mesh(new THREE.SphereGeometry(0.075, 8, 6), mat)
+      vol.position.set(-(r + 0.045), 1.73 * h, 0.02); g.add(vol)
+    },
     addAccessory: (g, col) => {
-      // Crystal gem above head
       const gemMat = new THREE.MeshStandardMaterial({
         color: col, emissive: col, emissiveIntensity: 1.2,
         transparent: true, opacity: 0.85, metalness: 0.3, roughness: 0.1,
       })
-      const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.1, 0), gemMat)
-      gem.position.set(0, 2.1, 0); g.add(gem)
-      // Glow ring under gem
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.012, 6, 16), gemMat)
-      ring.position.set(0, 2.0, 0); g.add(ring)
+      const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.11, 0), gemMat)
+      gem.position.set(0, 2.18, 0); g.add(gem)
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.11, 0.013, 6, 16), gemMat)
+      ring.position.set(0, 2.06, 0); g.add(ring)
     },
   },
   sarvam: {
-    torsoW: 0.32, torsoH: 0.52, headR: 0.19, heightMult: 1.02,
+    torsoW: 0.32, torsoH: 0.47, headR: 0.26, heightMult: 1.02,
+    pantsColor: '#292524', innerColor: '#fff7ed', shoeColor: '#92400e',
+    addHair: (g, h, r) => {
+      const mat = new THREE.MeshStandardMaterial({ color: '#0f0f0f', roughness: 0.6 })
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(r + 0.01, 16, 8, 0, Math.PI * 2, 0, Math.PI * 0.55), mat)
+      cap.position.set(0, 1.72 * h, 0); g.add(cap)
+      ;[-1, 1].forEach(s => {
+        const drape = new THREE.Mesh(new THREE.CapsuleGeometry(0.038, 0.18, 4, 8), mat)
+        drape.position.set(s * (r + 0.012), 1.61 * h, 0.02); g.add(drape)
+      })
+      const back = new THREE.Mesh(new THREE.SphereGeometry(r * 0.72, 8, 6), mat)
+      back.position.set(0, 1.69 * h, r * 0.82); g.add(back)
+    },
     addAccessory: (g, col) => {
-      // Bindi dot on forehead
       const bindiMat = new THREE.MeshStandardMaterial({ color: '#FF4444', emissive: new THREE.Color('#FF2222'), emissiveIntensity: 1.5 })
-      const bindi = new THREE.Mesh(new THREE.SphereGeometry(0.022, 8, 8), bindiMat)
-      bindi.position.set(0, 1.82, 0.195); g.add(bindi)
-      // Head scarf / dupatta hint
-      const scarfMat = new THREE.MeshStandardMaterial({ color: col, transparent: true, opacity: 0.5, emissive: col, emissiveIntensity: 0.3 })
-      const scarf = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.025, 6, 20, Math.PI), scarfMat)
-      scarf.position.set(0, 1.88, 0); scarf.rotation.x = 0.4; g.add(scarf)
+      const bindi = new THREE.Mesh(new THREE.SphereGeometry(0.026, 8, 8), bindiMat)
+      bindi.position.set(0, 1.88, 0.26); g.add(bindi)
+      const scarfMat = new THREE.MeshStandardMaterial({ color: col, transparent: true, opacity: 0.55, emissive: col, emissiveIntensity: 0.3 })
+      const scarf = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.03, 6, 20, Math.PI), scarfMat)
+      scarf.position.set(0, 1.97, 0); scarf.rotation.x = 0.4; g.add(scarf)
     },
   },
 }
@@ -142,6 +202,8 @@ function buildRig(char: CharacterConfig, isActive: boolean): Omit<Rig, 'labelEl'
   const skin = () => new THREE.MeshStandardMaterial({ color: char.skinColor, roughness: 0.5 })
   const eyeW = () => new THREE.MeshStandardMaterial({ color: 'white', emissive: new THREE.Color('white'), emissiveIntensity: 0.6 })
   const shine = () => new THREE.MeshStandardMaterial({ color: 'white', emissive: new THREE.Color('white'), emissiveIntensity: 3 })
+  const pant = () => new THREE.MeshStandardMaterial({ color: d.pantsColor, roughness: 0.45 })
+  const shoe = () => new THREE.MeshStandardMaterial({ color: d.shoeColor, roughness: 0.3, metalness: 0.1 })
 
   const group = new THREE.Group()
   group.position.set(char.homePosition[0], char.homePosition[1], char.homePosition[2])
@@ -154,32 +216,34 @@ function buildRig(char: CharacterConfig, isActive: boolean): Omit<Rig, 'labelEl'
   headMesh.castShadow = true
   headGroup.add(headMesh)
 
-  // Hair cap (half sphere on top of head)
-  const hairCap = new THREE.Mesh(
-    new THREE.SphereGeometry(d.headR + 0.01, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2),
-    main()
-  )
-  hairCap.position.set(0, 1.72 * h, 0)
-  headGroup.add(hairCap)
+  // Per-character styled hair
+  d.addHair(headGroup, h, d.headR)
 
   // Eyes
-  const eyeY = 1.73 * h
-  const eyePositions: [number, number, number][] = [[-0.085, eyeY, d.headR * 0.88], [0.085, eyeY, d.headR * 0.88]]
-  eyePositions.forEach(([x, y, z]) => {
-    const e = new THREE.Mesh(new THREE.SphereGeometry(0.042, 12, 12), eyeW()); e.position.set(x, y, z); headGroup.add(e)
-    const p = new THREE.Mesh(new THREE.SphereGeometry(0.024, 8, 8), dark()); p.position.set(x, y, z + 0.03); headGroup.add(p)
-    const s = new THREE.Mesh(new THREE.SphereGeometry(0.009, 4, 4), shine()); s.position.set(x - 0.01, y + 0.01, z + 0.052); headGroup.add(s)
+  // Chibi-large eyes scaled to head radius
+  const eyeX = d.headR * 0.41
+  const eyeY = 1.74 * h
+  const eyeZ = d.headR * 0.87
+  const eyeSR = d.headR * 0.23
+  const irisR = eyeSR * 0.66
+  const pupilR = eyeSR * 0.42
+  ;[-eyeX, eyeX].forEach(x => {
+    const e = new THREE.Mesh(new THREE.SphereGeometry(eyeSR, 12, 12), eyeW()); e.position.set(x, eyeY, eyeZ); headGroup.add(e)
+    const iris = new THREE.Mesh(new THREE.SphereGeometry(irisR, 8, 8), new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.4 }))
+    iris.position.set(x, eyeY, eyeZ + eyeSR * 0.48); headGroup.add(iris)
+    const p = new THREE.Mesh(new THREE.SphereGeometry(pupilR, 8, 8), dark()); p.position.set(x, eyeY, eyeZ + eyeSR * 0.68); headGroup.add(p)
+    const s = new THREE.Mesh(new THREE.SphereGeometry(eyeSR * 0.19, 4, 4), shine()); s.position.set(x - eyeSR * 0.24, eyeY + eyeSR * 0.28, eyeZ + eyeSR * 0.86); headGroup.add(s)
   })
 
-  // Eyebrows
+  // Eyebrows — scaled to head
   const browMat = main()
-  ;[[-0.085, 1.755 * h, d.headR * 0.85], [0.085, 1.755 * h, d.headR * 0.85]].forEach(([x, y, z]) => {
-    const brow = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.016, 0.012), browMat)
-    brow.position.set(x, y, z); headGroup.add(brow)
+  ;[-eyeX, eyeX].forEach(x => {
+    const brow = new THREE.Mesh(new THREE.BoxGeometry(d.headR * 0.42, 0.022, 0.015), browMat)
+    brow.position.set(x, 1.775 * h, d.headR * 0.82); headGroup.add(brow)
   })
 
-  // Animated mouth
-  const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.048, 0.011, 6, 12, Math.PI), dark())
+  // Animated mouth — scaled to head
+  const mouth = new THREE.Mesh(new THREE.TorusGeometry(d.headR * 0.21, 0.013, 6, 12, Math.PI), dark())
   mouth.position.set(0, 1.685 * h, d.headR * 0.9)
   mouth.rotation.set(0.2, 0, 0)
   headGroup.add(mouth)
@@ -201,7 +265,17 @@ function buildRig(char: CharacterConfig, isActive: boolean): Omit<Rig, 'labelEl'
   torso.castShadow = true
   group.add(torso)
 
-  // Shoulder buttons / collar
+  // Inner shirt visible between jacket lapels
+  const innerMat = new THREE.MeshStandardMaterial({ color: d.innerColor, roughness: 0.5 })
+  const innerShirt = new THREE.Mesh(new THREE.BoxGeometry(d.torsoW * 0.32, d.torsoH * 0.62, 0.016), innerMat)
+  innerShirt.position.set(0, 1.22 * h, 0.108); group.add(innerShirt)
+  // Jacket lapels
+  const lapelGeo = new THREE.BoxGeometry(d.torsoW * 0.28, d.torsoH * 0.44, 0.024)
+  const lLapel = new THREE.Mesh(lapelGeo, main())
+  lLapel.position.set(-d.torsoW * 0.11, 1.39 * h, 0.106); lLapel.rotation.z = 0.24; group.add(lLapel)
+  const rLapel = new THREE.Mesh(lapelGeo, main())
+  rLapel.position.set(d.torsoW * 0.11, 1.39 * h, 0.106); rLapel.rotation.z = -0.24; group.add(rLapel)
+  // Collar
   const collarMat = new THREE.MeshStandardMaterial({ color: 0xffffff, opacity: 0.3, transparent: true })
   const collar = new THREE.Mesh(new THREE.TorusGeometry(d.torsoW * 0.38, 0.018, 6, 16), collarMat)
   collar.rotation.x = Math.PI / 2; collar.position.set(0, 1.46 * h, 0); group.add(collar)
@@ -235,20 +309,24 @@ function buildRig(char: CharacterConfig, isActive: boolean): Omit<Rig, 'labelEl'
   const legRad = 0.07; const thighLen = 0.34; const shinLen = 0.3
   const rightLeg = new THREE.Group()
   rightLeg.position.set(-0.1, 0.86 * h, 0)
-  const rlThigh = new THREE.Mesh(new THREE.CapsuleGeometry(legRad, thighLen, 6, 10), main()); rlThigh.castShadow = true
-  const rlKnee = new THREE.Mesh(new THREE.SphereGeometry(0.075, 8, 8), main()); rlKnee.position.set(0, -(thighLen / 2 + 0.07), 0)
-  const rlShin = new THREE.Mesh(new THREE.CapsuleGeometry(legRad * 0.88, shinLen, 6, 10), dark()); rlShin.position.set(0, -(thighLen / 2 + 0.3), 0)
-  const rlShoe = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.08, 0.24), dark()); rlShoe.position.set(0, -(thighLen / 2 + shinLen + 0.05), 0.04)
-  rightLeg.add(rlThigh, rlKnee, rlShin, rlShoe)
+  const rlThigh = new THREE.Mesh(new THREE.CapsuleGeometry(legRad, thighLen, 6, 10), pant()); rlThigh.castShadow = true
+  const rlKnee = new THREE.Mesh(new THREE.SphereGeometry(0.075, 8, 8), pant()); rlKnee.position.set(0, -(thighLen / 2 + 0.07), 0)
+  const rlShin = new THREE.Mesh(new THREE.CapsuleGeometry(legRad * 0.88, shinLen, 6, 10), pant()); rlShin.position.set(0, -(thighLen / 2 + 0.3), 0)
+  const rlShoe = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.08, 0.25), shoe()); rlShoe.position.set(0, -(thighLen / 2 + shinLen + 0.05), 0.04)
+  const rlSole = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.028, 0.27), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.5 }))
+  rlSole.position.set(0, -(thighLen / 2 + shinLen + 0.1), 0.04)
+  rightLeg.add(rlThigh, rlKnee, rlShin, rlShoe, rlSole)
   group.add(rightLeg)
 
   const leftLeg = new THREE.Group()
   leftLeg.position.set(0.1, 0.86 * h, 0)
-  const llThigh = new THREE.Mesh(new THREE.CapsuleGeometry(legRad, thighLen, 6, 10), main()); llThigh.castShadow = true
-  const llKnee = new THREE.Mesh(new THREE.SphereGeometry(0.075, 8, 8), main()); llKnee.position.set(0, -(thighLen / 2 + 0.07), 0)
-  const llShin = new THREE.Mesh(new THREE.CapsuleGeometry(legRad * 0.88, shinLen, 6, 10), dark()); llShin.position.set(0, -(thighLen / 2 + 0.3), 0)
-  const llShoe = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.08, 0.24), dark()); llShoe.position.set(0, -(thighLen / 2 + shinLen + 0.05), 0.04)
-  leftLeg.add(llThigh, llKnee, llShin, llShoe)
+  const llThigh = new THREE.Mesh(new THREE.CapsuleGeometry(legRad, thighLen, 6, 10), pant()); llThigh.castShadow = true
+  const llKnee = new THREE.Mesh(new THREE.SphereGeometry(0.075, 8, 8), pant()); llKnee.position.set(0, -(thighLen / 2 + 0.07), 0)
+  const llShin = new THREE.Mesh(new THREE.CapsuleGeometry(legRad * 0.88, shinLen, 6, 10), pant()); llShin.position.set(0, -(thighLen / 2 + 0.3), 0)
+  const llShoe = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.08, 0.25), shoe()); llShoe.position.set(0, -(thighLen / 2 + shinLen + 0.05), 0.04)
+  const llSole = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.028, 0.27), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.5 }))
+  llSole.position.set(0, -(thighLen / 2 + shinLen + 0.1), 0.04)
+  leftLeg.add(llThigh, llKnee, llShin, llShoe, llSole)
   group.add(leftLeg)
 
   // ── Glow & floor circle ───────────────────────────────────────────────────
@@ -285,7 +363,7 @@ function animateRig(rig: Rig, char: CharacterConfig, state: CharacterState, isAc
     : new THREE.Vector3(hx, hy, hz)
 
   if (state.action === 'walking') {
-    rig.currentPos.lerp(target, d * 2.2)
+    rig.currentPos.lerp(target, d * 0.75)
     g.position.set(rig.currentPos.x, hy, rig.currentPos.z)
     const dir = target.clone().sub(rig.currentPos)
     if (dir.length() > 0.05) {
@@ -352,10 +430,17 @@ function animateRig(rig: Rig, char: CharacterConfig, state: CharacterState, isAc
   // ── Arms (human-like opposite swing) ─────────────────────────────────────
   const ra = rig.rightArm, la = rig.leftArm
   if (state.action === 'waving') {
-    ra.rotation.z = THREE.MathUtils.lerp(ra.rotation.z, -1.15, d * 5)
-    ra.rotation.y = Math.sin(t * 7) * 0.4
-    ra.rotation.x = 0
-    la.rotation.z = THREE.MathUtils.lerp(la.rotation.z, 0.15, d * 3)
+    // Both arms raised — enthusiastic chibi wave
+    ra.rotation.z = THREE.MathUtils.lerp(ra.rotation.z, -1.55, d * 7)
+    ra.rotation.y = Math.sin(t * 8) * 0.6
+    ra.rotation.x = Math.sin(t * 6) * 0.15
+    la.rotation.z = THREE.MathUtils.lerp(la.rotation.z, 1.3, d * 5)
+    la.rotation.y = -Math.sin(t * 8 + 0.5) * 0.35
+    la.rotation.x = THREE.MathUtils.lerp(la.rotation.x, 0.15, d * 4)
+    rig.headGroup.rotation.y = Math.sin(t * 4) * 0.2
+    rig.headGroup.rotation.z = Math.sin(t * 3.5) * 0.1
+    rig.torso.rotation.z = Math.sin(t * 4) * 0.06
+    g.position.y += Math.abs(Math.sin(t * 7)) * 0.055
   } else if (state.action === 'celebrating') {
     ra.rotation.z = -Math.PI / 2 + Math.sin(t * 7) * 0.3
     la.rotation.z = Math.PI / 2 + Math.sin(t * 7 + 1) * 0.3

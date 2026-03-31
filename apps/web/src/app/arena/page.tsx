@@ -204,8 +204,14 @@ function BuildPanel({
   onClose: () => void
 }) {
   const [selectedFile, setSelectedFile] = useState<string | null>(null)
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const isCompleted = taskStatus === 'done'
   const apiPreviewUrl = taskId ? `/api/v1/preview/${taskId}` : null
+
+  // Auto-expand to 65% when build completes, exit fullscreen
+  useEffect(() => {
+    if (isCompleted) setIsFullscreen(false)
+  }, [isCompleted])
 
   useEffect(() => {
     if (files.length > 0 && !selectedFile) setSelectedFile(files[0].path)
@@ -226,18 +232,20 @@ function BuildPanel({
 
   const activeFile = files.find(f => f.path === selectedFile)
 
+  const panelWidth = isFullscreen ? '100%' : isCompleted ? '65%' : '48%'
+
   return (
     <div style={{
       position: 'fixed',
       right: 0,
       top: 0,
       bottom: 0,
-      width: '48%',
+      width: panelWidth,
       background: 'rgba(6, 6, 20, 0.96)',
       backdropFilter: 'blur(20px)',
       borderLeft: '1px solid rgba(99,102,241,0.2)',
       transform: show ? 'translateX(0)' : 'translateX(100%)',
-      transition: 'transform 0.45s cubic-bezier(0.32, 0, 0.67, 0)',
+      transition: 'transform 0.45s cubic-bezier(0.32, 0, 0.67, 0), width 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       display: 'flex',
       flexDirection: 'column',
       zIndex: 50,
@@ -272,11 +280,29 @@ function BuildPanel({
               fontSize: 12,
               fontWeight: 700,
               cursor: 'pointer',
+              flexShrink: 0,
             }}
           >
             ↓ Download ZIP
           </button>
         )}
+        <button
+          onClick={() => setIsFullscreen(f => !f)}
+          title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen preview'}
+          style={{
+            color: '#94a3b8',
+            background: 'rgba(99,102,241,0.1)',
+            border: '1px solid rgba(99,102,241,0.25)',
+            borderRadius: 8,
+            cursor: 'pointer',
+            fontSize: 13,
+            padding: '4px 8px',
+            flexShrink: 0,
+            transition: 'all 0.2s',
+          }}
+        >
+          {isFullscreen ? '⊡' : '⛶'}
+        </button>
         <button
           onClick={onClose}
           style={{ color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, padding: 4 }}

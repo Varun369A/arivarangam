@@ -100,12 +100,27 @@ export async function search(query: string): Promise<string> {
 }
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
+// Lightweight: 1-token completion to verify API key and connectivity
 
 export async function pingPerplexity(): Promise<{ ok: boolean; latencyMs: number }> {
   const start = Date.now();
   try {
-    const result = await search('What is 2+2?');
-    return { ok: result.length > 0, latencyMs: Date.now() - start };
+    const config = getConfig();
+    const response = await fetch(`${PERPLEXITY_BASE}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${config.PERPLEXITY_API_KEY}`,
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        model: SONAR_MODEL,
+        messages: [{ role: 'user', content: 'ping' }],
+        max_tokens: 1,
+        stream: false,
+      }),
+    });
+    return { ok: response.ok, latencyMs: Date.now() - start };
   } catch {
     return { ok: false, latencyMs: Date.now() - start };
   }
