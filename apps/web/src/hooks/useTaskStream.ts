@@ -317,13 +317,17 @@ export function useTaskStream(taskId: string | null): UseTaskStreamReturn {
   const forceReconnect = useCallback(() => {
     if (!taskId) return
     closeConnection()
-    setState((prev) => ({
-      ...prev,
+    // Full state reset so replayed history renders without duplicates
+    setState({
+      events: [],
+      status: null,
+      previewUrl: null,
+      files: [],
+      streamingFile: null,
       isConnected: false,
       isComplete: false,
       error: null,
-      status: null,
-    }))
+    })
     reconnectCountRef.current = 0
     connect(taskId)
   }, [taskId, connect, closeConnection])

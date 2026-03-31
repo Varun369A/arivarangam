@@ -11,11 +11,12 @@
 import { prisma } from '@arivarangam/db';
 import { UsageMeter } from '../services/UsageMeter';
 import { CATEGORY_RULES } from '../rules/categories';
-import { analyzePrompt }  from './phases/AnalyzePhase';
-import { planBuild }      from './phases/PlanPhase';
-import { buildFiles }     from './phases/BuildPhase';
-import { reviewFiles }    from './phases/ReviewPhase';
-import { repairFiles }    from './phases/RepairPhase';
+import { analyzePrompt }    from './phases/AnalyzePhase';
+import { createDesignSpec } from './phases/DesignSpecPhase';
+import { planBuild }        from './phases/PlanPhase';
+import { buildFiles }       from './phases/BuildPhase';
+import { reviewFiles }      from './phases/ReviewPhase';
+import { repairFiles }      from './phases/RepairPhase';
 import type { OnEvent, BuiltFile } from './types';
 
 // ─── Orchestrator ─────────────────────────────────────────────────────────────
@@ -40,16 +41,23 @@ export class TaskOrchestrator {
     // ── Phase 1: Analyze ─────────────────────────────────────────────────────
     const analysis = await analyzePrompt(prompt, category, onEvent);
 
-    // ── Phase 2: Plan ────────────────────────────────────────────────────────
+    // ── Phase 2: Design Spec (visual blueprint — section by section) ─────────
+    // Skip for non-visual categories (agent, workflow, mcp, bot)
+    const VISUAL_CATEGORIES = ['web', 'animation', 'presentation', 'banner', 'brand', 'design-system', 'dataviz', 'logo', 'mobile', 'content', 'code'];
+    const designSpec = VISUAL_CATEGORIES.includes(category)
+      ? await createDesignSpec(prompt, category, analysis, onEvent, meter)
+      : null;
+
+    // ── Phase 3: Plan ────────────────────────────────────────────────────────
     const plan = await planBuild(prompt, category, analysis, categoryRules, onEvent, meter);
 
-    // ── Phase 3: Build ───────────────────────────────────────────────────────
-    let files = await buildFiles(prompt, category, analysis, plan, categoryRules, onEvent, meter);
+    // ── Phase 4: Build ───────────────────────────────────────────────────────
+    let files = await buildFiles(prompt, category, analysis, plan, categoryRules, onEvent, meter, designSpec);
 
-    // ── Phase 4: Review ──────────────────────────────────────────────────────
+    // ── Phase 5: Review ──────────────────────────────────────────────────────
     const review = await reviewFiles(files, categoryRules, onEvent, meter);
 
-    // ── Phase 5: Repair (if needed) ──────────────────────────────────────────
+    // ── Phase 6: Repair (if needed) ──────────────────────────────────────────
     if (!review.passed && categoryRules.maxRepairAttempts > 0) {
       files = await repairFiles(files, review, categoryRules, onEvent, meter);
 
@@ -60,7 +68,7 @@ export class TaskOrchestrator {
       }
     }
 
-    // ── Phase 6: Complete ────────────────────────────────────────────────────
+    // ── Phase 7: Complete ────────────────────────────────────────────────────
     await this.completeTask(taskId, userId, files, meter, onEvent);
   }
 

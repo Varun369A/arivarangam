@@ -5,7 +5,7 @@ import { callClaudeSonnet } from '../../connectors/claude';
 import { DESIGN_RULES } from '../../rules/design';
 import { MOTION_RULES } from '../../rules/motion';
 import { SECURITY_RULES } from '../../rules/security';
-import type { PromptAnalysis, BuildPlan, CategoryRuleSet, BuiltFile, OnEvent } from '../types';
+import type { PromptAnalysis, BuildPlan, CategoryRuleSet, BuiltFile, DesignSpec, OnEvent } from '../types';
 import type { UsageMeter } from '../../services/UsageMeter';
 
 function buildRuleContext(ruleSets: string[], analysis: PromptAnalysis): string {
@@ -16,6 +16,60 @@ function buildRuleContext(ruleSets: string[], analysis: PromptAnalysis): string 
   return parts.join('\n\n');
 }
 
+function formatDesignSpec(spec: DesignSpec): string {
+  const cs = spec.colorSystem;
+  const ty = spec.typography;
+
+  const colorBlock = `CSS DESIGN TOKENS (use EXACTLY these values):
+--color-bg:          ${cs.bg};
+--color-surface:     ${cs.surface};
+--color-surface-alt: ${cs.surfaceAlt};
+--color-primary:     ${cs.primary};
+--color-secondary:   ${cs.secondary};
+--color-accent:      ${cs.accent};
+--color-text:        ${cs.text};
+--color-text-muted:  ${cs.textMuted};
+--color-border:      ${cs.border};
+Key gradients: ${cs.gradients.join(' | ')}`;
+
+  const typoBlock = `TYPOGRAPHY:
+Display font: ${ty.displayFont}
+Body font: ${ty.bodyFont}
+Google Fonts URL: ${ty.googleFontsUrl}
+Hero size: ${ty.heroSize} | weight ${ty.heroWeight} | letter-spacing ${ty.letterSpacingHero}
+H2 size: ${ty.h2Size}
+H3 size: ${ty.h3Size}`;
+
+  const sectionsBlock = spec.sections.map(s =>
+    `SECTION "${s.name}":
+  Layout: ${s.layout}
+  Elements (in order): ${s.elements.join(' → ')}
+  Colors: ${s.colors}
+  Animation: ${s.animation}`
+  ).join('\n\n');
+
+  const componentsBlock = spec.components.map(c =>
+    `COMPONENT "${c.name}": ${c.style}`
+  ).join('\n');
+
+  return `═══ DESIGN BLUEPRINT (FOLLOW EXACTLY) ═══
+
+Overall mood: ${spec.overallMood}
+
+${colorBlock}
+
+${typoBlock}
+
+PAGE STRUCTURE:
+${sectionsBlock}
+
+${componentsBlock}
+
+Special effects: ${spec.specialEffects?.join(', ') || 'none'}
+
+═══ END DESIGN BLUEPRINT ═══`;
+}
+
 export async function buildFiles(
   prompt: string,
   category: string,
@@ -23,15 +77,20 @@ export async function buildFiles(
   plan: BuildPlan,
   categoryRules: CategoryRuleSet,
   onEvent: OnEvent,
-  meter: UsageMeter
+  meter: UsageMeter,
+  designSpec?: DesignSpec | null
 ): Promise<BuiltFile[]> {
   const builtFiles: BuiltFile[] = [];
   const fileMap = new Map<string, string>(); // path → content for dependency injection
   const ruleContext = buildRuleContext(categoryRules.appliedRuleSets, analysis);
 
+  const specBlock = designSpec ? formatDesignSpec(designSpec) : '';
+
   const systemBase = `${categoryRules.systemPromptCore}
 
 ${ruleContext}
+
+${specBlock}
 
 ${categoryRules.buildHints}
 
@@ -49,7 +108,8 @@ ORIGINAL REQUEST: ${prompt}
 OUTPUT RULES:
 - Output ONLY the raw file content — no markdown fences, no explanation
 - The file must be complete and production-ready
-- Do not truncate or leave TODO comments`;
+- Do not truncate or leave TODO comments
+- If a DESIGN BLUEPRINT is provided above, follow it exactly — do not deviate from the specified colors, fonts, sections, or animations`;
 
   for (const filePlan of plan.files) {
     await onEvent({

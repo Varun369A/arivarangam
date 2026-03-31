@@ -87,6 +87,16 @@ export async function streamRoutes(fastify: FastifyInstance): Promise<void> {
       return;
     }
 
+    // ─── Replay historical events (so reconnects/follow-ups show full history) ──
+    const historicalEvents = await prisma.taskEvent.findMany({
+      where: { taskId },
+      orderBy: { createdAt: 'asc' },
+      take: 300,
+    });
+    for (const evt of historicalEvents) {
+      reply.raw.write(`event: ${evt.type}\ndata: ${JSON.stringify({ ...(evt.data as object ?? {}), timestamp: evt.createdAt.toISOString() })}\n\n`);
+    }
+
     // ─── Redis Subscribe ───────────────────────────────────────────────────────
     const subscriber = createSubscriber();
     const channel = TASK_CHANNEL(taskId);
