@@ -510,7 +510,7 @@ function PreviewContent({
     return (
       <div className="flex-1 flex flex-col overflow-hidden">
         <PreviewBar url="" label="⏳ Building preview…" onRefresh={() => setIframeKey(k => k + 1)} dark />
-        <iframe key={iframeKey} srcdoc={liveHtml} className="flex-1 w-full border-0 bg-white" title="Live Preview" />
+        <iframe key={iframeKey} srcDoc={liveHtml} className="flex-1 w-full border-0 bg-white" title="Live Preview" />
       </div>
     );
   }
@@ -648,7 +648,7 @@ function PreviewContent({
                   <code className="text-xs text-slate-600 font-mono capitalize">{label}</code>
                 </div>
                 <div className="overflow-hidden" style={{ height: 200 }}>
-                  <iframe srcdoc={f.content ?? ''} className="w-full border-0 origin-top-left" style={{ transform: 'scale(0.4)', width: '250%', height: 500 }} title={f.path} />
+                  <iframe srcDoc={f.content ?? ''} className="w-full border-0 origin-top-left" style={{ transform: 'scale(0.4)', width: '250%', height: 500 }} title={f.path} />
                 </div>
               </div>
             );
@@ -667,7 +667,7 @@ function PreviewContent({
           <div className="flex items-center gap-2 px-4 py-2 bg-slate-800 border-b border-slate-700 flex-shrink-0">
             <span className="text-xs text-slate-400">🎨 Brand identity preview</span>
           </div>
-          <iframe srcdoc={previewFile.content} className="flex-1 w-full border-0 bg-white" title="Brand Preview" />
+          <iframe srcDoc={previewFile.content} className="flex-1 w-full border-0 bg-white" title="Brand Preview" />
         </div>
       );
     }
@@ -682,7 +682,7 @@ function PreviewContent({
           <div className="flex items-center gap-2 px-4 py-2 bg-slate-800 border-b border-slate-700 flex-shrink-0">
             <span className="text-xs text-slate-400">🎯 Presentation preview</span>
           </div>
-          <iframe srcdoc={htmlF.content} className="flex-1 w-full border-0 bg-white" title="Presentation" />
+          <iframe srcDoc={htmlF.content} className="flex-1 w-full border-0 bg-white" title="Presentation" />
         </div>
       );
     }
