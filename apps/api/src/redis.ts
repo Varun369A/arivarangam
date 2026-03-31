@@ -1,10 +1,10 @@
-import Redis from 'ioredis';
+import Redis, { type RedisOptions } from 'ioredis';
 import { getConfig } from '@arivarangam/config';
 
 // ─── Redis URL Parser ─────────────────────────────────────────────────────────
 // Handles both local Redis (redis://) and Upstash (rediss:// TLS)
 
-function parseRedisOptions(url: string): ConstructorParameters<typeof Redis>[0] {
+function parseRedisOptions(url: string): RedisOptions | string {
   // If it's a full URL string, ioredis can parse it directly
   // but we need to add TLS options for Upstash (rediss://)
   const isTLS = url.startsWith('rediss://');

@@ -84,7 +84,7 @@ Return ONLY this JSON (no markdown, no explanation):
         logo: { min: 40, max: 80, typical: 55 },
         banner: { min: 60, max: 120, typical: 80 },
         brand: { min: 80, max: 200, typical: 130 },
-        'design-system': { min: 70, max: 160, typical: 100 },
+        'design_system': { min: 70, max: 160, typical: 100 },
         mcp: { min: 60, max: 120, typical: 80 },
         bot: { min: 60, max: 130, typical: 85 },
       };

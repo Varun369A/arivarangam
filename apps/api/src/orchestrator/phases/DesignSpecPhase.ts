@@ -174,7 +174,7 @@ export async function createDesignSpec(
   ].filter(Boolean).join('\n');
 
   try {
-    const raw = await callClaudeSonnet(userPrompt, SYSTEM, 4096, meter);
+    const raw = await callClaudeSonnet(userPrompt, SYSTEM, 4096, undefined, meter);
     const jsonStr = extractJson(raw);
     const parsed = JSON.parse(jsonStr);
 

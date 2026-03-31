@@ -11,7 +11,7 @@ import { creditService } from '../services/CreditService';
 const ALL_CATEGORIES = [
   'code', 'research', 'image', 'voice', 'content', 'mobile',
   'presentation', 'agent', 'workflow', 'animation', 'dataviz',
-  'logo', 'banner', 'brand', 'design-system', 'mcp', 'bot',
+  'logo', 'banner', 'brand', 'design_system', 'mcp', 'bot',
 ] as const;
 
 const createTaskSchema = z.object({

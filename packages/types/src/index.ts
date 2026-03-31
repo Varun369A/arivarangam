@@ -8,7 +8,7 @@ export type AIModel =
   | 'perplexity-sonar'
   | 'sarvam';
 
-export type TaskCategory = 'code' | 'research' | 'image' | 'voice' | 'content' | 'mobile' | 'presentation' | 'agent' | 'workflow' | 'animation' | 'dataviz' | 'logo' | 'banner' | 'brand' | 'design-system' | 'mcp' | 'bot';
+export type TaskCategory = 'code' | 'research' | 'image' | 'voice' | 'content' | 'mobile' | 'presentation' | 'agent' | 'workflow' | 'animation' | 'dataviz' | 'logo' | 'banner' | 'brand' | 'design_system' | 'mcp' | 'bot';
 
 export type TaskStatus =
   | 'pending'
@@ -63,7 +63,8 @@ export type TaskEventType =
   | 'error_fixed'
   | 'preview_ready'
   | 'completed'
-  | 'log';
+  | 'log'
+  | 'credit_update';
 
 export interface TaskEvent {
   type: TaskEventType;

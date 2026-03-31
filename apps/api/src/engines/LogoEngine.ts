@@ -413,7 +413,7 @@ Files in this package:
     return `${r}, ${g}, ${b}`;
   }
 
-  private fallbackSvg(variant: typeof ['primary', 'dark', 'mark', 'horizontal', 'favicon'][number], plan: LogoPlan): string {
+  private fallbackSvg(variant: 'primary' | 'dark' | 'mark' | 'horizontal' | 'favicon', plan: LogoPlan): string {
     const { primary, secondary, light } = plan.colors;
     if (variant === 'favicon') {
       return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">

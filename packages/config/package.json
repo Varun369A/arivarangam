@@ -3,6 +3,15 @@
   "version": "1.0.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "scripts": { "build": "tsc" },
-  "devDependencies": { "typescript": "^5.4.0", "@types/node": "^20.0.0" }
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@vitest/coverage-v8": "^4.1.2",
+    "typescript": "^5.4.0",
+    "vitest": "^4.1.2"
+  }
 }

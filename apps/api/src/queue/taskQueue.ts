@@ -29,7 +29,6 @@ export function getTaskQueue(): Queue<TaskJobData> {
         },
         removeOnComplete: { count: 100 },   // Keep last 100 completed
         removeOnFail: { count: 500 },        // Keep last 500 failed for debugging
-        timeout: 30 * 60 * 1000,             // 30-minute job timeout
       },
     });
 

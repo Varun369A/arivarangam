@@ -4,13 +4,14 @@
   "scripts": {
     "dev": "tsx watch --env-file=.env src/server.ts",
     "dev:worker": "tsx watch --env-file=.env src/worker.ts",
-    "build": "NODE_OPTIONS='--max-old-space-size=4096' tsc || true",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "start": "node dist/server.js",
     "start:worker": "node dist/worker.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.24.0",
-    "bullmq": "^5.0.0",
     "@arivarangam/config": "*",
     "@arivarangam/db": "*",
     "@arivarangam/types": "*",
@@ -23,6 +24,7 @@
     "@fastify/rate-limit": "^10.0.0",
     "@types/nodemailer": "^7.0.11",
     "bcryptjs": "^2.4.3",
+    "bullmq": "^5.0.0",
     "dotenv": "^16.4.0",
     "fastify": "^5.0.0",
     "ioredis": "^5.3.0",
@@ -38,6 +40,8 @@
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/node-cron": "^3.0.0",
-    "typescript": "^5.4.0"
+    "@vitest/coverage-v8": "^4.1.2",
+    "typescript": "^5.4.0",
+    "vitest": "^4.1.2"
   }
 }

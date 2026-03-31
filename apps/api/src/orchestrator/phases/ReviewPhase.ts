@@ -98,7 +98,7 @@ Return exactly:
     const result: ReviewResult = {
       score:       Math.max(0, Math.min(10, parsed.score ?? 5)),
       passed:      parsed.passed ?? (parsed.score >= categoryRules.qualityThreshold),
-      failures:    Array.isArray(parsed.failures)    ? parsed.failures    : [],
+      failures:    Array.isArray(parsed.failures)    ? parsed.failures.map((f: any) => ({ file: String(f.file ?? ''), issue: String(f.issue ?? ''), severity: (['low','medium','high'].includes(f.severity) ? f.severity : 'medium') as 'low'|'medium'|'high' })) : [],
       suggestions: Array.isArray(parsed.suggestions) ? parsed.suggestions : [],
     };
 

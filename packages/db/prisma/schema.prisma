@@ -41,6 +41,14 @@ enum TaskCategory {
   presentation
   agent
   workflow
+  animation
+  dataviz
+  logo
+  banner
+  brand
+  design_system
+  mcp
+  bot
 }
 
 enum TaskStatus {

@@ -79,7 +79,7 @@ export async function geminiReviewCode(
   files: { path: string; content: string }[],
   qualityThreshold: number,
   reviewCriteria: string
-): Promise<{ score: number; passed: boolean; failures: { file: string; issue: string; severity: string }[]; suggestions: string[] } | null> {
+): Promise<{ score: number; passed: boolean; failures: { file: string; issue: string; severity: 'low' | 'medium' | 'high' }[]; suggestions: string[] } | null> {
   if (!getApiKey()) return null;
 
   const filesSummary = files
@@ -109,7 +109,7 @@ Return ONLY a valid JSON object — no markdown, no commentary:
     return {
       score:       Math.max(0, Math.min(10, parsed.score ?? 5)),
       passed:      parsed.passed ?? (parsed.score >= qualityThreshold),
-      failures:    Array.isArray(parsed.failures)    ? parsed.failures    : [],
+      failures:    Array.isArray(parsed.failures)    ? parsed.failures.map((f: any) => ({ file: String(f.file ?? ''), issue: String(f.issue ?? ''), severity: (['low','medium','high'].includes(f.severity) ? f.severity : 'medium') as 'low'|'medium'|'high' })) : [],
       suggestions: Array.isArray(parsed.suggestions) ? parsed.suggestions : [],
     };
   } catch {
