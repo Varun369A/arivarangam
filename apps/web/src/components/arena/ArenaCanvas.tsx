@@ -417,14 +417,17 @@ function animateRig(rig: Rig, char: CharacterConfig, state: CharacterState, isAc
 
 interface ArenaCanvasProps {
   characterStates: Record<string, CharacterState>
+  welcomeUser?: string | null
 }
 
-export function ArenaCanvas({ characterStates }: ArenaCanvasProps) {
+export function ArenaCanvas({ characterStates, welcomeUser }: ArenaCanvasProps) {
   const mountRef = useRef<HTMLDivElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
   const stateRef = useRef(characterStates)
+  const welcomeRef = useRef(welcomeUser ?? null)
 
   useEffect(() => { stateRef.current = characterStates }, [characterStates])
+  useEffect(() => { welcomeRef.current = welcomeUser ?? null }, [welcomeUser])
 
   useEffect(() => {
     const mount = mountRef.current as HTMLDivElement
@@ -465,8 +468,12 @@ export function ArenaCanvas({ characterStates }: ArenaCanvasProps) {
     ;(sun.shadow.camera as THREE.OrthographicCamera).bottom = -14
     scene.add(sun)
 
-    scene.add(Object.assign(new THREE.DirectionalLight('#4040CC', 0.45), { position: new THREE.Vector3(-8, 4, -3) }))
-    scene.add(Object.assign(new THREE.DirectionalLight('#6030A0', 0.3), { position: new THREE.Vector3(0, 3, -10) }))
+    const bl = new THREE.DirectionalLight('#4040CC', 0.45)
+    bl.position.set(-8, 4, -3)
+    scene.add(bl)
+    const bl2 = new THREE.DirectionalLight('#6030A0', 0.3)
+    bl2.position.set(0, 3, -10)
+    scene.add(bl2)
 
     const spot = new THREE.SpotLight('#FEF3C7', 2.8)
     spot.position.set(0, 9, 1); spot.angle = 0.32; spot.penumbra = 0.65; spot.castShadow = true
@@ -585,6 +592,8 @@ export function ArenaCanvas({ characterStates }: ArenaCanvasProps) {
     const clock = new THREE.Clock()
     let prevT = 0, rafId = 0
     const def: CharacterState = { action: 'idle', targetPosition: null, speech: null }
+    const prevClaudeSpeech = { value: '' }
+    const dismissedUntil = new Map<string, number>()
 
     function loop() {
       rafId = requestAnimationFrame(loop)
@@ -598,8 +607,40 @@ export function ArenaCanvas({ characterStates }: ArenaCanvasProps) {
       })
 
       const states = stateRef.current
+
+      // Dismiss detection — scan Claude speech for "thank you [Name] you can go/leave"
+      const claudeSpeechNow = (states['claude'] ?? def).speech ?? ''
+      if (claudeSpeechNow && claudeSpeechNow !== prevClaudeSpeech.value) {
+        prevClaudeSpeech.value = claudeSpeechNow
+        if (/thank you|you can go|you can leave|you may leave|go back|that.s all|goodbye|farewell/i.test(claudeSpeechNow)) {
+          const lower = claudeSpeechNow.toLowerCase()
+          CHARACTER_ORDER.forEach(cid => {
+            if (cid !== 'claude' && lower.includes(CHARACTERS[cid].name.toLowerCase())) {
+              dismissedUntil.set(cid, Date.now() + 12000)
+            }
+          })
+        }
+      }
+
       CHARACTER_ORDER.forEach((id) => {
-        const rig = rigs[id]; const char = CHARACTERS[id]; const state = states[id] ?? def
+        const rig = rigs[id]; const char = CHARACTERS[id]
+        let state = states[id] ?? def
+
+        // Welcome override — Claude waves to user on first login
+        if (id === 'claude' && welcomeRef.current) {
+          state = { action: 'waving', speech: `Welcome, ${welcomeRef.current}! What shall we build today?`, targetPosition: null }
+        }
+
+        // Dismiss override — dismissed AIs walk back to off-screen home
+        const dismissEnd = dismissedUntil.get(id)
+        if (dismissEnd) {
+          if (Date.now() < dismissEnd) {
+            state = { action: 'walking', targetPosition: char.homePosition as [number, number, number], speech: null }
+          } else {
+            dismissedUntil.delete(id)
+          }
+        }
+
         animateRig(rig, char, state, id === 'claude', t, delta)
       })
 

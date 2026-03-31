@@ -33,21 +33,30 @@ function detectCategory(text: string): string {
   return 'code'
 }
 
+// ─── AI brand config for chat bubbles ─────────────────────────────────────────
+const AI_CHAT_STYLE: Record<string, { color: string; bg: string; border: string; icon: string; role: string }> = {
+  claude:     { color: '#F59E0B', bg: 'rgba(217,119,6,0.12)',   border: 'rgba(245,158,11,0.28)',  icon: '◆', role: 'Builder'    },
+  perplexity: { color: '#14B8A6', bg: 'rgba(13,148,136,0.12)',  border: 'rgba(20,184,166,0.28)',  icon: '⬡', role: 'Researcher' },
+  chatgpt:    { color: '#10B981', bg: 'rgba(16,185,129,0.12)',  border: 'rgba(16,185,129,0.28)',  icon: '●', role: 'Advisor'    },
+  gemini:     { color: '#A78BFA', bg: 'rgba(139,92,246,0.12)',  border: 'rgba(167,139,250,0.28)', icon: '◈', role: 'Visualizer' },
+  sarvam:     { color: '#FBBF24', bg: 'rgba(245,158,11,0.12)',  border: 'rgba(251,191,36,0.28)',  icon: '❋', role: 'Translator' },
+}
+
 // ─── Chat Message Row ─────────────────────────────────────────────────────────
 function ChatRow({ msg }: { msg: { type: string; text: string; character?: string } }) {
   if (msg.type === 'user') {
     return (
-      <div className="flex justify-end mb-2">
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
         <div style={{
           background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
           color: 'white',
           borderRadius: '18px 18px 4px 18px',
           padding: '10px 16px',
-          maxWidth: '78%',
+          maxWidth: '82%',
           fontSize: 13,
-          lineHeight: 1.5,
+          lineHeight: 1.6,
           fontWeight: 500,
-          boxShadow: '0 2px 12px rgba(99,102,241,0.35)',
+          boxShadow: '0 2px 16px rgba(99,102,241,0.4), 0 1px 4px rgba(0,0,0,0.3)',
         }}>
           {msg.text}
         </div>
@@ -57,16 +66,17 @@ function ChatRow({ msg }: { msg: { type: string; text: string; character?: strin
 
   if (msg.type === 'file_done') {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-        <span style={{ color: '#34D399', fontSize: 11 }}>✓</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 5, paddingLeft: 6 }}>
+        <span style={{ color: '#34D399', fontSize: 10, flexShrink: 0 }}>✦</span>
         <span style={{
-          background: 'rgba(16,185,129,0.1)',
-          border: '1px solid rgba(16,185,129,0.25)',
+          background: 'rgba(16,185,129,0.08)',
+          border: '1px solid rgba(16,185,129,0.22)',
           borderRadius: 8,
-          padding: '3px 10px',
+          padding: '2px 9px',
           color: '#6EE7B7',
-          fontSize: 11,
+          fontSize: 10.5,
           fontFamily: 'monospace',
+          letterSpacing: '0.02em',
         }}>
           {msg.text}
         </span>
@@ -77,14 +87,18 @@ function ChatRow({ msg }: { msg: { type: string; text: string; character?: strin
   if (msg.type === 'completed') {
     return (
       <div style={{
-        background: 'rgba(16,185,129,0.1)',
-        border: '1px solid rgba(16,185,129,0.3)',
-        borderRadius: 12,
-        padding: '10px 14px',
+        background: 'linear-gradient(135deg, rgba(16,185,129,0.12), rgba(5,150,105,0.08))',
+        border: '1px solid rgba(16,185,129,0.35)',
+        borderRadius: 14,
+        padding: '11px 16px',
         marginBottom: 8,
         marginTop: 4,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
       }}>
-        <span style={{ color: '#34D399', fontSize: 13, fontWeight: 600 }}>✓ {msg.text}</span>
+        <span style={{ fontSize: 16, lineHeight: 1 }}>✓</span>
+        <span style={{ color: '#6EE7B7', fontSize: 13, fontWeight: 700 }}>{msg.text}</span>
       </div>
     )
   }
@@ -92,25 +106,85 @@ function ChatRow({ msg }: { msg: { type: string; text: string; character?: strin
   if (msg.type === 'error') {
     return (
       <div style={{
-        background: 'rgba(239,68,68,0.1)',
-        border: '1px solid rgba(239,68,68,0.25)',
+        background: 'rgba(239,68,68,0.08)',
+        border: '1px solid rgba(239,68,68,0.22)',
         borderRadius: 10,
         padding: '8px 12px',
         marginBottom: 6,
-        color: '#FCA5A5',
-        fontSize: 12,
+        display: 'flex', alignItems: 'flex-start', gap: 6,
       }}>
-        ✗ {msg.text}
+        <span style={{ color: '#F87171', fontSize: 11, flexShrink: 0, marginTop: 1 }}>✗</span>
+        <span style={{ color: '#FCA5A5', fontSize: 12, lineHeight: 1.5 }}>{msg.text}</span>
       </div>
     )
   }
 
-  // ai_log
-  const charColor = msg.character ? CHARACTERS[msg.character as keyof typeof CHARACTERS]?.color ?? '#94a3b8' : '#94a3b8'
+  // ai_log — per-AI styled bubble
+  const charId = msg.character ?? 'claude'
+  const ai = AI_CHAT_STYLE[charId] ?? { color: '#94a3b8', bg: 'rgba(148,163,184,0.08)', border: 'rgba(148,163,184,0.2)', icon: '·', role: 'AI' }
+  const charName = CHARACTERS[charId as keyof typeof CHARACTERS]?.name ?? charId
+
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 7, marginBottom: 5 }}>
-      <span style={{ width: 5, height: 5, borderRadius: '50%', background: charColor, marginTop: 6, flexShrink: 0 }} />
-      <span style={{ color: '#94a3b8', fontSize: 12, lineHeight: 1.5 }}>{msg.text}</span>
+    <div style={{
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: 8,
+      marginBottom: 8,
+      animation: 'fadeInBubble 0.3s ease',
+    }}>
+      {/* Avatar dot */}
+      <div style={{
+        width: 26,
+        height: 26,
+        borderRadius: 8,
+        background: ai.bg,
+        border: `1.5px solid ${ai.border}`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flexShrink: 0,
+        marginTop: 1,
+        fontSize: 11,
+        color: ai.color,
+        boxShadow: `0 0 8px ${ai.color}30`,
+      }}>
+        {ai.icon}
+      </div>
+
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {/* Name badge */}
+        <div style={{ marginBottom: 3, display: 'flex', alignItems: 'center', gap: 5 }}>
+          <span style={{
+            fontSize: 10,
+            fontWeight: 800,
+            color: ai.color,
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+          }}>
+            {charName}
+          </span>
+          <span style={{
+            fontSize: 9,
+            color: ai.color,
+            opacity: 0.55,
+            fontWeight: 500,
+          }}>
+            {ai.role}
+          </span>
+        </div>
+
+        {/* Message bubble */}
+        <div style={{
+          background: ai.bg,
+          border: `1px solid ${ai.border}`,
+          borderRadius: '4px 14px 14px 14px',
+          padding: '8px 12px',
+          color: '#e2e8f0',
+          fontSize: 12.5,
+          lineHeight: 1.6,
+          boxShadow: `0 0 12px ${ai.color}15`,
+        }}>
+          {msg.text}
+        </div>
+      </div>
     </div>
   )
 }
@@ -298,6 +372,8 @@ export default function ArenaPage() {
   const [showProjects, setShowProjects] = useState(false)
   const [projectsList, setProjectsList] = useState<any[]>([])
   const [projectsLoading, setProjectsLoading] = useState(false)
+  const [welcomeUser, setWelcomeUser] = useState<string | null>(null)
+  const welcomedRef = useRef(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const estimateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -321,6 +397,16 @@ export default function ArenaPage() {
   useEffect(() => {
     if (!user) return
     creditsApi.getBalance().then(r => setUserCredits((r as any).data?.balance ?? (r as any).balance ?? null)).catch(() => {})
+  }, [user])
+
+  // Claude welcome wave on first load
+  useEffect(() => {
+    if (!user || welcomedRef.current) return
+    welcomedRef.current = true
+    const name = user.name?.split(' ')[0] ?? 'there'
+    setWelcomeUser(name)
+    const t = setTimeout(() => setWelcomeUser(null), 6000)
+    return () => clearTimeout(t)
   }, [user])
 
   const isRunning = taskStatus === 'running'
@@ -441,7 +527,7 @@ export default function ArenaPage() {
 
       {/* ── Full-screen 3D arena ── */}
       <div style={{ position: 'absolute', inset: 0 }}>
-        <ArenaCanvas characterStates={characterStates} />
+        <ArenaCanvas characterStates={characterStates} welcomeUser={welcomeUser} />
       </div>
 
       {/* ── Top bar ── */}

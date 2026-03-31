@@ -54,7 +54,7 @@ export const CHARACTERS: Record<CharacterId, CharacterConfig> = {
     color: '#0D9488',           // teal
     glowColor: '#14B8A6',
     skinColor: '#5EEAD4',
-    homePosition: [6, 0, 1.5],
+    homePosition: [55, 0, 8],   // off-screen right — walks in when called
     meetPosition: [2.2, 0, 0.5],
     greetings: [
       "Research incoming!",
@@ -80,7 +80,7 @@ export const CHARACTERS: Record<CharacterId, CharacterConfig> = {
     color: '#10B981',           // emerald green — OpenAI brand
     glowColor: '#34D399',
     skinColor: '#6EE7B7',
-    homePosition: [6, 0, -1.5],
+    homePosition: [55, 0, -8],
     meetPosition: [2.2, 0, -0.5],
     greetings: [
       "Here's my perspective on this!",
@@ -106,7 +106,7 @@ export const CHARACTERS: Record<CharacterId, CharacterConfig> = {
     color: '#8B5CF6',           // violet — Google brand
     glowColor: '#A78BFA',
     skinColor: '#C4B5FD',
-    homePosition: [-6, 0, -1.5],
+    homePosition: [-55, 0, -8],
     meetPosition: [-2.2, 0, -0.5],
     greetings: [
       "I can see the design clearly!",
@@ -132,7 +132,7 @@ export const CHARACTERS: Record<CharacterId, CharacterConfig> = {
     color: '#F59E0B',           // saffron/gold
     glowColor: '#FBBF24',
     skinColor: '#FCD34D',
-    homePosition: [-6, 0, 1.5],
+    homePosition: [-55, 0, 8],
     meetPosition: [-2.2, 0, 0.5],
     greetings: [
       "நான் உதவ தயாராக இருக்கிறேன்!",
