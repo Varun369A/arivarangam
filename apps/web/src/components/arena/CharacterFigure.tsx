@@ -1,10 +1,9 @@
 'use client'
 
-import { useRef, useEffect, useMemo } from 'react'
-import { useFrame, useThree } from '@react-three/fiber'
-import { Html, useGLTF } from '@react-three/drei'
+import { useRef, useEffect } from 'react'
+import { useFrame } from '@react-three/fiber'
+import { Html } from '@react-three/drei'
 import * as THREE from 'three'
-import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils.js'
 import type { CharacterConfig } from '@/lib/characters'
 
 // ─── Feature flag ─────────────────────────────────────────────────────────────
@@ -36,61 +35,6 @@ interface Props {
   character: CharacterConfig
   state: CharacterState
   isActive?: boolean
-}
-
-// ─── Viseme map (Ready Player Me morph target names) ─────────────────────────
-
-const PHONEME_VISEME_MAP: Record<string, string> = {
-  'p':  'viseme_PP', 'b': 'viseme_PP', 'm': 'viseme_PP',
-  'f':  'viseme_FF', 'v': 'viseme_FF',
-  't':  'viseme_DD', 'd': 'viseme_DD',
-  'k':  'viseme_kk', 'g': 'viseme_kk',
-  'ch': 'viseme_CH', 'sh':'viseme_CH', 'j': 'viseme_CH',
-  's':  'viseme_SS', 'z': 'viseme_SS',
-  'n':  'viseme_nn', 'l': 'viseme_nn',
-  'r':  'viseme_RR',
-  'a':  'viseme_aa',
-  'e':  'viseme_E',
-  'i':  'viseme_I',  'y': 'viseme_I',
-  'o':  'viseme_O',
-  'u':  'viseme_U',  'w': 'viseme_U',
-}
-
-function textToVisemeSequence(text: string): Array<{ viseme: string; duration: number }> {
-  const seq: Array<{ viseme: string; duration: number }> = []
-  const lower = text.toLowerCase()
-  let i = 0
-  while (i < lower.length) {
-    const ch2 = lower.slice(i, i + 2)
-    const ch1 = lower[i]
-    if (PHONEME_VISEME_MAP[ch2]) {
-      seq.push({ viseme: PHONEME_VISEME_MAP[ch2], duration: 120 })
-      i += 2
-    } else if (PHONEME_VISEME_MAP[ch1]) {
-      seq.push({ viseme: PHONEME_VISEME_MAP[ch1], duration: 80 })
-      i++
-    } else {
-      if (ch1 === ' ' || ch1 === ',' || ch1 === '.') {
-        seq.push({ viseme: 'rest', duration: 60 })
-      }
-      i++
-    }
-  }
-  return seq
-}
-
-// ─── Animation clip name mapping ──────────────────────────────────────────────
-
-const ACTION_TO_ANIM: Record<CharacterAction, string> = {
-  idle:        'idle',
-  walking:     'walk',
-  talking:     'talk',
-  waving:      'wave',
-  thinking:    'think',
-  pointing:    'point',
-  celebrating: 'celebrate',
-  listening:   'idle',
-  calling:     'wave',
 }
 
 // ─── Shared Speech Bubble ─────────────────────────────────────────────────────
@@ -144,196 +88,13 @@ function SpeechBubble({ character, speech }: { character: CharacterConfig; speec
   )
 }
 
-// ─── GLB Character (full digital human — used when USE_PLACEHOLDER = false) ───
+// ─── GLB Character stub ───────────────────────────────────────────────────────
+// Full implementation lives in GLBCharacterImpl.tsx (loaded dynamically).
+// To activate: set USE_PLACEHOLDER = false and add assets to /public/avatars/ and /public/animations/
 
-function GLBCharacter({ character, state, isActive = false }: Props) {
-  const groupRef       = useRef<THREE.Group>(null)
-  const mixerRef       = useRef<THREE.AnimationMixer | null>(null)
-  const actionsRef     = useRef<Record<string, THREE.AnimationAction>>({})
-  const currentAnimRef = useRef<string>('idle')
-  const headBoneRef    = useRef<THREE.Bone | null>(null)
-  const morphMeshRef   = useRef<THREE.SkinnedMesh | null>(null)
-  const visemeQueueRef = useRef<Array<{ viseme: string; duration: number }>>([])
-  const visemeTimerRef = useRef(0)
-  const blinkTimerRef  = useRef(Math.random() * 4000)
-  const currentPos     = useRef(new THREE.Vector3(...character.homePosition))
-
-  // Load avatar GLB — requires /public/avatars/{id}.glb
-  const { scene: avatarScene } = useGLTF(`/avatars/${character.id}.glb`)
-  const clonedScene = useMemo(() => SkeletonUtils.clone(avatarScene) as THREE.Group, [avatarScene])
-
-  // Load shared animation clips
-  const idleGLB      = useGLTF('/animations/idle.glb')
-  const walkGLB      = useGLTF('/animations/walk.glb')
-  const talkGLB      = useGLTF('/animations/talk.glb')
-  const waveGLB      = useGLTF('/animations/wave.glb')
-  const thinkGLB     = useGLTF('/animations/think.glb')
-  const pointGLB     = useGLTF('/animations/point.glb')
-  const celebrateGLB = useGLTF('/animations/celebrate.glb')
-
-  // Setup mixer and actions on first mount
-  useEffect(() => {
-    const mixer = new THREE.AnimationMixer(clonedScene)
-    mixerRef.current = mixer
-
-    const clipDefs: Array<[string, THREE.AnimationClip | undefined]> = [
-      ['idle',       idleGLB.animations[0]],
-      ['walk',       walkGLB.animations[0]],
-      ['talk',       talkGLB.animations[0]],
-      ['wave',       waveGLB.animations[0]],
-      ['think',      thinkGLB.animations[0]],
-      ['point',      pointGLB.animations[0]],
-      ['celebrate',  celebrateGLB.animations[0]],
-    ]
-
-    for (const [name, clip] of clipDefs) {
-      if (!clip) continue
-      const action = mixer.clipAction(clip, clonedScene)
-      const isLooping = name === 'idle' || name === 'walk' || name === 'talk'
-      action.setLoop(isLooping ? THREE.LoopRepeat : THREE.LoopOnce, Infinity)
-      action.clampWhenFinished = true
-      actionsRef.current[name] = action
-    }
-
-    actionsRef.current['idle']?.play()
-    currentAnimRef.current = 'idle'
-
-    // Find head bone + face mesh for morph targets
-    clonedScene.traverse((obj) => {
-      if (obj instanceof THREE.Bone) {
-        const n = obj.name.toLowerCase()
-        if (n === 'head' || n.includes('head')) headBoneRef.current = obj
-      }
-      if (obj instanceof THREE.SkinnedMesh && obj.morphTargetDictionary) {
-        const keys = Object.keys(obj.morphTargetDictionary)
-        if (keys.some(k => k.startsWith('viseme_'))) morphMeshRef.current = obj
-      }
-    })
-
-    return () => {
-      mixer.stopAllAction()
-      mixer.uncacheRoot(clonedScene)
-    }
-  }, [clonedScene, idleGLB, walkGLB, talkGLB, waveGLB, thinkGLB, pointGLB, celebrateGLB])
-
-  // Crossfade to new animation when action changes
-  useEffect(() => {
-    const targetAnim = ACTION_TO_ANIM[state.action]
-    if (targetAnim === currentAnimRef.current) return
-    const prev = actionsRef.current[currentAnimRef.current]
-    const next = actionsRef.current[targetAnim]
-    if (next) {
-      next.reset().play()
-      prev?.crossFadeTo(next, 0.3, true)
-      currentAnimRef.current = targetAnim
-    }
-  }, [state.action])
-
-  // Generate viseme sequence when speech text changes
-  useEffect(() => {
-    if (state.speech) {
-      visemeQueueRef.current = textToVisemeSequence(state.speech)
-      visemeTimerRef.current = 0
-    } else {
-      visemeQueueRef.current = []
-    }
-  }, [state.speech])
-
-  const camera = useThree(s => s.camera)
-
-  useFrame((_, delta) => {
-    const g = groupRef.current
-    if (!g) return
-
-    // Update animation mixer
-    mixerRef.current?.update(delta)
-
-    // ── Positional movement ───────────────────────────────────────────────────
-    const target = state.targetPosition
-      ? new THREE.Vector3(...state.targetPosition)
-      : new THREE.Vector3(...character.homePosition)
-
-    if (state.action === 'walking') {
-      currentPos.current.lerp(target, delta * 1.8)
-      g.position.copy(currentPos.current)
-      const dir = target.clone().sub(currentPos.current)
-      if (dir.length() > 0.05) {
-        g.rotation.y = THREE.MathUtils.lerp(g.rotation.y, Math.atan2(dir.x, dir.z), delta * 6)
-      }
-    } else {
-      currentPos.current.lerp(new THREE.Vector3(...character.homePosition), delta * 1.2)
-      g.position.copy(currentPos.current)
-      g.rotation.y = THREE.MathUtils.lerp(g.rotation.y, 0, delta * 4)
-    }
-
-    // ── Head look-at (camera tracking) ───────────────────────────────────────
-    const headBone = headBoneRef.current
-    if (headBone && state.action !== 'walking') {
-      const worldPos = new THREE.Vector3()
-      headBone.getWorldPosition(worldPos)
-      const lookDir = camera.position.clone().sub(worldPos).normalize()
-      const targetQ = new THREE.Quaternion().setFromUnitVectors(
-        new THREE.Vector3(0, 0, 1), lookDir
-      )
-      const euler = new THREE.Euler().setFromQuaternion(targetQ, 'YXZ')
-      euler.y = THREE.MathUtils.clamp(euler.y, -0.52, 0.52)
-      euler.x = THREE.MathUtils.clamp(euler.x, -0.26, 0.26)
-      headBone.quaternion.slerp(new THREE.Quaternion().setFromEuler(euler), delta * 3)
-    }
-
-    // ── Viseme lip sync ───────────────────────────────────────────────────────
-    const morphMesh = morphMeshRef.current
-    if (morphMesh?.morphTargetInfluences && morphMesh.morphTargetDictionary) {
-      const dict = morphMesh.morphTargetDictionary
-      const inf  = morphMesh.morphTargetInfluences
-
-      // Decay all viseme influences toward 0
-      for (const key of Object.keys(dict)) {
-        if (key.startsWith('viseme_') && inf[dict[key]] > 0) {
-          inf[dict[key]] = THREE.MathUtils.lerp(inf[dict[key]], 0, delta * 15)
-        }
-      }
-
-      // Advance viseme queue
-      visemeTimerRef.current -= delta * 1000
-      if (visemeTimerRef.current <= 0 && visemeQueueRef.current.length > 0) {
-        const { viseme, duration } = visemeQueueRef.current.shift()!
-        visemeTimerRef.current = duration
-        if (viseme !== 'rest' && dict[viseme] !== undefined) {
-          inf[dict[viseme]] = 0.8
-        }
-      }
-
-      // ── Auto blink ───────────────────────────────────────────────────────────
-      blinkTimerRef.current -= delta * 1000
-      const blinkIdx = dict['eyesClosed']
-      if (blinkTimerRef.current <= 0 && blinkIdx !== undefined && inf) {
-        blinkTimerRef.current = 2500 + Math.random() * 4000
-        inf[blinkIdx] = 1
-        setTimeout(() => { if (inf) inf[blinkIdx] = 0 }, 120)
-      }
-
-      // ── Expression morph targets ──────────────────────────────────────────
-      const smileIdx = dict['mouthSmile']
-      const browIdx  = dict['browInnerUp']
-
-      if (smileIdx !== undefined) {
-        const target = state.action === 'celebrating' || state.action === 'talking' ? 0.6 : 0.2
-        inf[smileIdx] = THREE.MathUtils.lerp(inf[smileIdx], target, delta * 3)
-      }
-      if (browIdx !== undefined) {
-        const target = state.action === 'thinking' || state.action === 'waving' ? 0.5 : 0
-        inf[browIdx] = THREE.MathUtils.lerp(inf[browIdx], target, delta * 3)
-      }
-    }
-  })
-
-  return (
-    <group ref={groupRef} position={character.homePosition}>
-      <primitive object={clonedScene} />
-      <SpeechBubble character={character} speech={state.speech} />
-    </group>
-  )
+function GLBCharacter(props: Props) {
+  // Fallback to placeholder until real GLB assets are available
+  return <PlaceholderCharacter {...props} />
 }
 
 // ─── Placeholder Character (capsule geometry, works without assets) ───────────
