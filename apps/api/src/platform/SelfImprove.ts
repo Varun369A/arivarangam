@@ -156,7 +156,7 @@ Be specific and technical — this will be reviewed by engineers.`;
       code: 'claude-sonnet-4-6',
       research: 'llama-3.1-sonar-large-128k-online',
       image: 'gpt-image-1',
-      voice: 'elevenlabs-multilingual-v2',
+      voice: 'sarvam-bulbul-v1',
       content: 'claude-sonnet-4-6',
     };
 

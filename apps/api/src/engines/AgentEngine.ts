@@ -3,6 +3,8 @@ import type { TaskEvent } from '@arivarangam/types';
 import { callClaudeSonnet, callClaudeHaiku } from '../connectors/claude';
 import { taskService } from '../services/TaskService';
 import { UsageMeter } from '../services/UsageMeter';
+import { autoRepairEngine } from './AutoRepairEngine';
+import { autoTestEngine } from './AutoTestEngine';
 
 // ─── AgentEngine ──────────────────────────────────────────────────────────────
 //
@@ -65,14 +67,22 @@ export class AgentEngine {
         }
       }
 
+      // AutoRepair pass — validate and fix code issues
+      const repairedFiles = await autoRepairEngine.repairFiles(fixedFiles, task.prompt, onEvent, meter);
+
+      // AutoTest pass — generate tests and static analysis
+      await emit({ type: 'log', data: { message: '🧪 Generating tests and running security scan...' }, timestamp: new Date().toISOString() });
+      const testResult = await autoTestEngine.generateTests(repairedFiles, task.prompt, onEvent, meter);
+      const allFiles = [...repairedFiles, ...testResult.testFiles];
+
       const creditsUsed = meter.toCredits();
       await taskService.completeTask(task.id, creditsUsed, {
-        files: fixedFiles, framework: plan.framework, fileCount: fixedFiles.length, usage: meter.summary(),
+        files: allFiles, framework: plan.framework, fileCount: allFiles.length, staticIssues: testResult.staticIssues.length, usage: meter.summary(),
       });
 
       await emit({
         type: 'completed',
-        data: { files: fixedFiles, creditsUsed, message: `✅ ${plan.framework} agent ready — ${fixedFiles.length} files` },
+        data: { files: allFiles, creditsUsed, message: `✅ ${plan.framework} agent ready — ${allFiles.length} files (${testResult.testFiles.length} test files)` },
         timestamp: new Date().toISOString(),
       });
     } catch (err: any) {

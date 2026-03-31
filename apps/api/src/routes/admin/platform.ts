@@ -4,7 +4,7 @@ import { prisma } from '@arivarangam/db';
 import { getRedis } from '../../redis';
 import { callClaudeHaiku } from '../../connectors/claude';
 import { pingOpenAI } from '../../connectors/openai';
-import { pingElevenLabs } from '../../connectors/elevenlabs';
+import { pingSarvam } from '../../connectors/sarvam';
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 
@@ -59,7 +59,7 @@ export async function adminPlatformRoutes(fastify: FastifyInstance): Promise<voi
 
   // GET /health — model API status, error rates, active tasks count
   fastify.get('/health', async (request: FastifyRequest, reply: FastifyReply) => {
-    const [activeTasks, recentErrors, redisOk, claudeOk, openaiResult, elevenLabsResult] = await Promise.allSettled([
+    const [activeTasks, recentErrors, redisOk, claudeOk, openaiResult, sarvamResult] = await Promise.allSettled([
       prisma.task.count({ where: { status: { in: ['running', 'analyzing'] } } }),
       prisma.taskEvent.count({
         where: {
@@ -73,8 +73,8 @@ export async function adminPlatformRoutes(fastify: FastifyInstance): Promise<voi
       callClaudeHaiku('ping', 'Reply with OK only', 10).then(() => ({ ok: true, latencyMs: 0 })).catch(() => ({ ok: false, latencyMs: 0 })),
       // OpenAI ping
       pingOpenAI(),
-      // ElevenLabs ping
-      pingElevenLabs(),
+      // Sarvam AI ping
+      pingSarvam(),
     ]);
 
     const activeTaskCount = activeTasks.status === 'fulfilled' ? activeTasks.value : 0;
@@ -96,7 +96,7 @@ export async function adminPlatformRoutes(fastify: FastifyInstance): Promise<voi
     const openaiStatus = openaiResult.status === 'fulfilled' && (openaiResult.value as any)?.ok
       ? 'ok' : 'error';
 
-    const elevenLabsStatus = elevenLabsResult.status === 'fulfilled' && (elevenLabsResult.value as any)?.ok
+    const sarvamStatus = sarvamResult.status === 'fulfilled' && (sarvamResult.value as any)?.ok
       ? 'ok' : 'error';
 
     const redisStatus = redisOk.status === 'fulfilled' && redisOk.value ? 'ok' : 'error';
@@ -117,9 +117,9 @@ export async function adminPlatformRoutes(fastify: FastifyInstance): Promise<voi
             latencyMs: openaiResult.status === 'fulfilled' ? (openaiResult.value as any)?.latencyMs : null,
           },
           perplexity: { status: 'unknown' }, // Perplexity has no cheap ping
-          elevenlabs: {
-            status: elevenLabsStatus,
-            latencyMs: elevenLabsResult.status === 'fulfilled' ? (elevenLabsResult.value as any)?.latencyMs : null,
+          sarvam: {
+            status: sarvamStatus,
+            latencyMs: sarvamResult.status === 'fulfilled' ? (sarvamResult.value as any)?.latencyMs : null,
           },
         },
         redis: { status: redisStatus },

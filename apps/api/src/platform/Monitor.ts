@@ -2,7 +2,7 @@ import { prisma } from '@arivarangam/db';
 import { getRedis } from '../redis';
 import { callClaudeHaiku } from '../connectors/claude';
 import { pingOpenAI } from '../connectors/openai';
-import { pingElevenLabs } from '../connectors/elevenlabs';
+import { pingSarvam } from '../connectors/sarvam';
 import { creditService } from '../services/CreditService';
 
 // ─── Platform Monitor ─────────────────────────────────────────────────────────
@@ -133,7 +133,7 @@ export class PlatformMonitor {
     const checks = await Promise.allSettled([
       this.checkClaude(),
       pingOpenAI(),
-      pingElevenLabs(),
+      pingSarvam(),
     ]);
 
     const [claudeResult, openaiResult, elevenLabsResult] = checks;

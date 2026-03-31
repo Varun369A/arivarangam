@@ -58,7 +58,6 @@ const SERVICE_CATALOG: Record<string, { label: string; envKeys: string[]; docsUr
   sendgrid:    { label: 'SendGrid',     envKeys: ['SENDGRID_API_KEY'],             docsUrl: 'https://docs.sendgrid.com',        getUrl: 'https://app.sendgrid.com/settings/api_keys' },
   razorpay:    { label: 'Razorpay',     envKeys: ['RAZORPAY_KEY_ID', 'RAZORPAY_KEY_SECRET'], docsUrl: 'https://razorpay.com/docs', getUrl: 'https://dashboard.razorpay.com/app/keys' },
   cloudinary:  { label: 'Cloudinary',   envKeys: ['CLOUDINARY_URL', 'CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET'], docsUrl: 'https://cloudinary.com/documentation', getUrl: 'https://console.cloudinary.com/pm/developer-dashboard' },
-  elevenlabs:  { label: 'ElevenLabs',   envKeys: ['ELEVENLABS_API_KEY'],           docsUrl: 'https://elevenlabs.io/docs',       getUrl: 'https://elevenlabs.io/app/profile-settings' },
   github:      { label: 'GitHub',       envKeys: ['GITHUB_TOKEN', 'GITHUB_CLIENT_ID', 'GITHUB_CLIENT_SECRET'], docsUrl: 'https://docs.github.com', getUrl: 'https://github.com/settings/tokens' },
   google:      { label: 'Google',       envKeys: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_API_KEY'], docsUrl: 'https://developers.google.com', getUrl: 'https://console.developers.google.com/apis/credentials' },
   sarvam:      { label: 'Sarvam AI',    envKeys: ['SARVAM_API_KEY'],               docsUrl: 'https://docs.sarvam.ai',           getUrl: 'https://app.sarvam.ai/dashboard' },

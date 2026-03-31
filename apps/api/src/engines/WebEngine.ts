@@ -3,6 +3,8 @@ import type { TaskEvent } from '@arivarangam/types';
 import { callClaudeSonnet } from '../connectors/claude';
 import { taskService } from '../services/TaskService';
 import { UsageMeter } from '../services/UsageMeter';
+import { autoRepairEngine } from './AutoRepairEngine';
+import { uiQualityEngine } from './UIQualityEngine';
 
 // ─── Installed Library Stack (via CDN for browser preview) ────────────────────
 //
@@ -147,9 +149,17 @@ export class WebEngine {
         }
       }
 
+      // AutoRepair: validate CDN order, broken refs, GSAP registration
+      const repairedFiles = await autoRepairEngine.repairFiles(fixedFiles, task.prompt, onEvent, meter);
+
+      // UIQuality: grade and improve until score ≥ 75/100
+      const { files: qualityFiles, score } = await uiQualityEngine.gradeAndImprove(repairedFiles, task.prompt, onEvent, meter);
+
+      await emit({ type: 'log', data: { message: `📊 Final quality score: ${score.total}/100` }, timestamp: new Date().toISOString() });
+
       const creditsUsed = meter.toCredits();
       await taskService.completeTask(task.id, creditsUsed, {
-        files: fixedFiles, techStack: plan.techStack, fileCount: fixedFiles.length, usage: meter.summary(),
+        files: qualityFiles, techStack: plan.techStack, fileCount: qualityFiles.length, qualityScore: score.total, usage: meter.summary(),
       });
 
       await emit({
