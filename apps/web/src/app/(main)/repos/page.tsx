@@ -3,14 +3,15 @@
 import { useState, useRef } from 'react'
 import Link from 'next/link'
 import { useQuery, useQueryClient } from 'react-query'
-import { GitBranch, ChevronLeft, ChevronRight, Plus, ExternalLink, Pencil, Check, X, Download } from 'lucide-react'
+import { GitBranch, ChevronLeft, ChevronRight, Plus, ExternalLink, Pencil, Check, X, Download, Trash2 } from 'lucide-react'
 import { reposApi } from '@/lib/api'
 import { formatDate } from '@/lib/utils'
 
-function RepoRow({ repo, onRenamed }: { repo: any; onRenamed: (id: string, name: string) => void }) {
+function RepoRow({ repo, onRenamed, onDeleted }: { repo: any; onRenamed: (id: string, name: string) => void; onDeleted: (id: string) => void }) {
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(repo.name)
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   function startEdit(e: React.MouseEvent) {
@@ -43,6 +44,19 @@ function RepoRow({ repo, onRenamed }: { repo: any; onRenamed: (id: string, name:
     e?.stopPropagation()
     setName(repo.name)
     setEditing(false)
+  }
+
+  async function handleDelete(e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return
+    setDeleting(true)
+    try {
+      await reposApi.delete(repo.id)
+      onDeleted(repo.id)
+    } catch {
+      setDeleting(false)
+    }
   }
 
   function handleDownload(e: React.MouseEvent) {
@@ -108,6 +122,10 @@ function RepoRow({ repo, onRenamed }: { repo: any; onRenamed: (id: string, name:
             <Download className="w-3.5 h-3.5" />
           </button>
         )}
+        <button type="button" onClick={handleDelete} disabled={deleting}
+          className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-600 hover:text-red-600 transition-all disabled:opacity-40" title="Delete repo">
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
         <Link href={`/repos/${repo.id}`} onClick={e => e.stopPropagation()}>
           <ExternalLink className="w-4 h-4 text-slate-300 hover:text-slate-700 transition-colors" />
         </Link>
@@ -133,6 +151,13 @@ export default function ReposPage() {
     queryClient.setQueryData(['repos-list', page], (old: any) => {
       if (!old) return old
       return { ...old, data: old.data.map((r: any) => r.id === id ? { ...r, name: newName } : r) }
+    })
+  }
+
+  function handleDeleted(id: string) {
+    queryClient.setQueryData(['repos-list', page], (old: any) => {
+      if (!old) return old
+      return { ...old, data: old.data.filter((r: any) => r.id !== id) }
     })
   }
 
@@ -170,7 +195,7 @@ export default function ReposPage() {
             </div>
             <div className="divide-y divide-slate-50">
               {repos.map((repo: any) => (
-                <RepoRow key={repo.id} repo={repo} onRenamed={handleRenamed} />
+                <RepoRow key={repo.id} repo={repo} onRenamed={handleRenamed} onDeleted={handleDeleted} />
               ))}
             </div>
           </>

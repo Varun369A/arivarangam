@@ -423,8 +423,7 @@ function buildHtmlPreview(files: TaskStreamFile[]): string | null {
     return `<script${typeAttr}>\n${content}\n</script>`;
   });
 
-  const blob = new Blob([html], { type: 'text/html' });
-  return URL.createObjectURL(blob);
+  return html;
 }
 
 // ─── Preview Panel ────────────────────────────────────────────────────────────
@@ -438,21 +437,17 @@ function PreviewContent({
   previewUrl: string | null;
   streamFiles: TaskStreamFile[];
 }) {
-  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
   const [iframeKey, setIframeKey] = useState(0);
 
-  // Build blob preview when files are ready
+  // Build inline preview when files are ready
   useEffect(() => {
     if (streamFiles.length === 0) return;
-    const url = buildHtmlPreview(streamFiles);
-    if (url) {
-      setBlobUrl(prev => {
-        if (prev) URL.revokeObjectURL(prev);
-        return url;
-      });
+    const html = buildHtmlPreview(streamFiles);
+    if (html) {
+      setPreviewHtml(html);
       setIframeKey(k => k + 1);
     }
-    return () => { if (url) URL.revokeObjectURL(url); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [streamFiles.length]);
 
@@ -480,8 +475,8 @@ function PreviewContent({
     );
   }
 
-  // Live local HTML preview via blob URL
-  if (blobUrl) {
+  // Live local HTML preview via srcdoc
+  if (previewHtml) {
     return (
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex items-center gap-2 px-4 py-2 bg-slate-800 border-b border-slate-700 flex-shrink-0">
@@ -491,7 +486,7 @@ function PreviewContent({
             <div className="w-3 h-3 rounded-full bg-green-500" />
           </div>
           <div className="flex-1 bg-slate-700 rounded-lg px-3 py-1 text-xs text-slate-400 font-mono truncate">
-            🔴 Live preview (local)
+            🟢 Live preview
           </div>
           <button
             type="button"
@@ -502,7 +497,7 @@ function PreviewContent({
             ↺
           </button>
         </div>
-        <iframe key={iframeKey} src={blobUrl} className="flex-1 w-full border-0 bg-white" title="Live Preview" />
+        <iframe key={iframeKey} srcdoc={previewHtml} className="flex-1 w-full border-0 bg-white" title="Live Preview" />
       </div>
     );
   }
@@ -633,17 +628,14 @@ function PreviewContent({
       <div className="flex-1 overflow-auto p-4 bg-slate-100">
         <div className="space-y-4">
           {htmlBanners.map(f => {
-            const blob = new Blob([f.content ?? ''], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
             const label = f.path.replace('.html', '').replace(/-/g, ' ');
             return (
               <div key={f.path} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
                   <code className="text-xs text-slate-600 font-mono capitalize">{label}</code>
-                  <a href={url} target="_blank" rel="noreferrer" className="text-xs text-indigo-600 hover:text-indigo-700">Open ↗</a>
                 </div>
                 <div className="overflow-hidden" style={{ height: 200 }}>
-                  <iframe src={url} className="w-full border-0 origin-top-left" style={{ transform: 'scale(0.4)', width: '250%', height: 500 }} title={f.path} />
+                  <iframe srcdoc={f.content ?? ''} className="w-full border-0 origin-top-left" style={{ transform: 'scale(0.4)', width: '250%', height: 500 }} title={f.path} />
                 </div>
               </div>
             );
@@ -657,15 +649,12 @@ function PreviewContent({
   if (task?.category === 'brand' && streamFiles.length > 0) {
     const previewFile = streamFiles.find(f => f.path === 'brand-preview.html') ?? streamFiles.find(f => f.path.endsWith('.html'));
     if (previewFile?.content) {
-      const blob = new Blob([previewFile.content], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
       return (
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="flex items-center gap-2 px-4 py-2 bg-slate-800 border-b border-slate-700 flex-shrink-0">
             <span className="text-xs text-slate-400">🎨 Brand identity preview</span>
-            <a href={url} target="_blank" rel="noreferrer" className="text-xs text-pink-400 hover:text-pink-300 ml-auto">Open fullscreen ↗</a>
           </div>
-          <iframe src={url} className="flex-1 w-full border-0 bg-white" title="Brand Preview" />
+          <iframe srcdoc={previewFile.content} className="flex-1 w-full border-0 bg-white" title="Brand Preview" />
         </div>
       );
     }
@@ -675,17 +664,12 @@ function PreviewContent({
   if (task?.category === 'presentation' && streamFiles.length > 0) {
     const htmlF = streamFiles.find(f => f.path === 'index.html');
     if (htmlF?.content) {
-      const blob = new Blob([htmlF.content], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
       return (
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="flex items-center gap-2 px-4 py-2 bg-slate-800 border-b border-slate-700 flex-shrink-0">
             <span className="text-xs text-slate-400">🎯 Presentation preview</span>
-            <a href={url} target="_blank" rel="noreferrer" className="text-xs text-indigo-400 hover:text-indigo-300 ml-auto">
-              Open fullscreen ↗
-            </a>
           </div>
-          <iframe src={url} className="flex-1 w-full border-0 bg-white" title="Presentation" />
+          <iframe srcdoc={htmlF.content} className="flex-1 w-full border-0 bg-white" title="Presentation" />
         </div>
       );
     }
@@ -1337,7 +1321,7 @@ export default function TaskPage() {
                 </div>
               </div>
               {/* Code viewer */}
-              <div className="flex-1 overflow-hidden bg-slate-900">
+              <div className="flex-1 flex flex-col overflow-hidden bg-slate-900">
                 <CodeViewer file={selectedFile} />
               </div>
             </div>
