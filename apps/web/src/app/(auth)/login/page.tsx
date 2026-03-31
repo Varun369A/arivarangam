@@ -58,7 +58,7 @@ function UnverifiedBanner({ email }: { email: string }) {
 
 function LoginForm() {
   const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect') || '/dashboard'
+  const redirect = searchParams.get('redirect') || '/arena'
   const { login } = useAuth()
 
   const [email, setEmail] = useState('')
@@ -79,7 +79,7 @@ function LoginForm() {
     setLoading(true)
     try {
       await login({ email: email.trim().toLowerCase(), password })
-      if (redirect && redirect !== '/dashboard') window.location.href = redirect
+      if (redirect && redirect !== '/arena') window.location.href = redirect
     } catch (err: any) {
       const raw = err?.message || ''
       if (raw.toLowerCase().includes('verify') || raw.toLowerCase().includes('not verified')) {

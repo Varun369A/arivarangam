@@ -29,13 +29,28 @@ function isAdmin(pathname: string): boolean {
 }
 
 function isPublic(pathname: string): boolean {
-  if (pathname.startsWith('/api/')) return true
   return PUBLIC_ROUTES.some(r => pathname === r || pathname.startsWith(r + '/'))
 }
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const accessToken = request.cookies.get('accessToken')?.value
+
+  // ─── API proxy ─────────────────────────────────────────────────────────────
+  // Handle at RUNTIME (process.env read here, not baked at build time).
+  // NEXT_PUBLIC_API_URL in next.config.js rewrites() is evaluated at build time
+  // so it hardcodes localhost:3001. Middleware runs in Node.js on every request
+  // and always sees the current runtime env vars.
+  if (pathname.startsWith('/api/')) {
+    const apiBase = (
+      process.env.API_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      'http://localhost:3001'
+    ).replace(/\/$/, '')
+
+    const targetUrl = `${apiBase}${pathname}${request.nextUrl.search}`
+    return NextResponse.rewrite(new URL(targetUrl))
+  }
 
   // Public routes
   if (isPublic(pathname)) {

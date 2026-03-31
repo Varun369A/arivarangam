@@ -75,11 +75,10 @@ function AmbientParticles() {
   return (
     <points ref={points}>
       <bufferGeometry>
+        {/* args=[array, itemSize] maps to new THREE.BufferAttribute(array, itemSize) */}
         <bufferAttribute
           attach="attributes-position"
-          count={PARTICLE_COUNT}
-          array={PARTICLE_POSITIONS}
-          itemSize={3}
+          args={[PARTICLE_POSITIONS, 3]}
         />
       </bufferGeometry>
       <pointsMaterial size={0.035} color="#8B5CF6" transparent opacity={0.55} sizeAttenuation />

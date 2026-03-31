@@ -35,13 +35,8 @@ const nextConfig = {
     }
     return config
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/:path*`,
-      },
-    ]
-  },
+  // NOTE: API proxy rewrites are intentionally NOT here.
+  // They're handled in src/middleware.ts so that process.env.API_URL
+  // is read at runtime (not baked at build time into a standalone bundle).
 }
 module.exports = nextConfig
