@@ -384,19 +384,44 @@ function buildHtmlPreview(files: TaskStreamFile[]): string | null {
   const htmlFile = files.find(f => f.path === 'index.html' || f.path.endsWith('/index.html'));
   if (!htmlFile?.content) return null;
 
+  // Build a quick lookup map: basename → content
+  const fileMap = new Map<string, string>();
+  for (const f of files) {
+    if (!f.content) continue;
+    // Store by full path and by basename
+    fileMap.set(f.path, f.content);
+    const basename = f.path.split('/').pop() ?? f.path;
+    fileMap.set(basename, f.content);
+  }
+
   let html = htmlFile.content;
 
-  // Inline CSS files
-  const cssFile = files.find(f => f.path === 'style.css' || f.path.endsWith('/style.css') || f.path === 'styles.css');
-  if (cssFile?.content) {
-    html = html.replace(/<link[^>]+rel=["']stylesheet["'][^>]*>/gi, `<style>${cssFile.content}</style>`);
-  }
+  // ── Inline all local CSS <link> tags ────────────────────────────────────────
+  html = html.replace(/<link([^>]+)rel=["']stylesheet["']([^>]*)>/gi, (tag, before, after) => {
+    const hrefMatch = tag.match(/href=["']([^"']+)["']/i);
+    if (!hrefMatch) return tag;
+    const href = hrefMatch[1];
+    // Skip CDN URLs
+    if (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('//')) return tag;
+    const basename = href.replace(/^\.\//, '').split('/').pop() ?? href;
+    const content = fileMap.get(href) ?? fileMap.get(basename);
+    return content ? `<style>${content}</style>` : tag;
+  });
 
-  // Inline JS files (only if not using module bundlers)
-  const jsFile = files.find(f => (f.path === 'script.js' || f.path === 'app.js' || f.path === 'main.js') && !f.path.includes('node_modules'));
-  if (jsFile?.content && !html.includes('import ') && !html.includes('require(')) {
-    html = html.replace(/<script[^>]+src=["']\.\/?(script|app|main)\.js["'][^>]*><\/script>/gi, `<script>${jsFile.content}</script>`);
-  }
+  // ── Inline all local JS <script src="..."> tags ──────────────────────────────
+  html = html.replace(/<script([^>]+)src=["']([^"']+)["']([^>]*)><\/script>/gi, (tag, before, src, after) => {
+    // Skip CDN URLs
+    if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('//')) return tag;
+    // Skip node_modules
+    if (src.includes('node_modules')) return tag;
+    const basename = src.replace(/^\.\//, '').split('/').pop() ?? src;
+    const content = fileMap.get(src) ?? fileMap.get(basename);
+    if (!content) return tag;
+    // Preserve type="text/babel" if present (for React/JSX components)
+    const typeMatch = (before + after).match(/type=["']([^"']+)["']/i);
+    const typeAttr = typeMatch ? ` type="${typeMatch[1]}"` : '';
+    return `<script${typeAttr}>\n${content}\n</script>`;
+  });
 
   const blob = new Blob([html], { type: 'text/html' });
   return URL.createObjectURL(blob);
@@ -477,7 +502,7 @@ function PreviewContent({
             ↺
           </button>
         </div>
-        <iframe key={iframeKey} src={blobUrl} className="flex-1 w-full border-0 bg-white" title="Live Preview" sandbox="allow-scripts allow-same-origin" />
+        <iframe key={iframeKey} src={blobUrl} className="flex-1 w-full border-0 bg-white" title="Live Preview" />
       </div>
     );
   }

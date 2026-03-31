@@ -6,9 +6,9 @@ export type AIModel =
   | 'gpt-4o'
   | 'gpt-image-1'
   | 'perplexity-sonar'
-  | 'elevenlabs';
+  | 'sarvam';
 
-export type TaskCategory = 'code' | 'research' | 'image' | 'content' | 'mobile' | 'presentation' | 'agent' | 'workflow';
+export type TaskCategory = 'code' | 'research' | 'image' | 'content' | 'mobile' | 'presentation' | 'agent' | 'workflow' | 'animation';
 
 export type TaskStatus =
   | 'pending'
@@ -309,7 +309,7 @@ export interface AdminHealthStatus {
     claude: { status: string; latencyMs?: number };
     openai: { status: string; latencyMs?: number };
     perplexity: { status: string; latencyMs?: number };
-    elevenlabs: { status: string; latencyMs?: number };
+    sarvam: { status: string; latencyMs?: number };
   };
   redis: { status: string };
   database: { status: string };

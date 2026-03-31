@@ -25,15 +25,16 @@ export class CreditService {
     const systemPrompt = `You are a credit cost estimator for an AI platform. Analyze the given task and return ONLY a JSON object with credit estimates.
 
 Credit costs by category:
-- code: 80-200 credits (simple scripts = 80, full React/Next.js apps = 200)
+- code: 80-200 credits (simple scripts = 80, full immersive web app = 200)
 - mobile: 100-220 credits (simple screens = 100, full Expo app = 220)
-- presentation: 50-100 credits (short deck = 50, detailed 20+ slides = 100)
+- presentation: 60-120 credits (short deck = 60, detailed 20+ slide Reveal.js = 120)
 - agent: 80-150 credits (simple script = 80, multi-tool LangChain agent = 150)
-- workflow: 40-100 credits (simple n8n workflow = 40, complex multi-node = 100)
+- workflow: 50-100 credits (simple n8n workflow = 50, complex multi-node = 100)
 - research: 50-80 credits (simple = 50, deep = 80)
 - image: 80 credits (fixed)
 - voice: 30 credits per minute of estimated audio
-- content: 25-80 credits (short = 25, long-form = 80)
+- content: 40-100 credits (short article = 40, long-form multi-file = 100)
+- animation: 80-180 credits (simple canvas = 80, complex Three.js scene = 180)
 
 Return ONLY this JSON (no markdown, no explanation):
 {"min": number, "max": number, "typical": number}`;
@@ -64,13 +65,14 @@ Return ONLY this JSON (no markdown, no explanation):
       const fallbacks: Record<TaskCategory, { min: number; max: number; typical: number }> = {
         code: { min: 80, max: 200, typical: 120 },
         mobile: { min: 100, max: 220, typical: 140 },
-        presentation: { min: 50, max: 100, typical: 65 },
+        presentation: { min: 60, max: 120, typical: 80 },
         agent: { min: 80, max: 150, typical: 110 },
-        workflow: { min: 40, max: 100, typical: 60 },
+        workflow: { min: 50, max: 100, typical: 65 },
         research: { min: 50, max: 80, typical: 60 },
         image: { min: 80, max: 80, typical: 80 },
         voice: { min: 30, max: 120, typical: 60 },
-        content: { min: 25, max: 80, typical: 40 },
+        content: { min: 40, max: 100, typical: 60 },
+        animation: { min: 80, max: 180, typical: 110 },
       };
       const fb = fallbacks[category];
       estimate = {

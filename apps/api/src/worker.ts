@@ -67,25 +67,49 @@ async function dispatchToEngine(task: any): Promise<void> {
       await new MobileEngine().execute(task, onEvent);
       break;
     }
-    // ── Code-adjacent: upgraded CodeEngine (presentations, agents, workflows) ─
-    case 'content':
-    case 'presentation':
-    case 'agent':
-    case 'workflow': {
-      const { CodeEngine } = await import('./engines/CodeEngine');
-      await new CodeEngine().execute(task, onEvent);
+    // ── Animation: Three.js / GSAP / Canvas / tsParticles / Vanta ────────────
+    case 'animation': {
+      const { AnimationEngine } = await import('./engines/AnimationEngine');
+      await new AnimationEngine().execute(task, onEvent);
       break;
     }
+    // ── Presentation: Reveal.js with custom themes and animations ─────────────
+    case 'presentation': {
+      const { PresentationEngine } = await import('./engines/PresentationEngine');
+      await new PresentationEngine().execute(task, onEvent);
+      break;
+    }
+    // ── Content: Long-form articles, marketing copy, SEO content ─────────────
+    case 'content': {
+      const { ContentEngine } = await import('./engines/ContentEngine');
+      await new ContentEngine().execute(task, onEvent);
+      break;
+    }
+    // ── Agent: Python LangChain / CrewAI / LlamaIndex agents ─────────────────
+    case 'agent': {
+      const { AgentEngine } = await import('./engines/AgentEngine');
+      await new AgentEngine().execute(task, onEvent);
+      break;
+    }
+    // ── Workflow: n8n / Make / GitHub Actions / Shell automation ─────────────
+    case 'workflow': {
+      const { WorkflowEngine } = await import('./engines/WorkflowEngine');
+      await new WorkflowEngine().execute(task, onEvent);
+      break;
+    }
+    // ── Research: Perplexity web search + Claude synthesis ────────────────────
     case 'research': {
       const { ResearchEngine } = await import('./engines/ResearchEngine');
       await new ResearchEngine().execute(task, onEvent);
       break;
     }
+    // ── Image: DALL-E 3 HD with prompt enhancement ────────────────────────────
     case 'image': {
       const { ImageEngine } = await import('./engines/ImageEngine');
       await new ImageEngine().execute(task, onEvent);
       break;
     }
+    // ── Voice: Sarvam AI TTS with multilingual support ────────────────────────
     case 'voice': {
       const { VoiceEngine } = await import('./engines/VoiceEngine');
       await new VoiceEngine().execute(task, onEvent);
