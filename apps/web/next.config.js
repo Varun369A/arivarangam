@@ -11,15 +11,14 @@ const nextConfig = {
   transpilePackages: [
     '@arivarangam/types',
     '@arivarangam/config',
-    'three',
-    '@react-three/fiber',
-    '@react-three/drei',
   ],
   images: {
     domains: ['avatars.githubusercontent.com', 'oaidalleapiprodscus.blob.core.windows.net'],
   },
   // NOTE: API proxy rewrites are handled in src/middleware.ts (runtime env vars).
   // NOTE: No webpack alias — any React alias breaks Next.js hydration (blank page).
-  //       The arena R3F crash is fixed via dynamic import with ssr:false instead.
+  // NOTE: three/R3F/drei NOT in transpilePackages — they are ESM but loaded client-side
+  //       only (ssr:false dynamic import). Adding them to transpilePackages creates a
+  //       duplicate React module scope → ReactCurrentBatchConfig crash in the arena.
 }
 module.exports = nextConfig
