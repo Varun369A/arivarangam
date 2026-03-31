@@ -14,7 +14,7 @@ COPY packages/db/package.json ./packages/db/
 COPY apps/web/package.json ./apps/web/
 COPY apps/api/package.json ./apps/api/
 COPY apps/worker/package.json ./apps/worker/
-RUN npm ci --workspace=apps/web --workspace=packages/types --workspace=packages/config
+RUN npm install --workspace=apps/web --workspace=packages/types --workspace=packages/config --ignore-scripts
 
 # ─── Builder ──────────────────────────────────────────────────────────────────
 FROM base AS builder
@@ -25,6 +25,7 @@ ARG NEXT_PUBLIC_API_URL=http://localhost:3001
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 
+RUN npm install --workspace=apps/web --ignore-scripts
 RUN npm run build --workspace=apps/web
 
 # ─── Runner ───────────────────────────────────────────────────────────────────
