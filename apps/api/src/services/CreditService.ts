@@ -35,6 +35,7 @@ Credit costs by category:
 - voice: 30 credits per minute of estimated audio
 - content: 40-100 credits (short article = 40, long-form multi-file = 100)
 - animation: 80-180 credits (simple canvas = 80, complex Three.js scene = 180)
+- dataviz: 60-140 credits (simple Chart.js bar chart = 60, complex D3 force graph with filters = 140)
 
 Return ONLY this JSON (no markdown, no explanation):
 {"min": number, "max": number, "typical": number}`;
@@ -73,6 +74,7 @@ Return ONLY this JSON (no markdown, no explanation):
         voice: { min: 30, max: 120, typical: 60 },
         content: { min: 40, max: 100, typical: 60 },
         animation: { min: 80, max: 180, typical: 110 },
+        dataviz: { min: 60, max: 140, typical: 90 },
       };
       const fb = fallbacks[category];
       estimate = {

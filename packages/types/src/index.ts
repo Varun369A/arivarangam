@@ -8,7 +8,7 @@ export type AIModel =
   | 'perplexity-sonar'
   | 'sarvam';
 
-export type TaskCategory = 'code' | 'research' | 'image' | 'content' | 'mobile' | 'presentation' | 'agent' | 'workflow' | 'animation';
+export type TaskCategory = 'code' | 'research' | 'image' | 'content' | 'mobile' | 'presentation' | 'agent' | 'workflow' | 'animation' | 'dataviz';
 
 export type TaskStatus =
   | 'pending'

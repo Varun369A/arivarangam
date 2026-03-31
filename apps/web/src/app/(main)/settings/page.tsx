@@ -794,7 +794,7 @@ function ApiKeysTab() {
   const SERVICE_ICONS: Record<string, string> = {
     openai: '🤖', anthropic: '🟣', stripe: '💳', supabase: '⚡', firebase: '🔥',
     aws: '☁️', mongodb: '🍃', twilio: '📱', sendgrid: '📧', razorpay: '💰',
-    cloudinary: '🖼️', elevenlabs: '🎙️', github: '🐙', google: '🔍', sarvam: '🇮🇳', perplexity: '🔮',
+    cloudinary: '🖼️', github: '🐙', google: '🔍', sarvam: '🇮🇳', perplexity: '🔮',
   }
 
   return (

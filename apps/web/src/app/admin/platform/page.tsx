@@ -322,7 +322,7 @@ export default function AdminPlatformPage() {
                   { name: 'Claude', info: health.models.claude },
                   { name: 'OpenAI', info: health.models.openai },
                   { name: 'Perplexity', info: health.models.perplexity },
-                  { name: 'ElevenLabs', info: health.models.elevenlabs },
+                  { name: 'Sarvam', info: health.models.sarvam },
                 ].map(({ name, info }) => (
                   <div
                     key={name}

@@ -372,7 +372,7 @@ export default function AdminOverviewPage() {
                   { name: 'Claude', info: health.models.claude },
                   { name: 'OpenAI', info: health.models.openai },
                   { name: 'Perplexity', info: health.models.perplexity },
-                  { name: 'ElevenLabs', info: health.models.elevenlabs },
+                  { name: 'Sarvam', info: health.models.sarvam },
                 ].map(({ name, info }) => (
                   <div key={name} className="flex items-center justify-between">
                     <span className="flex items-center gap-2 text-sm text-slate-700">

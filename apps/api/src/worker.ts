@@ -97,6 +97,12 @@ async function dispatchToEngine(task: any): Promise<void> {
       await new WorkflowEngine().execute(task, onEvent);
       break;
     }
+    // ── DataViz: D3 / Chart.js / Apex / Plotly interactive dashboards ────────
+    case 'dataviz': {
+      const { DataVizEngine } = await import('./engines/DataVizEngine');
+      await new DataVizEngine().execute(task, onEvent);
+      break;
+    }
     // ── Research: Perplexity web search + Claude synthesis ────────────────────
     case 'research': {
       const { ResearchEngine } = await import('./engines/ResearchEngine');
