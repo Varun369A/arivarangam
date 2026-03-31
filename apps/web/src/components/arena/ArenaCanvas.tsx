@@ -3,7 +3,7 @@
 import { useRef, Suspense } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Stars, Float, MeshReflectorMaterial } from '@react-three/drei'
-import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
+
 import * as THREE from 'three'
 import { CharacterFigure, type CharacterState } from './CharacterFigure'
 import { CHARACTERS, CHARACTER_ORDER } from '@/lib/characters'
@@ -156,22 +156,6 @@ function SceneLighting() {
   )
 }
 
-// ─── Post Processing ──────────────────────────────────────────────────────────
-
-function PostFX() {
-  return (
-    <EffectComposer>
-      <Bloom
-        luminanceThreshold={0.3}
-        luminanceSmoothing={0.9}
-        intensity={0.6}
-        mipmapBlur
-      />
-      <Vignette eskil={false} offset={0.15} darkness={0.6} />
-    </EffectComposer>
-  )
-}
-
 // ─── Main Arena Canvas ────────────────────────────────────────────────────────
 
 interface ArenaCanvasProps {
@@ -220,9 +204,6 @@ export function ArenaCanvas({ characterStates }: ArenaCanvasProps) {
         />
       ))}
 
-      <Suspense fallback={null}>
-        <PostFX />
-      </Suspense>
     </Canvas>
   )
 }

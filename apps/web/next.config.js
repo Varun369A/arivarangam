@@ -8,8 +8,6 @@ const nextConfig = {
     'three',
     '@react-three/fiber',
     '@react-three/drei',
-    '@react-three/postprocessing',
-    'postprocessing',
   ],
   images: {
     domains: ['avatars.githubusercontent.com', 'oaidalleapiprodscus.blob.core.windows.net'],
