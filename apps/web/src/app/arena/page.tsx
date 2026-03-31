@@ -437,6 +437,20 @@ export default function ArenaPage() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, pointerEvents: 'auto' }}>
+          {user?.isAdmin && (
+            <a
+              href="/admin"
+              style={{
+                color: '#a78bfa', background: 'rgba(109,40,217,0.18)',
+                border: '1px solid rgba(139,92,246,0.4)',
+                borderRadius: 10, padding: '4px 12px',
+                fontSize: 11, fontWeight: 700, textDecoration: 'none',
+                letterSpacing: '0.02em',
+              }}
+            >
+              Admin Panel →
+            </a>
+          )}
           {user && (
             <span style={{ color: '#64748b', fontSize: 12, fontWeight: 500 }}>
               {user.name?.split(' ')[0]}

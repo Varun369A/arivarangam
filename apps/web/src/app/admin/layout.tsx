@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { AdminSidebar } from '@/components/AdminSidebar'
 import { AutoLogoutWatcher } from '@/components/AutoLogoutWatcher'
+import { AdminHeaderActions } from '@/components/AdminHeaderActions'
 
 export const metadata: Metadata = {
   title: {
@@ -22,15 +22,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <span className="text-sm font-bold text-[#1E1B4B]">Admin Panel</span>
           </div>
           <div className="flex-1" />
-          <Link
-            href="/dashboard"
-            className="text-xs text-[#4F46E5] bg-[#EEF2FF] hover:bg-[#E0E7FF] px-3 py-1.5 rounded-lg font-semibold transition-colors flex items-center gap-1.5 border border-[#C7D2FE]"
-          >
-            ← Back to App
-          </Link>
-          <span className="text-xs text-[#7C3AED] bg-[#F5F0FF] px-2 py-1 rounded-lg font-semibold border border-[#DDD6FE]">
-            Restricted Access
-          </span>
+          <AdminHeaderActions />
         </header>
 
         {/* Page content */}
