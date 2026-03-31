@@ -23,7 +23,7 @@ function parseSentences(text: string): string[] {
 }
 
 function sentenceDuration(s: string): number {
-  return Math.max(4500, Math.min(s.length * 90, 9500))
+  return Math.max(5000, Math.min(s.length * 95, 11000))
 }
 
 // ─── Rig type ─────────────────────────────────────────────────────────────────
@@ -76,14 +76,13 @@ const DESIGNS: Record<string, Design> = {
       })
     },
     addAccessory: (g, col) => {
-      const crownMat = new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.8 })
+      // Small amber crown — 5 spikes, no ring band
+      const crownMat = new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.9, roughness: 0.2 })
       for (let i = 0; i < 5; i++) {
         const ang = (i / 5) * Math.PI * 2
-        const peak = new THREE.Mesh(new THREE.ConeGeometry(0.036, 0.1, 4), crownMat)
-        peak.position.set(Math.cos(ang) * 0.21, 2.12, Math.sin(ang) * 0.21); g.add(peak)
+        const peak = new THREE.Mesh(new THREE.ConeGeometry(0.030, 0.12, 5), crownMat)
+        peak.position.set(Math.cos(ang) * 0.18, 2.10, Math.sin(ang) * 0.18); g.add(peak)
       }
-      const band = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.025, 6, 24), crownMat)
-      band.position.set(0, 2.03, 0); g.add(band)
     },
   },
   perplexity: {
@@ -219,32 +218,32 @@ function buildRig(char: CharacterConfig, isActive: boolean): Omit<Rig, 'labelEl'
   // Per-character styled hair
   d.addHair(headGroup, h, d.headR)
 
-  // Eyes
-  // Chibi-large eyes scaled to head radius
-  const eyeX = d.headR * 0.41
-  const eyeY = 1.74 * h
-  const eyeZ = d.headR * 0.87
-  const eyeSR = d.headR * 0.23
-  const irisR = eyeSR * 0.66
-  const pupilR = eyeSR * 0.42
+  // Eyes — positioned in lower face area (below hair cap coverage)
+  const eyeX = d.headR * 0.38
+  const eyeY = 1.63 * h
+  const eyeZ = d.headR * 0.88
+  const eyeSR = d.headR * 0.27   // bigger chibi eyes
+  const irisR = eyeSR * 0.70
+  const pupilR = eyeSR * 0.44
   ;[-eyeX, eyeX].forEach(x => {
-    const e = new THREE.Mesh(new THREE.SphereGeometry(eyeSR, 12, 12), eyeW()); e.position.set(x, eyeY, eyeZ); headGroup.add(e)
-    const iris = new THREE.Mesh(new THREE.SphereGeometry(irisR, 8, 8), new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.4 }))
-    iris.position.set(x, eyeY, eyeZ + eyeSR * 0.48); headGroup.add(iris)
-    const p = new THREE.Mesh(new THREE.SphereGeometry(pupilR, 8, 8), dark()); p.position.set(x, eyeY, eyeZ + eyeSR * 0.68); headGroup.add(p)
-    const s = new THREE.Mesh(new THREE.SphereGeometry(eyeSR * 0.19, 4, 4), shine()); s.position.set(x - eyeSR * 0.24, eyeY + eyeSR * 0.28, eyeZ + eyeSR * 0.86); headGroup.add(s)
+    const e = new THREE.Mesh(new THREE.SphereGeometry(eyeSR, 14, 14), eyeW()); e.position.set(x, eyeY, eyeZ); headGroup.add(e)
+    const iris = new THREE.Mesh(new THREE.SphereGeometry(irisR, 10, 10), new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.5 }))
+    iris.position.set(x, eyeY, eyeZ + eyeSR * 0.46); headGroup.add(iris)
+    const p = new THREE.Mesh(new THREE.SphereGeometry(pupilR, 8, 8), dark()); p.position.set(x, eyeY, eyeZ + eyeSR * 0.66); headGroup.add(p)
+    // Catchlight — bright white dot for life
+    const s = new THREE.Mesh(new THREE.SphereGeometry(eyeSR * 0.22, 4, 4), shine()); s.position.set(x - eyeSR * 0.22, eyeY + eyeSR * 0.26, eyeZ + eyeSR * 0.84); headGroup.add(s)
   })
 
-  // Eyebrows — scaled to head
+  // Eyebrows — above eyes
   const browMat = main()
   ;[-eyeX, eyeX].forEach(x => {
-    const brow = new THREE.Mesh(new THREE.BoxGeometry(d.headR * 0.42, 0.022, 0.015), browMat)
-    brow.position.set(x, 1.775 * h, d.headR * 0.82); headGroup.add(brow)
+    const brow = new THREE.Mesh(new THREE.BoxGeometry(d.headR * 0.40, 0.022, 0.015), browMat)
+    brow.position.set(x, eyeY + eyeSR + 0.022, d.headR * 0.82); headGroup.add(brow)
   })
 
   // Animated mouth — scaled to head
-  const mouth = new THREE.Mesh(new THREE.TorusGeometry(d.headR * 0.21, 0.013, 6, 12, Math.PI), dark())
-  mouth.position.set(0, 1.685 * h, d.headR * 0.9)
+  const mouth = new THREE.Mesh(new THREE.TorusGeometry(d.headR * 0.22, 0.014, 6, 14, Math.PI), dark())
+  mouth.position.set(0, eyeY - eyeSR * 1.6, d.headR * 0.90)
   mouth.rotation.set(0.2, 0, 0)
   headGroup.add(mouth)
 
@@ -541,9 +540,10 @@ export function ArenaCanvas({ characterStates, welcomeUser }: ArenaCanvasProps) 
     camera.lookAt(0, 1.2, 0)
 
     // ── Lights ────────────────────────────────────────────────────────────
-    scene.add(new THREE.AmbientLight('#1a1060', 0.15))
+    // Warm white ambient so skin tones render correctly
+    scene.add(new THREE.AmbientLight('#ffffff', 0.60))
 
-    const sun = new THREE.DirectionalLight('#fffaf0', 1.2)
+    const sun = new THREE.DirectionalLight('#fffaf0', 1.1)
     sun.position.set(3, 10, 6); sun.castShadow = true
     sun.shadow.mapSize.set(2048, 2048)
     sun.shadow.camera.near = 0.1; sun.shadow.camera.far = 35
@@ -553,10 +553,15 @@ export function ArenaCanvas({ characterStates, welcomeUser }: ArenaCanvasProps) 
     ;(sun.shadow.camera as THREE.OrthographicCamera).bottom = -14
     scene.add(sun)
 
-    const bl = new THREE.DirectionalLight('#4040CC', 0.45)
+    // Front fill — illuminates faces visible from camera
+    const frontFill = new THREE.DirectionalLight('#fff8e8', 0.9)
+    frontFill.position.set(0, 4, 12)
+    scene.add(frontFill)
+
+    const bl = new THREE.DirectionalLight('#4040CC', 0.3)
     bl.position.set(-8, 4, -3)
     scene.add(bl)
-    const bl2 = new THREE.DirectionalLight('#6030A0', 0.3)
+    const bl2 = new THREE.DirectionalLight('#6030A0', 0.2)
     bl2.position.set(0, 3, -10)
     scene.add(bl2)
 

@@ -25,11 +25,11 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function charSpeak(onEvent: OnEvent, character: string, text: string, durationMs = 4000): Promise<void> {
+async function charSpeak(onEvent: OnEvent, character: string, text: string, durationMs = 5500): Promise<void> {
   await onEvent({ type: 'log', data: { isCharacterEvent: true, character, action: 'speak', text, duration: durationMs }, timestamp: new Date().toISOString() });
 }
 
-async function charThink(onEvent: OnEvent, character: string, text: string, durationMs = 3500): Promise<void> {
+async function charThink(onEvent: OnEvent, character: string, text: string, durationMs = 5000): Promise<void> {
   await onEvent({ type: 'log', data: { isCharacterEvent: true, character, action: 'think', text, duration: durationMs }, timestamp: new Date().toISOString() });
 }
 
@@ -83,24 +83,26 @@ export class TaskOrchestrator {
     const VISUAL_CATEGORIES = ['web', 'animation', 'presentation', 'banner', 'brand', 'design_system', 'dataviz', 'logo', 'mobile', 'content', 'code'];
     let designSpec = null;
     if (VISUAL_CATEGORIES.includes(category)) {
-      // Call Perplexity for research/design reference if complex
-      if (analysis.complexity === 'complex' || analysis.hasAnimationRequest) {
-        await charCall(onEvent, 'claude', 'perplexity', 'I need design research for this one. Perplexity!', 2500);
-        await charSpeak(onEvent, 'perplexity', `Researching ${analysis.domain} design patterns…`, 3000);
+      // Call Perplexity for design research on all non-trivial tasks
+      if (analysis.complexity !== 'simple') {
+        await charCall(onEvent, 'claude', 'perplexity', `I need design research for this ${analysis.domain}. Perplexity, you're up!`, 1500);
+        await charSpeak(onEvent, 'perplexity', `On it! Researching ${analysis.domain} design patterns, trends, and best practices…`, 5500);
       }
       designSpec = await createDesignSpec(prompt, category, analysis, onEvent, meter);
-      if (analysis.complexity === 'complex' || analysis.hasAnimationRequest) {
-        await charReturn(onEvent, 'perplexity', 'Research done — here\'s what I found for Claude.', 2500);
+      if (analysis.complexity !== 'simple') {
+        await charSpeak(onEvent, 'perplexity', `Found great references for ${analysis.domain}. Here's the research summary for Claude!`, 5000);
+        await charReturn(onEvent, 'perplexity', 'All done — research passed to Claude. See you next time!', 1500);
       }
       await charSpeak(onEvent, 'claude', `Design blueprint ready. Starting to build…`, 2500);
     }
 
     // ── Phase 3: Plan ────────────────────────────────────────────────────────
-    // Optionally bring ChatGPT for suggestions on complex tasks
+    // Bring ChatGPT for suggestions on complex tasks
     if (analysis.complexity === 'complex') {
-      await charCall(onEvent, 'claude', 'chatgpt', 'Hey ChatGPT — any suggestions on the approach?', 2000);
-      await charSpeak(onEvent, 'chatgpt', `For a ${analysis.domain}, I'd suggest focusing on UX first.`, 2500);
-      await charReturn(onEvent, 'chatgpt', 'Good luck, Claude — you\'ve got this!', 2000);
+      await charCall(onEvent, 'claude', 'chatgpt', 'Hey ChatGPT — any creative suggestions on the approach for this one?', 1500);
+      await charSpeak(onEvent, 'chatgpt', `For a ${analysis.domain}, I'd focus on UX-first design — make it feel intuitive before making it look fancy.`, 5500);
+      await charSpeak(onEvent, 'chatgpt', `Also consider the user journey: clear CTAs, smooth transitions, and a strong visual hierarchy.`, 5000);
+      await charReturn(onEvent, 'chatgpt', 'Good luck Claude — you\'ve totally got this. Build something amazing!', 1500);
     }
     const plan = await planBuild(prompt, category, analysis, categoryRules, onEvent, meter);
     await emitCreditUpdate(onEvent, meter, isAdmin);
