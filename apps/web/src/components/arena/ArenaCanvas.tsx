@@ -220,7 +220,9 @@ export function ArenaCanvas({ characterStates }: ArenaCanvasProps) {
         />
       ))}
 
-      <PostFX />
+      <Suspense fallback={null}>
+        <PostFX />
+      </Suspense>
     </Canvas>
   )
 }
