@@ -247,6 +247,18 @@ function buildRig(char: CharacterConfig, isActive: boolean): Omit<Rig, 'labelEl'
   mouth.rotation.set(0.2, 0, 0)
   headGroup.add(mouth)
 
+  // Chibi cheek blush — oval pink patches below eyes
+  const blushMat = new THREE.MeshStandardMaterial({
+    color: '#FF9EB5', emissive: new THREE.Color('#FF85A0'), emissiveIntensity: 0.5,
+    transparent: true, opacity: 0.60, roughness: 0.9,
+  })
+  ;[-1, 1].forEach(s => {
+    const blush = new THREE.Mesh(new THREE.SphereGeometry(eyeSR * 0.82, 8, 8), blushMat)
+    blush.scale.set(1.0, 0.55, 0.32)
+    blush.position.set(s * (eyeX + eyeSR * 0.75), eyeY - eyeSR * 0.9, eyeZ * 0.92)
+    headGroup.add(blush)
+  })
+
   group.add(headGroup)
 
   // Accessories (character-specific) — attached to group so world positions work

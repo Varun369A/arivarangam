@@ -66,6 +66,8 @@ export function useArenaStream(taskId: string | null) {
   const reconnectRef       = useRef<ReturnType<typeof setTimeout> | null>(null)
   const reconnectCountRef  = useRef(0)
   const speechTimersRef    = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+  // Tracks when a walking-in character will arrive — prevents speak events interrupting walk
+  const walkEndTimeRef     = useRef<Record<string, number>>({})
 
   // ── Speech management ──────────────────────────────────────────────────────
 
@@ -141,17 +143,32 @@ export function useArenaStream(taskId: string | null) {
     if (!charId || !CHARACTERS[charId]) return
 
     switch (action) {
-      case 'speak':
-        setCharacterAction(charId, 'talking')
-        if (text) setSpeech(charId, text, duration)
-        setTimeout(() => setCharacterAction(charId, 'idle'), duration + 200)
+      case 'speak': {
+        // Delay speech if this character is still walking in from a call
+        const walkEnd = walkEndTimeRef.current[charId] ?? 0
+        const waitMs  = Math.max(0, walkEnd - Date.now() + 800)
+        const doSpeak = () => {
+          setCharacterAction(charId, 'talking')
+          if (text) setSpeech(charId, text, duration)
+          setTimeout(() => setCharacterAction(charId, 'idle'), duration + 200)
+        }
+        if (waitMs > 400) setTimeout(doSpeak, waitMs)
+        else doSpeak()
         break
+      }
 
-      case 'think':
-        setCharacterAction(charId, 'thinking')
-        if (text) setSpeech(charId, text, duration)
-        setTimeout(() => setCharacterAction(charId, 'idle'), duration + 200)
+      case 'think': {
+        const walkEnd2 = walkEndTimeRef.current[charId] ?? 0
+        const waitMs2  = Math.max(0, walkEnd2 - Date.now() + 800)
+        const doThink = () => {
+          setCharacterAction(charId, 'thinking')
+          if (text) setSpeech(charId, text, duration)
+          setTimeout(() => setCharacterAction(charId, 'idle'), duration + 200)
+        }
+        if (waitMs2 > 400) setTimeout(doThink, waitMs2)
+        else doThink()
         break
+      }
 
       case 'wave':
         setCharacterAction(charId, 'waving')
@@ -171,9 +188,10 @@ export function useArenaStream(taskId: string | null) {
         if (text) setSpeech(charId, text, 4500)
         if (targetChar && CHARACTERS[targetChar]) {
           const tc = CHARACTERS[targetChar]
-          // Walk starts after call
+          // Walk starts after call — mark when it will complete so speak events don't interrupt
           setTimeout(() => {
             setCharacterAction(targetChar, 'walking', tc.meetPosition as [number, number, number])
+            walkEndTimeRef.current[targetChar] = Date.now() + 9200
           }, 800)
           // Arrival greeting — after slow walk (~8.5s)
           setTimeout(() => {
@@ -209,6 +227,7 @@ export function useArenaStream(taskId: string | null) {
 
       case 'return':
         // Character says goodbye then slowly walks back off-screen
+        delete walkEndTimeRef.current[charId]
         if (text) setSpeech(charId, text, 5000)
         setTimeout(() => {
           setCharacterAction(charId, 'walking', CHARACTERS[charId].homePosition as [number, number, number])
