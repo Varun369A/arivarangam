@@ -43,209 +43,52 @@ interface Rig {
   speechEl: HTMLDivElement
 }
 
-// ─── Character designs (unique per AI) ───────────────────────────────────────
+// ─── Build one character (rounded bot) ───────────────────────────────────────
 
-interface Design {
-  torsoW: number
-  torsoH: number
-  headR: number
-  heightMult: number
-  pantsColor: string
-  innerColor: string
-  shoeColor: string
-  addHair: (g: THREE.Group, h: number, r: number) => void
-  addAccessory: (g: THREE.Group, color: THREE.Color) => void
-}
-
-const DESIGNS: Record<string, Design> = {
-  claude: {
-    torsoW: 0.36, torsoH: 0.46, headR: 0.27, heightMult: 1.0,
-    pantsColor: '#1e293b', innerColor: '#f8fafc', shoeColor: '#f0f0f0',
-    addHair: (g, h, r) => {
-      const mat = new THREE.MeshStandardMaterial({ color: '#3D2B1A', roughness: 0.7 })
-      const cap = new THREE.Mesh(new THREE.SphereGeometry(r + 0.012, 16, 8, 0, Math.PI * 2, 0, Math.PI * 0.58), mat)
-      cap.position.set(0, 1.72 * h, 0); g.add(cap)
-      ;[[-0.09, 0.14, -0.3], [0, 0, 0], [0.09, -0.14, -0.3]].forEach(([ox, rz, rx]) => {
-        const spike = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.2, 5), mat)
-        spike.position.set(ox, 1.93 * h, -r * 0.5)
-        spike.rotation.x = rx * 0.4; spike.rotation.z = rz; g.add(spike)
-      })
-      ;[-1, 1].forEach(s => {
-        const side = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 6), mat)
-        side.position.set(s * (r + 0.022), 1.7 * h, 0.02); g.add(side)
-      })
-    },
-    addAccessory: (g, col) => {
-      // Small amber crown — 5 spikes, no ring band
-      const crownMat = new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.9, roughness: 0.2 })
-      for (let i = 0; i < 5; i++) {
-        const ang = (i / 5) * Math.PI * 2
-        const peak = new THREE.Mesh(new THREE.ConeGeometry(0.030, 0.12, 5), crownMat)
-        peak.position.set(Math.cos(ang) * 0.18, 2.10, Math.sin(ang) * 0.18); g.add(peak)
-      }
-    },
-  },
-  perplexity: {
-    torsoW: 0.30, torsoH: 0.48, headR: 0.26, heightMult: 1.05,
-    pantsColor: '#374151', innerColor: '#d1d5db', shoeColor: '#111827',
-    addHair: (g, h, r) => {
-      const mat = new THREE.MeshStandardMaterial({ color: '#111827', roughness: 0.5 })
-      const cap = new THREE.Mesh(new THREE.SphereGeometry(r + 0.01, 16, 8, 0, Math.PI * 2, 0, Math.PI * 0.55), mat)
-      cap.position.set(0, 1.72 * h, 0); g.add(cap)
-      const fringe = new THREE.Mesh(new THREE.BoxGeometry(r * 1.9, 0.045, 0.09), mat)
-      fringe.position.set(-0.03, (1.72 + r - 0.02) * h, -r * 0.55); g.add(fringe)
-      ;[-1, 1].forEach(s => {
-        const side = new THREE.Mesh(new THREE.BoxGeometry(0.042, 0.15, 0.065), mat)
-        side.position.set(s * (r + 0.015), 1.63 * h, 0.04); g.add(side)
-      })
-    },
-    addAccessory: (g) => {
-      const mat = new THREE.MeshStandardMaterial({ color: '#aaaaaa', metalness: 0.9, roughness: 0.1 })
-      const lensGeo = new THREE.BoxGeometry(0.115, 0.062, 0.013)
-      const lL = new THREE.Mesh(lensGeo, mat); lL.position.set(-0.105, 1.77, 0.26); g.add(lL)
-      const lR = new THREE.Mesh(lensGeo, mat); lR.position.set(0.105, 1.77, 0.26); g.add(lR)
-      const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.013, 0.011), mat)
-      bridge.position.set(0, 1.77, 0.26); g.add(bridge)
-      const lArm = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.011, 0.011), mat)
-      lArm.position.set(-0.21, 1.77, 0.17); lArm.rotation.y = 0.4; g.add(lArm)
-      const rArm = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.011, 0.011), mat)
-      rArm.position.set(0.21, 1.77, 0.17); rArm.rotation.y = -0.4; g.add(rArm)
-    },
-  },
-  chatgpt: {
-    torsoW: 0.38, torsoH: 0.46, headR: 0.27, heightMult: 1.0,
-    pantsColor: '#1e3a5f', innerColor: '#9ca3af', shoeColor: '#dc2626',
-    addHair: (g, h, r) => {
-      const mat = new THREE.MeshStandardMaterial({ color: '#5D4037', roughness: 0.65 })
-      const cap = new THREE.Mesh(new THREE.SphereGeometry(r + 0.012, 16, 8, 0, Math.PI * 2, 0, Math.PI * 0.58), mat)
-      cap.position.set(0, 1.72 * h, 0); g.add(cap)
-      ;[[-0.1, 0.25], [0, 0], [0.1, -0.25]].forEach(([ox, rz]) => {
-        const wave = new THREE.Mesh(new THREE.CapsuleGeometry(0.042, 0.1, 4, 8), mat)
-        wave.position.set(ox, (1.87 + Math.abs(ox) * 0.15) * h, -r * 0.45)
-        wave.rotation.x = -0.2; wave.rotation.z = rz; g.add(wave)
-      })
-      ;[-1, 1].forEach(s => {
-        const side = new THREE.Mesh(new THREE.SphereGeometry(0.068, 8, 6), mat)
-        side.position.set(s * (r + 0.032), 1.69 * h, 0.02); g.add(side)
-      })
-    },
-    addAccessory: (g, col) => {
-      const stripeMat = new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.25, roughness: 0.4 })
-      const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.04, 0.022), stripeMat)
-      stripe.position.set(0, 1.08, 0.12); g.add(stripe)
-    },
-  },
-  gemini: {
-    torsoW: 0.31, torsoH: 0.46, headR: 0.26, heightMult: 0.96,
-    pantsColor: '#1e1b4b', innerColor: '#c4b5fd', shoeColor: '#8B5CF6',
-    addHair: (g, h, r) => {
-      const mat = new THREE.MeshStandardMaterial({ color: '#1a1a2e', roughness: 0.6 })
-      const cap = new THREE.Mesh(new THREE.SphereGeometry(r + 0.01, 16, 8, 0, Math.PI * 2, 0, Math.PI * 0.55), mat)
-      cap.position.set(0, 1.72 * h, 0); g.add(cap)
-      for (let i = 0; i < 3; i++) {
-        const sweep = new THREE.Mesh(new THREE.CapsuleGeometry(0.038 - i * 0.007, 0.14, 4, 8), mat)
-        sweep.position.set(-0.06 - i * 0.04, (1.91 - i * 0.04) * h, -0.06)
-        sweep.rotation.z = -0.55 + i * 0.12; sweep.rotation.x = -0.2; g.add(sweep)
-      }
-      const vol = new THREE.Mesh(new THREE.SphereGeometry(0.075, 8, 6), mat)
-      vol.position.set(-(r + 0.045), 1.73 * h, 0.02); g.add(vol)
-    },
-    addAccessory: (g, col) => {
-      const gemMat = new THREE.MeshStandardMaterial({
-        color: col, emissive: col, emissiveIntensity: 1.2,
-        transparent: true, opacity: 0.85, metalness: 0.3, roughness: 0.1,
-      })
-      const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.11, 0), gemMat)
-      gem.position.set(0, 2.18, 0); g.add(gem)
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.11, 0.013, 6, 16), gemMat)
-      ring.position.set(0, 2.06, 0); g.add(ring)
-    },
-  },
-  sarvam: {
-    torsoW: 0.32, torsoH: 0.47, headR: 0.26, heightMult: 1.02,
-    pantsColor: '#292524', innerColor: '#fff7ed', shoeColor: '#92400e',
-    addHair: (g, h, r) => {
-      const mat = new THREE.MeshStandardMaterial({ color: '#0f0f0f', roughness: 0.6 })
-      const cap = new THREE.Mesh(new THREE.SphereGeometry(r + 0.01, 16, 8, 0, Math.PI * 2, 0, Math.PI * 0.55), mat)
-      cap.position.set(0, 1.72 * h, 0); g.add(cap)
-      ;[-1, 1].forEach(s => {
-        const drape = new THREE.Mesh(new THREE.CapsuleGeometry(0.038, 0.18, 4, 8), mat)
-        drape.position.set(s * (r + 0.012), 1.61 * h, 0.02); g.add(drape)
-      })
-      const back = new THREE.Mesh(new THREE.SphereGeometry(r * 0.72, 8, 6), mat)
-      back.position.set(0, 1.69 * h, r * 0.82); g.add(back)
-    },
-    addAccessory: (g, col) => {
-      const bindiMat = new THREE.MeshStandardMaterial({ color: '#FF4444', emissive: new THREE.Color('#FF2222'), emissiveIntensity: 1.5 })
-      const bindi = new THREE.Mesh(new THREE.SphereGeometry(0.026, 8, 8), bindiMat)
-      bindi.position.set(0, 1.88, 0.26); g.add(bindi)
-      const scarfMat = new THREE.MeshStandardMaterial({ color: col, transparent: true, opacity: 0.55, emissive: col, emissiveIntensity: 0.3 })
-      const scarf = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.03, 6, 20, Math.PI), scarfMat)
-      scarf.position.set(0, 1.97, 0); scarf.rotation.x = 0.4; g.add(scarf)
-    },
-  },
-}
-
-// ─── Build one character ───────────────────────────────────────────────────────
 
 function buildRig(char: CharacterConfig, isActive: boolean): Omit<Rig, 'labelEl' | 'speechEl'> {
-  const d = DESIGNS[char.id] ?? DESIGNS.claude
-  const col = new THREE.Color(char.color)
-  const h = d.heightMult
-
-  const main = () => new THREE.MeshStandardMaterial({
-    color: col, roughness: 0.28, metalness: 0.12,
-    emissive: col, emissiveIntensity: isActive ? 0.25 : 0.1,
-  })
-  const dark = () => new THREE.MeshStandardMaterial({ color: '#060A14', roughness: 0.3 })
-  const skin = () => new THREE.MeshStandardMaterial({ color: char.skinColor, roughness: 0.5 })
-  const eyeW = () => new THREE.MeshStandardMaterial({ color: 'white', emissive: new THREE.Color('white'), emissiveIntensity: 0.6 })
-  const shine = () => new THREE.MeshStandardMaterial({ color: 'white', emissive: new THREE.Color('white'), emissiveIntensity: 3 })
-  const pant = () => new THREE.MeshStandardMaterial({ color: d.pantsColor, roughness: 0.45 })
-  const shoe = () => new THREE.MeshStandardMaterial({ color: d.shoeColor, roughness: 0.3, metalness: 0.1 })
-
+  const col   = new THREE.Color(char.color)
   const group = new THREE.Group()
   group.position.set(char.homePosition[0], char.homePosition[1], char.homePosition[2])
 
-  // ── Head group ────────────────────────────────────────────────────────────
+  const headR = 0.30
+  const headY = 1.22
+
+  // ── Materials ─────────────────────────────────────────────────────────────
+  const mainMat = () => new THREE.MeshStandardMaterial({ color: col, roughness: 0.28, metalness: 0.15, emissive: col, emissiveIntensity: isActive ? 0.28 : 0.12 })
+  const bodyMat = () => new THREE.MeshStandardMaterial({ color: col, roughness: 0.4,  metalness: 0.2,  emissive: col, emissiveIntensity: 0.06 })
+  const darkMat = () => new THREE.MeshStandardMaterial({ color: '#1a1a2e', roughness: 0.5 })
+  const eyeW   = () => new THREE.MeshStandardMaterial({ color: 'white', emissive: new THREE.Color('white'), emissiveIntensity: 0.6 })
+  const shine  = () => new THREE.MeshStandardMaterial({ color: 'white', emissive: new THREE.Color('white'), emissiveIntensity: 3 })
+  // ── Head ──────────────────────────────────────────────────────────────────
   const headGroup = new THREE.Group()
+  const headMesh = new THREE.Mesh(new THREE.SphereGeometry(headR, 24, 24), mainMat())
+  headMesh.position.set(0, headY, 0); headMesh.castShadow = true; headGroup.add(headMesh)
 
-  const headMesh = new THREE.Mesh(new THREE.SphereGeometry(d.headR, 24, 24), skin())
-  headMesh.position.set(0, 1.72 * h, 0)
-  headMesh.castShadow = true
-  headGroup.add(headMesh)
-
-  // Per-character styled hair
-  d.addHair(headGroup, h, d.headR)
-
-  // Eyes — positioned in lower face area (below hair cap coverage)
-  const eyeX = d.headR * 0.38
-  const eyeY = 1.63 * h
-  const eyeZ = d.headR * 0.88
-  const eyeSR = d.headR * 0.27   // bigger chibi eyes
-  const irisR = eyeSR * 0.70
+  // Eyes (chibi — big, in the lower front of head)
+  const eyeX  = headR * 0.38
+  const eyeY  = headY - 0.04
+  const eyeZ  = headR * 0.86
+  const eyeSR = headR * 0.27
+  const irisR  = eyeSR * 0.70
   const pupilR = eyeSR * 0.44
   ;[-eyeX, eyeX].forEach(x => {
     const e = new THREE.Mesh(new THREE.SphereGeometry(eyeSR, 14, 14), eyeW()); e.position.set(x, eyeY, eyeZ); headGroup.add(e)
     const iris = new THREE.Mesh(new THREE.SphereGeometry(irisR, 10, 10), new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.5 }))
     iris.position.set(x, eyeY, eyeZ + eyeSR * 0.46); headGroup.add(iris)
-    const p = new THREE.Mesh(new THREE.SphereGeometry(pupilR, 8, 8), dark()); p.position.set(x, eyeY, eyeZ + eyeSR * 0.66); headGroup.add(p)
-    // Catchlight — bright white dot for life
+    const p = new THREE.Mesh(new THREE.SphereGeometry(pupilR, 8, 8), darkMat()); p.position.set(x, eyeY, eyeZ + eyeSR * 0.66); headGroup.add(p)
     const s = new THREE.Mesh(new THREE.SphereGeometry(eyeSR * 0.22, 4, 4), shine()); s.position.set(x - eyeSR * 0.22, eyeY + eyeSR * 0.26, eyeZ + eyeSR * 0.84); headGroup.add(s)
   })
 
-  // Eyebrows — above eyes
-  const browMat = main()
+  // Eyebrows
   ;[-eyeX, eyeX].forEach(x => {
-    const brow = new THREE.Mesh(new THREE.BoxGeometry(d.headR * 0.40, 0.022, 0.015), browMat)
-    brow.position.set(x, eyeY + eyeSR + 0.022, d.headR * 0.82); headGroup.add(brow)
+    const brow = new THREE.Mesh(new THREE.BoxGeometry(headR * 0.40, 0.022, 0.015), mainMat())
+    brow.position.set(x, eyeY + eyeSR + 0.022, headR * 0.82); headGroup.add(brow)
   })
 
-  // Animated mouth — scaled to head
-  const mouth = new THREE.Mesh(new THREE.TorusGeometry(d.headR * 0.22, 0.014, 6, 14, Math.PI), dark())
-  mouth.position.set(0, eyeY - eyeSR * 1.6, d.headR * 0.90)
-  mouth.rotation.set(0.2, 0, 0)
-  headGroup.add(mouth)
+  // Animated mouth
+  const mouth = new THREE.Mesh(new THREE.TorusGeometry(headR * 0.22, 0.014, 6, 14, Math.PI), darkMat())
+  mouth.position.set(0, eyeY - eyeSR * 1.6, headR * 0.90); mouth.rotation.set(0.2, 0, 0); headGroup.add(mouth)
 
   // Chibi cheek blush — oval pink patches below eyes
   const blushMat = new THREE.MeshStandardMaterial({
@@ -261,83 +104,59 @@ function buildRig(char: CharacterConfig, isActive: boolean): Omit<Rig, 'labelEl'
 
   group.add(headGroup)
 
-  // Accessories (character-specific) — attached to group so world positions work
-  d.addAccessory(group, col)
+  // ── Per-character top accessory ────────────────────────────────────────────
+  const accY = headY + headR
+  if (char.id === 'claude') {
+    const crownMat = new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 1.0, roughness: 0.2 })
+    for (let i = 0; i < 5; i++) {
+      const ang = (i / 5) * Math.PI * 2
+      const peak = new THREE.Mesh(new THREE.ConeGeometry(0.026, 0.10, 5), crownMat)
+      peak.position.set(Math.cos(ang) * 0.14, accY + 0.05, Math.sin(ang) * 0.14); group.add(peak)
+    }
+  } else if (char.id === 'perplexity') {
+    const antMat = new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.7, roughness: 0.3 })
+    const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.18, 8), antMat)
+    rod.position.set(0, accY + 0.09, 0); group.add(rod)
+    const antTip = new THREE.Mesh(new THREE.SphereGeometry(0.046, 8, 8), new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 2.2 }))
+    antTip.position.set(0, accY + 0.19, 0); group.add(antTip)
+  } else if (char.id === 'chatgpt') {
+    const ringMat = new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.9, roughness: 0.2 })
+    const topRing = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.020, 6, 16), ringMat)
+    topRing.position.set(0, accY + 0.12, 0); group.add(topRing)
+  } else if (char.id === 'gemini') {
+    const gemMat = new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 1.2, transparent: true, opacity: 0.9, metalness: 0.3, roughness: 0.1 })
+    const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.10, 0), gemMat)
+    gem.position.set(0, accY + 0.16, 0); group.add(gem)
+  } else if (char.id === 'sarvam') {
+    const bindiMat2 = new THREE.MeshStandardMaterial({ color: '#FF4444', emissive: new THREE.Color('#FF2222'), emissiveIntensity: 1.5 })
+    const bindi2 = new THREE.Mesh(new THREE.SphereGeometry(0.028, 8, 8), bindiMat2)
+    bindi2.position.set(0, headY + 0.06, headR * 0.94); group.add(bindi2)
+    const turbanMat = new THREE.MeshStandardMaterial({ color: col, roughness: 0.4, emissive: col, emissiveIntensity: 0.15 })
+    const turban = new THREE.Mesh(new THREE.SphereGeometry(0.10, 10, 8, 0, Math.PI * 2, 0, Math.PI * 0.55), turbanMat)
+    turban.position.set(0, headY + headR - 0.02, 0); group.add(turban)
+  }
 
-  // ── Neck ─────────────────────────────────────────────────────────────────
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.075, 0.14, 10), skin())
-  neck.position.set(0, 1.56 * h, 0)
-  group.add(neck)
-
-  // ── Torso ─────────────────────────────────────────────────────────────────
-  const torsoShape = new THREE.BoxGeometry(d.torsoW, d.torsoH, 0.2)
-  const torso = new THREE.Mesh(torsoShape, main())
-  torso.position.set(0, 1.22 * h, 0)
-  torso.castShadow = true
-  group.add(torso)
-
-  // Inner shirt visible between jacket lapels
-  const innerMat = new THREE.MeshStandardMaterial({ color: d.innerColor, roughness: 0.5 })
-  const innerShirt = new THREE.Mesh(new THREE.BoxGeometry(d.torsoW * 0.32, d.torsoH * 0.62, 0.016), innerMat)
-  innerShirt.position.set(0, 1.22 * h, 0.108); group.add(innerShirt)
-  // Jacket lapels
-  const lapelGeo = new THREE.BoxGeometry(d.torsoW * 0.28, d.torsoH * 0.44, 0.024)
-  const lLapel = new THREE.Mesh(lapelGeo, main())
-  lLapel.position.set(-d.torsoW * 0.11, 1.39 * h, 0.106); lLapel.rotation.z = 0.24; group.add(lLapel)
-  const rLapel = new THREE.Mesh(lapelGeo, main())
-  rLapel.position.set(d.torsoW * 0.11, 1.39 * h, 0.106); rLapel.rotation.z = -0.24; group.add(rLapel)
-  // Collar
-  const collarMat = new THREE.MeshStandardMaterial({ color: 0xffffff, opacity: 0.3, transparent: true })
-  const collar = new THREE.Mesh(new THREE.TorusGeometry(d.torsoW * 0.38, 0.018, 6, 16), collarMat)
-  collar.rotation.x = Math.PI / 2; collar.position.set(0, 1.46 * h, 0); group.add(collar)
-
-  // ── Hips ──────────────────────────────────────────────────────────────────
-  const hips = new THREE.Mesh(new THREE.BoxGeometry(d.torsoW * 0.8, 0.14, 0.18), dark())
-  hips.position.set(0, 0.93 * h, 0)
-  group.add(hips)
+  // ── Body / torso ──────────────────────────────────────────────────────────
+  const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.17, 0.26, 8, 16), bodyMat())
+  torso.position.set(0, 0.74, 0); torso.castShadow = true; group.add(torso)
 
   // ── Arms ──────────────────────────────────────────────────────────────────
-  const armRad = 0.058; const armLen = 0.32
-  const rightArm = new THREE.Group()
-  rightArm.position.set(-(d.torsoW / 2 + 0.06), 1.35 * h, 0)
-  const raUpper = new THREE.Mesh(new THREE.CapsuleGeometry(armRad, armLen, 6, 10), main()); raUpper.castShadow = true
-  const raElbow = new THREE.Mesh(new THREE.SphereGeometry(0.065, 8, 8), main()); raElbow.position.set(0, -(armLen / 2 + 0.06), 0)
-  const raFore = new THREE.Mesh(new THREE.CapsuleGeometry(armRad * 0.9, 0.26, 6, 10), skin()); raFore.position.set(0, -(armLen / 2 + 0.22), 0)
-  const raHand = new THREE.Mesh(new THREE.SphereGeometry(0.063, 8, 8), skin()); raHand.position.set(0, -(armLen / 2 + 0.38), 0)
-  rightArm.add(raUpper, raElbow, raFore, raHand)
+  const armMat = () => new THREE.MeshStandardMaterial({ color: col, roughness: 0.35, metalness: 0.1, emissive: col, emissiveIntensity: 0.05 })
+  const rightArm = new THREE.Group(); rightArm.position.set(-0.27, 0.82, 0)
+  rightArm.add(new THREE.Mesh(new THREE.CapsuleGeometry(0.055, 0.24, 6, 10), armMat()))
   group.add(rightArm)
 
-  const leftArm = new THREE.Group()
-  leftArm.position.set(d.torsoW / 2 + 0.06, 1.35 * h, 0)
-  const laUpper = new THREE.Mesh(new THREE.CapsuleGeometry(armRad, armLen, 6, 10), main()); laUpper.castShadow = true
-  const laElbow = new THREE.Mesh(new THREE.SphereGeometry(0.065, 8, 8), main()); laElbow.position.set(0, -(armLen / 2 + 0.06), 0)
-  const laFore = new THREE.Mesh(new THREE.CapsuleGeometry(armRad * 0.9, 0.26, 6, 10), skin()); laFore.position.set(0, -(armLen / 2 + 0.22), 0)
-  const laHand = new THREE.Mesh(new THREE.SphereGeometry(0.063, 8, 8), skin()); laHand.position.set(0, -(armLen / 2 + 0.38), 0)
-  leftArm.add(laUpper, laElbow, laFore, laHand)
+  const leftArm = new THREE.Group(); leftArm.position.set(0.27, 0.82, 0)
+  leftArm.add(new THREE.Mesh(new THREE.CapsuleGeometry(0.055, 0.24, 6, 10), armMat()))
   group.add(leftArm)
 
   // ── Legs ──────────────────────────────────────────────────────────────────
-  const legRad = 0.07; const thighLen = 0.34; const shinLen = 0.3
-  const rightLeg = new THREE.Group()
-  rightLeg.position.set(-0.1, 0.86 * h, 0)
-  const rlThigh = new THREE.Mesh(new THREE.CapsuleGeometry(legRad, thighLen, 6, 10), pant()); rlThigh.castShadow = true
-  const rlKnee = new THREE.Mesh(new THREE.SphereGeometry(0.075, 8, 8), pant()); rlKnee.position.set(0, -(thighLen / 2 + 0.07), 0)
-  const rlShin = new THREE.Mesh(new THREE.CapsuleGeometry(legRad * 0.88, shinLen, 6, 10), pant()); rlShin.position.set(0, -(thighLen / 2 + 0.3), 0)
-  const rlShoe = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.08, 0.25), shoe()); rlShoe.position.set(0, -(thighLen / 2 + shinLen + 0.05), 0.04)
-  const rlSole = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.028, 0.27), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.5 }))
-  rlSole.position.set(0, -(thighLen / 2 + shinLen + 0.1), 0.04)
-  rightLeg.add(rlThigh, rlKnee, rlShin, rlShoe, rlSole)
+  const rightLeg = new THREE.Group(); rightLeg.position.set(-0.10, 0.36, 0)
+  rightLeg.add(new THREE.Mesh(new THREE.CapsuleGeometry(0.065, 0.22, 6, 10), darkMat()))
   group.add(rightLeg)
 
-  const leftLeg = new THREE.Group()
-  leftLeg.position.set(0.1, 0.86 * h, 0)
-  const llThigh = new THREE.Mesh(new THREE.CapsuleGeometry(legRad, thighLen, 6, 10), pant()); llThigh.castShadow = true
-  const llKnee = new THREE.Mesh(new THREE.SphereGeometry(0.075, 8, 8), pant()); llKnee.position.set(0, -(thighLen / 2 + 0.07), 0)
-  const llShin = new THREE.Mesh(new THREE.CapsuleGeometry(legRad * 0.88, shinLen, 6, 10), pant()); llShin.position.set(0, -(thighLen / 2 + 0.3), 0)
-  const llShoe = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.08, 0.25), shoe()); llShoe.position.set(0, -(thighLen / 2 + shinLen + 0.05), 0.04)
-  const llSole = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.028, 0.27), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.5 }))
-  llSole.position.set(0, -(thighLen / 2 + shinLen + 0.1), 0.04)
-  leftLeg.add(llThigh, llKnee, llShin, llShoe, llSole)
+  const leftLeg = new THREE.Group(); leftLeg.position.set(0.10, 0.36, 0)
+  leftLeg.add(new THREE.Mesh(new THREE.CapsuleGeometry(0.065, 0.22, 6, 10), darkMat()))
   group.add(leftLeg)
 
   // ── Glow & floor circle ───────────────────────────────────────────────────
@@ -366,7 +185,6 @@ function animateRig(rig: Rig, char: CharacterConfig, state: CharacterState, isAc
   const d = Math.min(delta, 0.05)
   const g = rig.group
   const hx = char.homePosition[0], hy = char.homePosition[1], hz = char.homePosition[2]
-  const design = DESIGNS[char.id] ?? DESIGNS.claude
 
   // ── Movement ──────────────────────────────────────────────────────────────
   const target = state.targetPosition
@@ -385,8 +203,6 @@ function animateRig(rig: Rig, char: CharacterConfig, state: CharacterState, isAc
     g.position.set(rig.currentPos.x, hy, rig.currentPos.z)
     g.rotation.y = THREE.MathUtils.lerp(g.rotation.y, 0, d * 4)
   }
-
-  const hm = design.heightMult
 
   // ── Head & torso ──────────────────────────────────────────────────────────
   if (state.action === 'idle' || state.action === 'listening') {
@@ -773,7 +589,7 @@ export function ArenaCanvas({ characterStates, welcomeUser }: ArenaCanvasProps) 
         }
 
         // Project to screen
-        bubblePos.set(0, 2.5, 0).applyMatrix4(rig.group.matrixWorld).project(camera)
+        bubblePos.set(0, 1.85, 0).applyMatrix4(rig.group.matrixWorld).project(camera)
         const px = (bubblePos.x + 1) * 0.5 * mount.clientWidth
         const py = (-bubblePos.y + 1) * 0.5 * mount.clientHeight
 
