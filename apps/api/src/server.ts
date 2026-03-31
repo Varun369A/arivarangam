@@ -21,6 +21,7 @@ import { adminRoutes } from './routes/admin/index';
 import { envVarRoutes } from './routes/envVars';
 import { deployRoutes } from './routes/deploy';
 import { galleryRoutes } from './routes/gallery';
+import { previewRoutes } from './routes/preview';
 
 import { PlatformMonitor } from './platform/Monitor';
 import { SelfImprove } from './platform/SelfImprove';
@@ -109,6 +110,7 @@ async function buildServer() {
   await fastify.register(envVarRoutes, { prefix: '/api/v1/env-vars' });
   await fastify.register(deployRoutes, { prefix: '/api/v1/deploy' });
   await fastify.register(galleryRoutes, { prefix: '/api/v1/gallery' });
+  await fastify.register(previewRoutes, { prefix: '/api/v1/preview' });
 
   // Webhooks (no API v1 prefix — Razorpay calls /webhooks/razorpay)
   await fastify.register(webhookRoutes, { prefix: '/webhooks' });

@@ -18,6 +18,7 @@ import { prisma } from '@arivarangam/db';
 import Redis from 'ioredis';
 import { creditService } from './services/CreditService';
 import { TASK_CHANNEL, getBullMQConnection } from './redis';
+import { taskOrchestrator } from './orchestrator/TaskOrchestrator';
 import type { TaskEvent } from '@arivarangam/types';
 
 // ─── Publisher (for SSE relay — not BullMQ mode) ──────────────────────────────
@@ -51,115 +52,13 @@ async function emitEvent(taskId: string, event: TaskEvent): Promise<void> {
 
 // ─── Engine Dispatcher ────────────────────────────────────────────────────────
 
+// ─── Orchestrator Dispatch ────────────────────────────────────────────────────
+// All categories route through TaskOrchestrator.
+// Orchestrator internally delegates image/voice/research to legacy engines.
+
 async function dispatchToEngine(task: any): Promise<void> {
   const onEvent = async (event: TaskEvent) => emitEvent(task.id, event);
-
-  switch (task.category) {
-    // ── Web: Three.js + GSAP + Lenis + tsParticles + Vanta + Lottie + Swiper ─
-    case 'code': {
-      const { WebEngine } = await import('./engines/WebEngine');
-      await new WebEngine().execute(task, onEvent);
-      break;
-    }
-    // ── Mobile: Expo + Reanimated + Moti + Lottie + LinearGradient ───────────
-    case 'mobile': {
-      const { MobileEngine } = await import('./engines/MobileEngine');
-      await new MobileEngine().execute(task, onEvent);
-      break;
-    }
-    // ── Animation: Three.js / GSAP / Canvas / tsParticles / Vanta ────────────
-    case 'animation': {
-      const { AnimationEngine } = await import('./engines/AnimationEngine');
-      await new AnimationEngine().execute(task, onEvent);
-      break;
-    }
-    // ── Presentation: Reveal.js with custom themes and animations ─────────────
-    case 'presentation': {
-      const { PresentationEngine } = await import('./engines/PresentationEngine');
-      await new PresentationEngine().execute(task, onEvent);
-      break;
-    }
-    // ── Content: Long-form articles, marketing copy, SEO content ─────────────
-    case 'content': {
-      const { ContentEngine } = await import('./engines/ContentEngine');
-      await new ContentEngine().execute(task, onEvent);
-      break;
-    }
-    // ── Agent: Python LangChain / CrewAI / LlamaIndex agents ─────────────────
-    case 'agent': {
-      const { AgentEngine } = await import('./engines/AgentEngine');
-      await new AgentEngine().execute(task, onEvent);
-      break;
-    }
-    // ── Workflow: n8n / Make / GitHub Actions / Shell automation ─────────────
-    case 'workflow': {
-      const { WorkflowEngine } = await import('./engines/WorkflowEngine');
-      await new WorkflowEngine().execute(task, onEvent);
-      break;
-    }
-    // ── DataViz: D3 / Chart.js / Apex / Plotly interactive dashboards ────────
-    case 'dataviz': {
-      const { DataVizEngine } = await import('./engines/DataVizEngine');
-      await new DataVizEngine().execute(task, onEvent);
-      break;
-    }
-    // ── Logo: SVG logo kit with 5 variants + brand colors ─────────────────────
-    case 'logo': {
-      const { LogoEngine } = await import('./engines/LogoEngine');
-      await new LogoEngine().execute(task, onEvent);
-      break;
-    }
-    // ── Banner: 7-platform social media banner kit (HTML, exact dimensions) ──
-    case 'banner': {
-      const { BannerEngine } = await import('./engines/BannerEngine');
-      await new BannerEngine().execute(task, onEvent);
-      break;
-    }
-    // ── Brand: Full brand identity — guide, colors, typography, logo, preview ─
-    case 'brand': {
-      const { BrandEngine } = await import('./engines/BrandEngine');
-      await new BrandEngine().execute(task, onEvent);
-      break;
-    }
-    // ── Design System: tokens + Tailwind config + React components ───────────
-    case 'design-system': {
-      const { DesignSystemEngine } = await import('./engines/DesignSystemEngine');
-      await new DesignSystemEngine().execute(task, onEvent);
-      break;
-    }
-    // ── MCP: TypeScript Model Context Protocol server with tools ─────────────
-    case 'mcp': {
-      const { McpEngine } = await import('./engines/McpEngine');
-      await new McpEngine().execute(task, onEvent);
-      break;
-    }
-    // ── Bot: Discord (discord.js v14) or Telegram (grammy) bot ───────────────
-    case 'bot': {
-      const { BotEngine } = await import('./engines/BotEngine');
-      await new BotEngine().execute(task, onEvent);
-      break;
-    }
-    // ── Research: Perplexity web search + Claude synthesis ────────────────────
-    case 'research': {
-      const { ResearchEngine } = await import('./engines/ResearchEngine');
-      await new ResearchEngine().execute(task, onEvent);
-      break;
-    }
-    // ── Image: DALL-E 3 HD with prompt enhancement ────────────────────────────
-    case 'image': {
-      const { ImageEngine } = await import('./engines/ImageEngine');
-      await new ImageEngine().execute(task, onEvent);
-      break;
-    }
-    // ── Voice: Sarvam AI TTS with multilingual support ────────────────────────
-    case 'voice': {
-      const { VoiceEngine } = await import('./engines/VoiceEngine');
-      await new VoiceEngine().execute(task, onEvent);
-      break;
-    }
-    default:
-      throw new Error(`Unknown task category: ${task.category}`);
-  }
+  await taskOrchestrator.execute(task, onEvent);
 }
 
 // ─── Task Failure Helper ──────────────────────────────────────────────────────

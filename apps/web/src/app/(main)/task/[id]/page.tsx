@@ -428,6 +428,34 @@ function buildHtmlPreview(files: TaskStreamFile[]): string | null {
 
 // ─── Preview Panel ────────────────────────────────────────────────────────────
 
+function PreviewBar({
+  url, label, openHref, onRefresh, dark = false,
+}: { url: string; label: string; openHref?: string; onRefresh?: () => void; dark?: boolean }) {
+  return (
+    <div className={`flex items-center gap-2 px-4 py-2 border-b flex-shrink-0 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-200'}`}>
+      <div className="flex gap-1.5">
+        <div className={`w-3 h-3 rounded-full ${dark ? 'bg-red-500' : 'bg-red-400'}`} />
+        <div className={`w-3 h-3 rounded-full ${dark ? 'bg-yellow-500' : 'bg-yellow-400'}`} />
+        <div className={`w-3 h-3 rounded-full ${dark ? 'bg-green-500' : 'bg-green-400'}`} />
+      </div>
+      <div className={`flex-1 rounded-lg px-3 py-1 text-xs font-mono truncate border ${dark ? 'bg-slate-700 border-slate-600 text-slate-400' : 'bg-white border-slate-200 text-slate-500'}`}>
+        {label}
+      </div>
+      {openHref && (
+        <a href={openHref} target="_blank" rel="noreferrer"
+          className={`text-xs font-medium shrink-0 ${dark ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-700'}`}>
+          Open ↗
+        </a>
+      )}
+      {onRefresh && (
+        <button type="button" onClick={onRefresh}
+          className={`text-xs px-2 transition-colors ${dark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-800'}`}
+          title="Refresh">↺</button>
+      )}
+    </div>
+  );
+}
+
 function PreviewContent({
   task,
   previewUrl,
@@ -437,67 +465,52 @@ function PreviewContent({
   previewUrl: string | null;
   streamFiles: TaskStreamFile[];
 }) {
-  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
+  const [liveHtml, setLiveHtml] = useState<string | null>(null);
   const [iframeKey, setIframeKey] = useState(0);
 
-  // Build inline preview when files are ready
+  const taskId = task?.id;
+  const isCompleted = task?.status === 'completed';
+  // Layer 1: backend preview URL — no CSP, real URL, CDN scripts load
+  const apiPreviewUrl = taskId ? `/api/v1/preview/${taskId}` : null;
+  // Layer 3: deployed external URL
+  const deployedUrl = previewUrl ?? task?.deployUrl ?? null;
+
+  // Build live srcdoc preview while task is running
   useEffect(() => {
     if (streamFiles.length === 0) return;
     const html = buildHtmlPreview(streamFiles);
-    if (html) {
-      setPreviewHtml(html);
-      setIframeKey(k => k + 1);
-    }
+    if (html) setLiveHtml(html);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [streamFiles.length]);
 
-  const activeUrl = previewUrl ?? (task?.deployUrl) ?? null;
-
-  if (activeUrl) {
+  // Layer 3: deployed external URL (highest priority)
+  if (deployedUrl) {
     return (
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 border-b border-slate-200 flex-shrink-0">
-          <div className="flex gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-red-400" />
-            <div className="w-3 h-3 rounded-full bg-yellow-400" />
-            <div className="w-3 h-3 rounded-full bg-green-400" />
-          </div>
-          <div className="flex-1 bg-white rounded-lg px-3 py-1 text-xs text-slate-500 font-mono truncate border border-slate-200">
-            {activeUrl}
-          </div>
-          <a href={activeUrl} target="_blank" rel="noreferrer"
-            className="text-xs text-indigo-600 hover:text-indigo-700 font-medium shrink-0">
-            Open ↗
-          </a>
-        </div>
-        <iframe src={activeUrl} className="flex-1 w-full border-0" title="Live Preview" />
+        <PreviewBar url={deployedUrl} label={deployedUrl} openHref={deployedUrl}
+          onRefresh={() => setIframeKey(k => k + 1)} />
+        <iframe key={iframeKey} src={deployedUrl} className="flex-1 w-full border-0" title="Live Preview" />
       </div>
     );
   }
 
-  // Live local HTML preview via srcdoc
-  if (previewHtml) {
+  // Layer 1: backend API preview (task completed — full fidelity, no CSP)
+  if (isCompleted && apiPreviewUrl) {
     return (
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex items-center gap-2 px-4 py-2 bg-slate-800 border-b border-slate-700 flex-shrink-0">
-          <div className="flex gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-red-500" />
-            <div className="w-3 h-3 rounded-full bg-yellow-500" />
-            <div className="w-3 h-3 rounded-full bg-green-500" />
-          </div>
-          <div className="flex-1 bg-slate-700 rounded-lg px-3 py-1 text-xs text-slate-400 font-mono truncate">
-            🟢 Live preview
-          </div>
-          <button
-            type="button"
-            onClick={() => setIframeKey(k => k + 1)}
-            className="text-xs text-slate-400 hover:text-white transition-colors px-2"
-            title="Refresh preview"
-          >
-            ↺
-          </button>
-        </div>
-        <iframe key={iframeKey} srcdoc={previewHtml} className="flex-1 w-full border-0 bg-white" title="Live Preview" />
+        <PreviewBar url={apiPreviewUrl} label="🟢 Live preview" openHref={apiPreviewUrl}
+          onRefresh={() => setIframeKey(k => k + 1)} dark />
+        <iframe key={iframeKey} src={apiPreviewUrl} className="flex-1 w-full border-0 bg-white" title="Live Preview" />
+      </div>
+    );
+  }
+
+  // Layer 1 fallback: srcdoc during task running (live updates as files stream)
+  if (liveHtml) {
+    return (
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <PreviewBar url="" label="⏳ Building preview…" onRefresh={() => setIframeKey(k => k + 1)} dark />
+        <iframe key={iframeKey} srcdoc={liveHtml} className="flex-1 w-full border-0 bg-white" title="Live Preview" />
       </div>
     );
   }
