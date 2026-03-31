@@ -318,8 +318,8 @@ export function ArenaCanvas({ characterStates }: ArenaCanvasProps) {
   }, [characterStates])
 
   useEffect(() => {
-    const mount = mountRef.current
-    const overlay = overlayRef.current
+    const mount = mountRef.current as HTMLDivElement
+    const overlay = overlayRef.current as HTMLDivElement
     if (!mount || !overlay) return
 
     // Renderer
