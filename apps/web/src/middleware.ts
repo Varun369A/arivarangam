@@ -1,21 +1,15 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// Routes that require authentication
-const PROTECTED_ROUTES = [
-  '/dashboard',
-  '/task',
-  '/repos',
-  '/settings',
-]
+// The one protected route — the arena
+const PROTECTED_ROUTES = ['/arena']
 
 // Admin routes — require auth AND admin role
 const ADMIN_ROUTES = ['/admin']
 
-// Routes that are always public — no redirect needed
+// Public routes — no auth required
 const PUBLIC_ROUTES = [
   '/',
-  '/gallery',
   '/login',
   '/signup',
   '/forgot-password',
@@ -27,60 +21,58 @@ const PUBLIC_ROUTES = [
 ]
 
 function isProtected(pathname: string): boolean {
-  return PROTECTED_ROUTES.some((route) => pathname.startsWith(route))
+  return PROTECTED_ROUTES.some(r => pathname.startsWith(r))
 }
 
 function isAdmin(pathname: string): boolean {
-  return ADMIN_ROUTES.some((route) => pathname.startsWith(route))
+  return ADMIN_ROUTES.some(r => pathname.startsWith(r))
 }
 
 function isPublic(pathname: string): boolean {
   if (pathname.startsWith('/api/')) return true
-  return PUBLIC_ROUTES.some((route) => pathname === route || pathname.startsWith(route + '/'))
+  return PUBLIC_ROUTES.some(r => pathname === r || pathname.startsWith(r + '/'))
 }
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const accessToken = request.cookies.get('accessToken')?.value
 
-  // Always allow public routes first (before admin check — /admin-login starts with /admin)
+  // Public routes
   if (isPublic(pathname)) {
+    // Redirect logged-in users away from auth pages → to arena
     if (accessToken && (pathname === '/login' || pathname === '/signup')) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+      return NextResponse.redirect(new URL('/arena', request.url))
     }
-    // Prevent browser from showing cached auth pages after logout (back button fix)
-    const publicRes = NextResponse.next()
+    const res = NextResponse.next()
     if (pathname === '/login' || pathname === '/signup') {
-      publicRes.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
-      publicRes.headers.set('Pragma', 'no-cache')
+      res.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+      res.headers.set('Pragma', 'no-cache')
     }
-    return publicRes
+    return res
   }
 
-  // Admin routes: require authentication
+  // Admin routes
   if (isAdmin(pathname)) {
     if (!accessToken) {
-      const loginUrl = new URL('/login', request.url)
-      loginUrl.searchParams.set('redirect', pathname)
-      return NextResponse.redirect(loginUrl)
+      const url = new URL('/login', request.url)
+      url.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(url)
     }
-    const adminRes = NextResponse.next()
-    adminRes.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
-    adminRes.headers.set('Pragma', 'no-cache')
-    return adminRes
+    const res = NextResponse.next()
+    res.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+    return res
   }
 
-  // Protected routes: require authentication
+  // Arena + any other protected route
   if (isProtected(pathname)) {
     if (!accessToken) {
-      const loginUrl = new URL('/login', request.url)
-      loginUrl.searchParams.set('redirect', pathname)
-      return NextResponse.redirect(loginUrl)
+      const url = new URL('/login', request.url)
+      url.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(url)
     }
-    const protectedRes = NextResponse.next()
-    protectedRes.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
-    protectedRes.headers.set('Pragma', 'no-cache')
-    return protectedRes
+    const res = NextResponse.next()
+    res.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+    return res
   }
 
   return NextResponse.next()
@@ -88,13 +80,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico
-     * - public folder files (images, icons, etc.)
-     */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)$).*)',
   ],
 }

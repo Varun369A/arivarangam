@@ -65,7 +65,7 @@ export function useAuth(): UseAuthReturn {
         // Populate query cache immediately
         queryClient.setQueryData<User>(AUTH_QUERY_KEY, user)
         toast.success(`Welcome back, ${user.name.split(' ')[0]}!`)
-        router.push('/dashboard')
+        router.push('/arena')
       } catch (err) {
         throw new Error(getApiError(err))
       }
