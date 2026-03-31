@@ -1,11 +1,12 @@
 const path = require('path')
 
+// Monorepo root (two levels up from apps/web/)
+const monorepoRoot = path.join(__dirname, '../../')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-  experimental: {
-    outputFileTracingRoot: path.join(__dirname, '../../'),
-  },
+  outputFileTracingRoot: monorepoRoot,
   reactStrictMode: true,
   transpilePackages: [
     '@arivarangam/types',
@@ -20,11 +21,14 @@ const nextConfig = {
   webpack(config) {
     // Force all packages to share a single React instance.
     // Prevents "Cannot read properties of undefined (reading 'ReactCurrentBatchConfig')"
-    // which happens when @react-three/fiber or other libs bundle their own React copy.
+    // require.resolve gives the file path — use path.dirname on package.json to get
+    // the directory so sub-paths like react/jsx-runtime still resolve correctly.
+    const reactDir = path.dirname(require.resolve('react/package.json'))
+    const reactDomDir = path.dirname(require.resolve('react-dom/package.json'))
     config.resolve.alias = {
       ...config.resolve.alias,
-      react: require.resolve('react'),
-      'react-dom': require.resolve('react-dom'),
+      react: reactDir,
+      'react-dom': reactDomDir,
     }
     return config
   },
