@@ -18,17 +18,20 @@ const nextConfig = {
   images: {
     domains: ['avatars.githubusercontent.com', 'oaidalleapiprodscus.blob.core.windows.net'],
   },
-  webpack(config) {
-    // Force all packages to share a single React instance.
+  webpack(config, { isServer }) {
+    // Force all packages to share a single React instance — CLIENT ONLY.
     // Prevents "Cannot read properties of undefined (reading 'ReactCurrentBatchConfig')"
-    // require.resolve gives the file path — use path.dirname on package.json to get
-    // the directory so sub-paths like react/jsx-runtime still resolve correctly.
-    const reactDir = path.dirname(require.resolve('react/package.json'))
-    const reactDomDir = path.dirname(require.resolve('react-dom/package.json'))
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      react: reactDir,
-      'react-dom': reactDomDir,
+    // Must NOT apply to server bundle: React.cache is server-only and lives in the
+    // react-server entry point; aliasing to the browser directory breaks it with
+    // "TypeError: (0, d.cache) is not a function".
+    if (!isServer) {
+      const reactDir = path.dirname(require.resolve('react/package.json'))
+      const reactDomDir = path.dirname(require.resolve('react-dom/package.json'))
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        react: reactDir,
+        'react-dom': reactDomDir,
+      }
     }
     return config
   },
