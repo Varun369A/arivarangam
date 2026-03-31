@@ -36,6 +36,12 @@ Credit costs by category:
 - content: 40-100 credits (short article = 40, long-form multi-file = 100)
 - animation: 80-180 credits (simple canvas = 80, complex Three.js scene = 180)
 - dataviz: 60-140 credits (simple Chart.js bar chart = 60, complex D3 force graph with filters = 140)
+- logo: 40-80 credits (simple lettermark = 40, full 5-variant SVG logo kit = 80)
+- banner: 60-120 credits (single banner = 60, full 7-platform banner kit = 120)
+- brand: 80-200 credits (minimal brand = 80, full identity with preview page = 200)
+- design-system: 70-160 credits (basic tokens = 70, full component library = 160)
+- mcp: 60-120 credits (simple 2-tool MCP = 60, complex multi-tool MCP server = 120)
+- bot: 60-130 credits (simple bot = 60, full Discord/Telegram bot with AI = 130)
 
 Return ONLY this JSON (no markdown, no explanation):
 {"min": number, "max": number, "typical": number}`;
@@ -75,6 +81,12 @@ Return ONLY this JSON (no markdown, no explanation):
         content: { min: 40, max: 100, typical: 60 },
         animation: { min: 80, max: 180, typical: 110 },
         dataviz: { min: 60, max: 140, typical: 90 },
+        logo: { min: 40, max: 80, typical: 55 },
+        banner: { min: 60, max: 120, typical: 80 },
+        brand: { min: 80, max: 200, typical: 130 },
+        'design-system': { min: 70, max: 160, typical: 100 },
+        mcp: { min: 60, max: 120, typical: 80 },
+        bot: { min: 60, max: 130, typical: 85 },
       };
       const fb = fallbacks[category];
       estimate = {

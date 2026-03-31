@@ -103,6 +103,42 @@ async function dispatchToEngine(task: any): Promise<void> {
       await new DataVizEngine().execute(task, onEvent);
       break;
     }
+    // ── Logo: SVG logo kit with 5 variants + brand colors ─────────────────────
+    case 'logo': {
+      const { LogoEngine } = await import('./engines/LogoEngine');
+      await new LogoEngine().execute(task, onEvent);
+      break;
+    }
+    // ── Banner: 7-platform social media banner kit (HTML, exact dimensions) ──
+    case 'banner': {
+      const { BannerEngine } = await import('./engines/BannerEngine');
+      await new BannerEngine().execute(task, onEvent);
+      break;
+    }
+    // ── Brand: Full brand identity — guide, colors, typography, logo, preview ─
+    case 'brand': {
+      const { BrandEngine } = await import('./engines/BrandEngine');
+      await new BrandEngine().execute(task, onEvent);
+      break;
+    }
+    // ── Design System: tokens + Tailwind config + React components ───────────
+    case 'design-system': {
+      const { DesignSystemEngine } = await import('./engines/DesignSystemEngine');
+      await new DesignSystemEngine().execute(task, onEvent);
+      break;
+    }
+    // ── MCP: TypeScript Model Context Protocol server with tools ─────────────
+    case 'mcp': {
+      const { McpEngine } = await import('./engines/McpEngine');
+      await new McpEngine().execute(task, onEvent);
+      break;
+    }
+    // ── Bot: Discord (discord.js v14) or Telegram (grammy) bot ───────────────
+    case 'bot': {
+      const { BotEngine } = await import('./engines/BotEngine');
+      await new BotEngine().execute(task, onEvent);
+      break;
+    }
     // ── Research: Perplexity web search + Claude synthesis ────────────────────
     case 'research': {
       const { ResearchEngine } = await import('./engines/ResearchEngine');

@@ -2,7 +2,11 @@
 
 import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { Zap, Code2, Search, Image, Mic, FileText, Smartphone, Monitor, Bot, GitMerge } from 'lucide-react';
+import {
+  Zap, Code2, Search, Image, Mic, FileText, Smartphone, Monitor,
+  Bot, GitMerge, Sparkles, BarChart2, Layers, Layout, Palette,
+  Grid3X3, Server, MessageSquare,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TaskStatusBadge } from '@/components/ui/Badge';
 import type { Task, TaskCategory } from '@arivarangam/types';
@@ -70,6 +74,60 @@ const categoryConfig: Record<TaskCategory, {
     iconBg: 'bg-teal-100',
     iconColor: 'text-teal-600',
     accent: 'group-hover:border-teal-200',
+  },
+  animation: {
+    icon: <Sparkles className="h-4 w-4" />,
+    iconBg: 'bg-fuchsia-100',
+    iconColor: 'text-fuchsia-600',
+    accent: 'group-hover:border-fuchsia-200',
+  },
+  dataviz: {
+    icon: <BarChart2 className="h-4 w-4" />,
+    iconBg: 'bg-cyan-100',
+    iconColor: 'text-cyan-600',
+    accent: 'group-hover:border-cyan-200',
+  },
+  logo: {
+    icon: <Layers className="h-4 w-4" />,
+    iconBg: 'bg-rose-100',
+    iconColor: 'text-rose-600',
+    accent: 'group-hover:border-rose-200',
+  },
+  banner: {
+    icon: <Layout className="h-4 w-4" />,
+    iconBg: 'bg-amber-100',
+    iconColor: 'text-amber-600',
+    accent: 'group-hover:border-amber-200',
+  },
+  brand: {
+    icon: <Palette className="h-4 w-4" />,
+    iconBg: 'bg-pink-100',
+    iconColor: 'text-pink-600',
+    accent: 'group-hover:border-pink-200',
+  },
+  'design-system': {
+    icon: <Grid3X3 className="h-4 w-4" />,
+    iconBg: 'bg-slate-100',
+    iconColor: 'text-slate-600',
+    accent: 'group-hover:border-slate-200',
+  },
+  mcp: {
+    icon: <Server className="h-4 w-4" />,
+    iconBg: 'bg-green-100',
+    iconColor: 'text-green-600',
+    accent: 'group-hover:border-green-200',
+  },
+  bot: {
+    icon: <MessageSquare className="h-4 w-4" />,
+    iconBg: 'bg-sky-100',
+    iconColor: 'text-sky-600',
+    accent: 'group-hover:border-sky-200',
+  },
+  voice: {
+    icon: <Mic className="h-4 w-4" />,
+    iconBg: 'bg-red-100',
+    iconColor: 'text-red-600',
+    accent: 'group-hover:border-red-200',
   },
 };
 

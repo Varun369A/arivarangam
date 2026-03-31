@@ -589,6 +589,88 @@ function PreviewContent({
     );
   }
 
+  // Logo preview — show SVG files in a grid
+  if (task?.category === 'logo' && streamFiles.length > 0) {
+    const svgFiles = streamFiles.filter(f => f.path.endsWith('.svg'));
+    return (
+      <div className="flex-1 overflow-auto p-6 bg-slate-50">
+        <div className="max-w-2xl mx-auto space-y-4">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex items-center justify-between">
+            <div>
+              <div className="text-2xl mb-1">🎨</div>
+              <p className="text-sm font-bold text-slate-800">Logo kit ready</p>
+              <p className="text-xs text-slate-500 mt-0.5">{svgFiles.length} SVG variants generated</p>
+            </div>
+            <button type="button" onClick={() => {
+              const zip = svgFiles.map(f => `<!-- ${f.path} -->\n${f.content ?? ''}`).join('\n\n');
+              const blob = new Blob([zip], { type: 'text/plain' });
+              const url = URL.createObjectURL(blob); const a = document.createElement('a');
+              a.href = url; a.download = 'logo-kit.svg.txt'; a.click(); URL.revokeObjectURL(url);
+            }} className="px-4 py-2 bg-rose-600 text-white text-sm font-semibold rounded-xl hover:bg-rose-700 transition-colors">↓ Download Kit</button>
+          </div>
+          {svgFiles.map(f => (
+            <div key={f.path} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
+                <code className="text-xs text-slate-600 font-mono">{f.path}</code>
+              </div>
+              <div className="p-6 flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 min-h-[120px]"
+                dangerouslySetInnerHTML={{ __html: f.content ?? '' }} />
+              <div className="px-4 py-2 border-t border-slate-100 bg-slate-900 flex items-center justify-center gap-4">
+                <div className="p-3 bg-white rounded-lg" dangerouslySetInnerHTML={{ __html: f.content ?? '' }} style={{ width: 60, height: 40, overflow: 'hidden' }} />
+                <div className="p-3 bg-slate-800 rounded-lg" dangerouslySetInnerHTML={{ __html: f.content ?? '' }} style={{ width: 60, height: 40, overflow: 'hidden' }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Banner preview — show HTML banners in tabs
+  if (task?.category === 'banner' && streamFiles.length > 0) {
+    const htmlBanners = streamFiles.filter(f => f.path.endsWith('.html'));
+    return (
+      <div className="flex-1 overflow-auto p-4 bg-slate-100">
+        <div className="space-y-4">
+          {htmlBanners.map(f => {
+            const blob = new Blob([f.content ?? ''], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const label = f.path.replace('.html', '').replace(/-/g, ' ');
+            return (
+              <div key={f.path} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
+                  <code className="text-xs text-slate-600 font-mono capitalize">{label}</code>
+                  <a href={url} target="_blank" rel="noreferrer" className="text-xs text-indigo-600 hover:text-indigo-700">Open ↗</a>
+                </div>
+                <div className="overflow-hidden" style={{ height: 200 }}>
+                  <iframe src={url} className="w-full border-0 origin-top-left" style={{ transform: 'scale(0.4)', width: '250%', height: 500 }} title={f.path} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // Brand preview — show brand-preview.html
+  if (task?.category === 'brand' && streamFiles.length > 0) {
+    const previewFile = streamFiles.find(f => f.path === 'brand-preview.html') ?? streamFiles.find(f => f.path.endsWith('.html'));
+    if (previewFile?.content) {
+      const blob = new Blob([previewFile.content], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      return (
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex items-center gap-2 px-4 py-2 bg-slate-800 border-b border-slate-700 flex-shrink-0">
+            <span className="text-xs text-slate-400">🎨 Brand identity preview</span>
+            <a href={url} target="_blank" rel="noreferrer" className="text-xs text-pink-400 hover:text-pink-300 ml-auto">Open fullscreen ↗</a>
+          </div>
+          <iframe src={url} className="flex-1 w-full border-0 bg-white" title="Brand Preview" />
+        </div>
+      );
+    }
+  }
+
   // Presentation preview — look for Reveal.js index.html
   if (task?.category === 'presentation' && streamFiles.length > 0) {
     const htmlF = streamFiles.find(f => f.path === 'index.html');

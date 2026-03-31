@@ -278,6 +278,46 @@ ${plan.techStack.join(', ')}
 
 NOTES FROM ARCHITECT: ${plan.notes}
 
+━━━ DESIGN INTELLIGENCE (ui-ux-pro-max v2.5) ━━━
+
+COLOR PALETTE — select by domain:
+- SaaS/AI/Tech:      #4F46E5 + #7C3AED + #0F172A + #818CF8 (indigo-violet dark)
+- Fintech/Finance:   #1A1B4B + #00D4AA + #FFD700 + #0F0F23 (navy-mint-gold)
+- Health/Wellness:   #059669 + #34D399 + #F0FDF4 + #065F46 (emerald fresh)
+- Creative/Agency:   #FF6B6B + #4ECDC4 + #1A1A2E + #FFEAA7 (coral-teal)
+- Gaming/Entertain:  #00FF87 + #FF007A + #0A0A0F + #7000FF (neon cosmic)
+- E-commerce:        #F97316 + #EF4444 + #1C1917 + #FFF7ED (fire warm)
+- Corporate/B2B:     #1E40AF + #3B82F6 + #0F172A + #E2E8F0 (trustworthy blue)
+- Default (dark):    #4F46E5 + #7C3AED + #050714 + #818CF8
+
+TYPOGRAPHY — Google Fonts CDN (pick one pairing):
+- Modern SaaS:     Space Grotesk 700/800 + DM Sans 400/500
+- Premium/Luxury:  Playfair Display 700/900 + Inter 400/500
+- Tech/AI:         Sora 700/800 + IBM Plex Sans 400
+- Startup:         Outfit 700/800 + Plus Jakarta Sans 400/500
+- Creative Agency: Clash Display 700 + Satoshi 400
+- Elegant Brand:   Cormorant Garamond 600i + Jost 300/400
+Add to HTML: <link href="https://fonts.googleapis.com/css2?family=[choice]&display=swap" rel="stylesheet">
+
+STYLE PRESETS — pick based on prompt mood:
+- Glassmorphism (default dark): rgba cards + backdrop-blur-xl + white glow borders
+- Bento Grid: CSS grid-template-areas, mixed colspan cells, colored accent cards, brutalist grid gaps
+- Cosmic Dark: animated star field, nebula radial gradients, neon glow on text
+- Claymorphism: border-radius:24-32px, pastel bg, double drop shadows, bubbly shapes
+- Brutalism: 3-4px solid black borders, raw grid, ultra-high contrast, intentional rawness
+- Neumorphism: #e0e5ec bg, dual inset/outset shadows, minimal flat design
+
+UX MANDATES:
+- Every button/card has :hover transform:translateY(-2px) + box-shadow glow
+- Loading skeleton states on any async content
+- Smooth scroll with Lenis, visible scroll-progress bar
+- Mobile-first, touch targets min 44px, responsive breakpoints (320/768/1024/1280)
+- Animated entrance: GSAP stagger for lists, fade-up for sections
+- Micro-interactions: button press scale(0.97), icon rotate on hover
+- 60fps guaranteed: use will-change:transform on animated elements
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 VISUAL QUALITY MANDATE — EVERY FILE MUST HAVE:
 - Rich gradients (linear-gradient, radial-gradient) — NEVER flat solid colors
 - Glassmorphism on cards: background:rgba(255,255,255,0.05); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.1)
