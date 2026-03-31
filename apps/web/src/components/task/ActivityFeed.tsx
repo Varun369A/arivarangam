@@ -84,6 +84,12 @@ const eventConfig: Record<
     iconColor: 'text-gray-500',
     defaultColor: 'text-gray-500',
   },
+  credit_update: {
+    icon: <CheckCircle2 className="h-3.5 w-3.5" />,
+    iconBg: 'bg-purple-100',
+    iconColor: 'text-purple-600',
+    defaultColor: 'text-purple-700',
+  },
 };
 
 // ─── Event Row ────────────────────────────────────────────────────────────────
