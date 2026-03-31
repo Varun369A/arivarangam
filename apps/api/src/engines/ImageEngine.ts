@@ -3,6 +3,7 @@ import type { TaskEvent } from '@arivarangam/types';
 import { callClaudeHaiku } from '../connectors/claude';
 import { generateImage } from '../connectors/openai';
 import { taskService } from '../services/TaskService';
+import { UsageMeter } from '../services/UsageMeter';
 
 // ─── ImageEngine ──────────────────────────────────────────────────────────────
 
@@ -11,6 +12,7 @@ export class ImageEngine {
     const emit = async (event: TaskEvent) => {
       await onEvent(event);
     };
+    const meter = new UsageMeter();
 
     // Update task to running
     await prisma.task.update({
@@ -26,7 +28,7 @@ export class ImageEngine {
         timestamp: new Date().toISOString(),
       });
 
-      const enhancedPrompt = await this.enhancePrompt(task.prompt);
+      const enhancedPrompt = await this.enhancePrompt(task.prompt, meter);
 
       await emit({
         type: 'log',
@@ -47,7 +49,7 @@ export class ImageEngine {
       });
 
       // Step 3: Generate image
-      const imageUrl = await generateImage(enhancedPrompt, size);
+      const imageUrl = await generateImage(enhancedPrompt, size, meter);
 
       await emit({
         type: 'log',
@@ -67,13 +69,14 @@ export class ImageEngine {
         timestamp: new Date().toISOString(),
       });
 
-      const creditsUsed = 80; // Fixed for image generation (DALL-E 3 HD + platform margin)
+      const creditsUsed = meter.toCredits();
 
       const metadata = {
         imageUrl,
         enhancedPrompt,
         originalPrompt: task.prompt,
         size,
+        usage: meter.summary(),
       };
 
       await taskService.completeTask(task.id, creditsUsed, metadata);
@@ -99,7 +102,7 @@ export class ImageEngine {
 
   // ─── Enhance Prompt ───────────────────────────────────────────────────────────
 
-  private async enhancePrompt(userPrompt: string): Promise<string> {
+  private async enhancePrompt(userPrompt: string, meter: UsageMeter): Promise<string> {
     const systemPrompt = `You are an expert image prompt engineer. Transform the user's request into a rich, detailed prompt for image generation.
 
 Rules:
@@ -110,7 +113,7 @@ Rules:
 - Max 500 characters`;
 
     try {
-      const enhanced = await callClaudeHaiku(userPrompt, systemPrompt, 512);
+      const enhanced = await callClaudeHaiku(userPrompt, systemPrompt, 512, meter);
       return enhanced.trim().slice(0, 500);
     } catch {
       return userPrompt.slice(0, 500);

@@ -4,12 +4,14 @@ import { callClaudeHaiku } from '../connectors/claude';
 import { sarvamTTS, translateText, getLangLabel, isSarvamConfigured, type SarvamLanguageCode } from '../connectors/sarvam';
 import { uploadFile } from '../connectors/storage';
 import { taskService } from '../services/TaskService';
+import { UsageMeter } from '../services/UsageMeter';
 
 // ─── VoiceEngine ──────────────────────────────────────────────────────────────
 
 export class VoiceEngine {
   async execute(task: any, onEvent: (e: TaskEvent) => void): Promise<void> {
     const emit = async (event: TaskEvent) => { await onEvent(event); };
+    const meter = new UsageMeter();
 
     await prisma.task.update({ where: { id: task.id }, data: { status: 'running' } });
 
@@ -30,7 +32,7 @@ export class VoiceEngine {
       });
 
       // Step 1: Generate script
-      const speechText = await this.prepareSpeechText(task.prompt, language);
+      const speechText = await this.prepareSpeechText(task.prompt, language, meter);
       const wordCount = speechText.split(/\s+/).length;
       const estimatedMinutes = wordCount / 130; // ~130 wpm
 
@@ -47,6 +49,7 @@ export class VoiceEngine {
         timestamp: new Date().toISOString(),
       });
 
+      meter.addAudio(speechText.length);
       const audioBuffer = await this.sarvamTTSChunked(speechText, language as SarvamLanguageCode);
 
       await emit({
@@ -67,8 +70,8 @@ export class VoiceEngine {
         timestamp: new Date().toISOString(),
       });
 
-      const creditsUsed = Math.max(30, Math.ceil(estimatedMinutes * 30));
-      const metadata = { speechText, language, audioSizeBytes: audioBuffer.length, estimatedMinutes, audioUrl };
+      const creditsUsed = meter.toCredits();
+      const metadata = { speechText, language, audioSizeBytes: audioBuffer.length, estimatedMinutes, audioUrl, usage: meter.summary() };
       await taskService.completeTask(task.id, creditsUsed, metadata);
 
       await emit({
@@ -133,7 +136,7 @@ export class VoiceEngine {
 
   // ─── Prepare Speech Text ──────────────────────────────────────────────────────
 
-  private async prepareSpeechText(prompt: string, language: SarvamLanguageCode): Promise<string> {
+  private async prepareSpeechText(prompt: string, language: SarvamLanguageCode, meter: UsageMeter): Promise<string> {
     const isEnglish = language === 'en-IN';
 
     // Already a long script — just translate if not English
@@ -154,7 +157,7 @@ Rules:
 - Keep it concise but complete`;
 
     try {
-      const script = await callClaudeHaiku(prompt, systemPrompt, 1024);
+      const script = await callClaudeHaiku(prompt, systemPrompt, 1024, meter);
       const trimmed = script.trim();
       if (!isEnglish) {
         try { return await translateText(trimmed, language); } catch { return trimmed; }

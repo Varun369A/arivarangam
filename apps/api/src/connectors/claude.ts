@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { getConfig } from '@arivarangam/config';
+import type { UsageMeter } from '../services/UsageMeter';
 
 // ─── Model IDs ────────────────────────────────────────────────────────────────
 
@@ -14,6 +15,8 @@ export interface ClaudeOptions {
   system?: string;
   onToken?: (token: string) => void;
   temperature?: number;
+  /** Optional UsageMeter to accumulate exact token usage for credit billing. */
+  meter?: UsageMeter;
 }
 
 // ─── Retry Helper ────────────────────────────────────────────────────────────
@@ -52,6 +55,7 @@ export async function callClaude(
     system,
     onToken,
     temperature = 0.7,
+    meter,
   } = options;
 
   const modelId = model === 'sonnet' ? CLAUDE_SONNET : CLAUDE_HAIKU;
@@ -72,7 +76,7 @@ export async function callClaude(
         // Streaming mode
         let fullText = '';
 
-        const stream = await client.messages.stream({
+        const stream = client.messages.stream({
           model: modelId,
           max_tokens: maxTokens,
           system: systemPrompt,
@@ -91,6 +95,16 @@ export async function callClaude(
           }
         }
 
+        // Capture usage from the completed stream
+        if (meter) {
+          try {
+            const finalMsg = await stream.finalMessage();
+            meter.addClaude(model, finalMsg.usage.input_tokens, finalMsg.usage.output_tokens);
+          } catch {
+            // Usage capture is best-effort — don't fail the task
+          }
+        }
+
         return fullText;
       } else {
         // Non-streaming mode
@@ -101,6 +115,11 @@ export async function callClaude(
           messages,
           temperature,
         });
+
+        // Capture exact token usage
+        if (meter) {
+          meter.addClaude(model, response.usage.input_tokens, response.usage.output_tokens);
+        }
 
         const block = response.content[0];
         if (block.type !== 'text') {
@@ -134,16 +153,18 @@ export async function callClaude(
 export async function callClaudeHaiku(
   prompt: string,
   system?: string,
-  maxTokens = 2048
+  maxTokens = 2048,
+  meter?: UsageMeter
 ): Promise<string> {
-  return callClaude(prompt, { model: 'haiku', system, maxTokens });
+  return callClaude(prompt, { model: 'haiku', system, maxTokens, meter });
 }
 
 export async function callClaudeSonnet(
   prompt: string,
   system?: string,
   maxTokens = 8192,
-  onToken?: (t: string) => void
+  onToken?: (t: string) => void,
+  meter?: UsageMeter
 ): Promise<string> {
-  return callClaude(prompt, { model: 'sonnet', system, maxTokens, onToken });
+  return callClaude(prompt, { model: 'sonnet', system, maxTokens, onToken, meter });
 }

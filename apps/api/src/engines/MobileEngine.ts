@@ -2,6 +2,7 @@ import { prisma } from '@arivarangam/db';
 import type { TaskEvent } from '@arivarangam/types';
 import { callClaudeSonnet } from '../connectors/claude';
 import { taskService } from '../services/TaskService';
+import { UsageMeter } from '../services/UsageMeter';
 
 // ─── Installed Library Stack (React Native / Expo) ────────────────────────────
 //
@@ -77,13 +78,14 @@ const EXPO_PACKAGE_JSON = (projectName: string, extras: string[] = []) => {
 export class MobileEngine {
   async execute(task: any, onEvent: (e: TaskEvent) => void): Promise<void> {
     const emit = async (e: TaskEvent) => onEvent(e);
+    const meter = new UsageMeter();
 
     await prisma.task.update({ where: { id: task.id }, data: { status: 'running' } });
 
     try {
       await emit({ type: 'log', data: { message: '📱 Initializing mobile build with Expo + Reanimated + Lottie stack...' }, timestamp: new Date().toISOString() });
 
-      const plan = await this.planStructure(task.prompt);
+      const plan = await this.planStructure(task.prompt, meter);
 
       await emit({ type: 'log', data: { message: `📁 ${plan.files.length} files planned | ${plan.techStack.join(', ')}` }, timestamp: new Date().toISOString() });
 
@@ -93,7 +95,7 @@ export class MobileEngine {
         const fileMeta = plan.files[i];
         await emit({ type: 'log', data: { message: `⚡ Generating ${fileMeta.path} (${i + 1}/${plan.files.length})...` }, timestamp: new Date().toISOString() });
 
-        const content = await this.generateFile(task.prompt, fileMeta, generatedFiles, plan);
+        const content = await this.generateFile(task.prompt, fileMeta, generatedFiles, plan, meter);
         generatedFiles.push({ path: fileMeta.path, content });
 
         await emit({
@@ -104,7 +106,7 @@ export class MobileEngine {
       }
 
       await emit({ type: 'log', data: { message: '🔍 Running type-check and consistency pass...' }, timestamp: new Date().toISOString() });
-      const fixedFiles = await this.reviewPass(task.prompt, generatedFiles);
+      const fixedFiles = await this.reviewPass(task.prompt, generatedFiles, meter);
 
       for (const fixed of fixedFiles) {
         const original = generatedFiles.find(f => f.path === fixed.path);
@@ -117,9 +119,9 @@ export class MobileEngine {
         }
       }
 
-      const creditsUsed = Math.min(220, Math.max(100, 60 + fixedFiles.length * 14));
+      const creditsUsed = meter.toCredits();
       await taskService.completeTask(task.id, creditsUsed, {
-        files: fixedFiles, techStack: plan.techStack, fileCount: fixedFiles.length,
+        files: fixedFiles, techStack: plan.techStack, fileCount: fixedFiles.length, usage: meter.summary(),
       });
 
       await emit({
@@ -133,7 +135,7 @@ export class MobileEngine {
     }
   }
 
-  private async planStructure(prompt: string): Promise<FilePlan> {
+  private async planStructure(prompt: string, meter: UsageMeter): Promise<FilePlan> {
     const systemPrompt = `You are a React Native architect planning an Expo mobile app.
 
 INSTALLED LIBRARY STACK:
@@ -177,7 +179,7 @@ Return ONLY valid JSON: {"files":[{"path":"...","description":"...","language":"
 
     const response = await callClaudeSonnet(
       `Plan React Native Expo app for: ${prompt}`,
-      systemPrompt, 2048
+      systemPrompt, 2048, undefined, meter
     );
     return this.parseJSON<FilePlan>(response, {
       files: [
@@ -198,7 +200,8 @@ Return ONLY valid JSON: {"files":[{"path":"...","description":"...","language":"
     userPrompt: string,
     fileMeta: { path: string; description: string; language: string },
     existingFiles: FileEntry[],
-    plan: FilePlan
+    plan: FilePlan,
+    meter: UsageMeter
   ): Promise<string> {
     if (fileMeta.path === 'package.json') {
       return EXPO_PACKAGE_JSON(userPrompt.split(' ').slice(0, 3).join('-'));
@@ -254,12 +257,12 @@ Output: raw file content only, no markdown fences, no explanations`;
 
     const content = await callClaudeSonnet(
       `USER PROMPT: ${userPrompt}\nSTACK: ${plan.techStack.join(', ')}\n${ctx}\n\nGenerate: ${fileMeta.path}\nRole: ${fileMeta.description}`,
-      systemPrompt, 8192
+      systemPrompt, 8192, undefined, meter
     );
     return this.stripFences(content);
   }
 
-  private async reviewPass(userPrompt: string, files: FileEntry[]): Promise<FileEntry[]> {
+  private async reviewPass(userPrompt: string, files: FileEntry[], meter: UsageMeter): Promise<FileEntry[]> {
     if (files.length === 0) return files;
     const summary = files.map(f => `=== ${f.path} ===\n${f.content}`).join('\n\n');
 
@@ -268,7 +271,7 @@ Output: raw file content only, no markdown fences, no explanations`;
         `Prompt: ${userPrompt.slice(0, 200)}\n\nReview:\n${summary.slice(0, 12000)}`,
         `You are a React Native code reviewer. Return ONLY valid JSON array: [{"path":"...","content":"...","fixed":true/false}]
 Check: babel.config.js has reanimated plugin, package.json has all imported packages, navigation routes match screen files, no broken imports, TypeScript types correct, reanimated import from 'react-native-reanimated' not old path, moti imported from 'moti', expo-linear-gradient imported correctly. Return ALL files.`,
-        8192
+        8192, undefined, meter
       );
       const parsed = this.parseJSON<FileEntry[]>(response, []);
       if (!Array.isArray(parsed) || parsed.length === 0) return files;

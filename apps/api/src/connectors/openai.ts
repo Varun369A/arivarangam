@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import { getConfig } from '@arivarangam/config';
+import type { UsageMeter } from '../services/UsageMeter';
 
 let _client: OpenAI | null = null;
 
@@ -14,7 +15,8 @@ function getClient(): OpenAI {
 
 export async function generateImage(
   prompt: string,
-  size: '1024x1024' | '1792x1024' = '1024x1024'
+  size: '1024x1024' | '1792x1024' = '1024x1024',
+  meter?: UsageMeter
 ): Promise<string> {
   const client = getClient();
 
@@ -35,11 +37,13 @@ export async function generateImage(
     }
 
     if ((imageData as any).b64_json) {
+      meter?.addImage(size);
       return `data:image/png;base64,${(imageData as any).b64_json}`;
     }
 
     // Fallback to URL if b64_json not available
     if (imageData.url) {
+      meter?.addImage(size);
       return imageData.url;
     }
 

@@ -3,6 +3,7 @@ import type { TaskEvent } from '@arivarangam/types';
 import { callClaudeSonnet } from '../connectors/claude';
 import { search } from '../connectors/perplexity';
 import { taskService } from '../services/TaskService';
+import { UsageMeter } from '../services/UsageMeter';
 
 // ─── ResearchEngine ───────────────────────────────────────────────────────────
 
@@ -11,6 +12,7 @@ export class ResearchEngine {
     const emit = async (event: TaskEvent) => {
       await onEvent(event);
     };
+    const meter = new UsageMeter();
 
     // Update task status to running
     await prisma.task.update({
@@ -26,7 +28,7 @@ export class ResearchEngine {
         timestamp: new Date().toISOString(),
       });
 
-      const searchQuery = await this.refineQuery(task.prompt);
+      const searchQuery = await this.refineQuery(task.prompt, meter);
 
       await emit({
         type: 'log',
@@ -38,6 +40,7 @@ export class ResearchEngine {
       let rawResults: string;
       try {
         rawResults = await search(searchQuery);
+        meter.addSearch();
       } catch (err: any) {
         await emit({
           type: 'log',
@@ -54,7 +57,7 @@ export class ResearchEngine {
       });
 
       // Step 3: Claude synthesizes into structured report
-      const report = await this.synthesizeReport(task.prompt, rawResults);
+      const report = await this.synthesizeReport(task.prompt, rawResults, meter);
 
       await emit({
         type: 'log',
@@ -63,7 +66,7 @@ export class ResearchEngine {
       });
 
       const sources = this.extractSources(rawResults);
-      const creditsUsed = 60; // Research is 50-80 credits (web search + LLM synthesis)
+      const creditsUsed = meter.toCredits();
 
       // Emit files so the task page can display and download them
       await emit({
@@ -93,6 +96,7 @@ export class ResearchEngine {
         searchQuery,
         sources,
         wordCount: report.split(/\s+/).length,
+        usage: meter.summary(),
       };
 
       await taskService.completeTask(task.id, creditsUsed, metadata);
@@ -119,12 +123,12 @@ export class ResearchEngine {
 
   // ─── Refine Query ─────────────────────────────────────────────────────────────
 
-  private async refineQuery(prompt: string): Promise<string> {
+  private async refineQuery(prompt: string, meter: UsageMeter): Promise<string> {
     const systemPrompt = `You are a research query optimizer. Convert the user's request into an optimal search query.
 Return ONLY the search query string, nothing else. Make it specific and searchable.`;
 
     try {
-      const refined = await callClaudeSonnet(prompt, systemPrompt, 256);
+      const refined = await callClaudeSonnet(prompt, systemPrompt, 256, undefined, meter);
       return refined.trim().slice(0, 300);
     } catch {
       return prompt.slice(0, 300);
@@ -133,7 +137,7 @@ Return ONLY the search query string, nothing else. Make it specific and searchab
 
   // ─── Synthesize Report ────────────────────────────────────────────────────────
 
-  private async synthesizeReport(originalPrompt: string, rawResults: string): Promise<string> {
+  private async synthesizeReport(originalPrompt: string, rawResults: string, meter: UsageMeter): Promise<string> {
     const systemPrompt = `You are an expert research analyst. Synthesize the provided search results into a comprehensive, well-structured report.
 
 Format requirements:
@@ -148,7 +152,9 @@ Format requirements:
     const report = await callClaudeSonnet(
       `Original research request: ${originalPrompt}\n\nSearch results:\n${rawResults}`,
       systemPrompt,
-      4096
+      4096,
+      undefined,
+      meter
     );
 
     return report;

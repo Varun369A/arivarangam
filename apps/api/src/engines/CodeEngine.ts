@@ -2,6 +2,7 @@ import { prisma } from '@arivarangam/db';
 import type { TaskEvent } from '@arivarangam/types';
 import { callClaudeSonnet, callClaudeHaiku } from '../connectors/claude';
 import { taskService } from '../services/TaskService';
+import { UsageMeter } from '../services/UsageMeter';
 
 interface FileEntry {
   path: string;
@@ -19,6 +20,7 @@ interface FilePlan {
 export class CodeEngine {
   async execute(task: any, onEvent: (e: TaskEvent) => void): Promise<void> {
     const emit = async (event: TaskEvent) => { await onEvent(event); };
+    const meter = new UsageMeter();
 
     await prisma.task.update({
       where: { id: task.id },
@@ -33,7 +35,7 @@ export class CodeEngine {
         timestamp: new Date().toISOString(),
       });
 
-      const plan = await this.planStructure(task.prompt, task.category);
+      const plan = await this.planStructure(task.prompt, task.category, meter);
 
       await emit({
         type: 'log',
@@ -53,7 +55,7 @@ export class CodeEngine {
           timestamp: new Date().toISOString(),
         });
 
-        const content = await this.generateFile(task.prompt, fileMeta, generatedFiles, plan);
+        const content = await this.generateFile(task.prompt, fileMeta, generatedFiles, plan, meter);
         generatedFiles.push({ path: fileMeta.path, content });
 
         await emit({
@@ -76,7 +78,7 @@ export class CodeEngine {
         timestamp: new Date().toISOString(),
       });
 
-      const fixedFiles = await this.autoFix(task.prompt, generatedFiles);
+      const fixedFiles = await this.autoFix(task.prompt, generatedFiles, meter);
 
       for (const fixed of fixedFiles) {
         const original = generatedFiles.find(f => f.path === fixed.path);
@@ -89,8 +91,8 @@ export class CodeEngine {
         }
       }
 
-      const creditsUsed = Math.min(200, Math.max(80, 50 + fixedFiles.length * 12));
-      const metadata = { files: fixedFiles, techStack: plan.techStack, fileCount: fixedFiles.length };
+      const creditsUsed = meter.toCredits();
+      const metadata = { files: fixedFiles, techStack: plan.techStack, fileCount: fixedFiles.length, usage: meter.summary() };
 
       await taskService.completeTask(task.id, creditsUsed, metadata);
 
@@ -123,6 +125,7 @@ export class CodeEngine {
     onEvent: (e: TaskEvent) => void
   ): Promise<void> {
     const emit = async (event: TaskEvent) => { await onEvent(event); };
+    const meter = new UsageMeter();
 
     await prisma.task.update({
       where: { id: task.id },
@@ -163,7 +166,9 @@ Rules:
       const planResponse = await callClaudeSonnet(
         `${combinedPrompt}${previousFileSummary}\n\nWhat files need to be created or modified?`,
         planSystemPrompt,
-        2048
+        2048,
+        undefined,
+        meter
       );
 
       const plan = this.parseJSON<{ modify: any[]; create: any[]; techStack: string[] }>(
@@ -214,7 +219,7 @@ What to change: ${fileMeta.description}
 Current content:
 ${existing?.content ?? '(new file)'}`;
 
-        const newContent = await callClaudeSonnet(filePrompt, systemPrompt, 8192);
+        const newContent = await callClaudeSonnet(filePrompt, systemPrompt, 8192, undefined, meter);
         const cleaned = this.stripMarkdownFences(newContent, fileMeta.path.split('.').pop() ?? '');
 
         const idx = updatedFiles.findIndex(f => f.path === fileMeta.path);
@@ -245,7 +250,7 @@ ${existing?.content ?? '(new file)'}`;
           techStack: plan.techStack,
           notes: '',
         };
-        const content = await this.generateFile(combinedPrompt, fileMeta, updatedFiles, fullPlan);
+        const content = await this.generateFile(combinedPrompt, fileMeta, updatedFiles, fullPlan, meter);
         updatedFiles.push({ path: fileMeta.path, content });
 
         await emit({
@@ -255,8 +260,8 @@ ${existing?.content ?? '(new file)'}`;
         });
       }
 
-      const creditsUsed = Math.min(100, Math.max(40, 30 + totalChanges * 8));
-      const metadata = { files: updatedFiles, techStack: plan.techStack, fileCount: updatedFiles.length };
+      const creditsUsed = meter.toCredits();
+      const metadata = { files: updatedFiles, techStack: plan.techStack, fileCount: updatedFiles.length, usage: meter.summary() };
 
       await taskService.completeTask(task.id, creditsUsed, metadata);
 
@@ -282,7 +287,7 @@ ${existing?.content ?? '(new file)'}`;
 
   // ─── Plan File Structure ──────────────────────────────────────────────────────
 
-  private async planStructure(prompt: string, category: string): Promise<FilePlan> {
+  private async planStructure(prompt: string, category: string, meter: UsageMeter): Promise<FilePlan> {
     const categoryGuidance: Record<string, string> = {
       code: `Generate an IMMERSIVE, enterprise-grade web application that runs directly in a browser WITHOUT any build step.
 
@@ -378,7 +383,9 @@ Rules:
     const response = await callClaudeSonnet(
       `Create a file structure plan for this ${category} task:\n\n${prompt}`,
       systemPrompt,
-      4096
+      4096,
+      undefined,
+      meter
     );
 
     const parsed = this.parseJSON<FilePlan>(response, {
@@ -406,7 +413,8 @@ Rules:
     userPrompt: string,
     fileMeta: { path: string; description: string; language: string },
     existingFiles: FileEntry[],
-    plan: FilePlan
+    plan: FilePlan,
+    meter: UsageMeter
   ): Promise<string> {
     const contextSummary = existingFiles.length > 0
       ? `\n\nAlready generated files:\n${existingFiles.map(f =>
@@ -454,13 +462,13 @@ Now generate the complete content for: ${fileMeta.path}
 Description: ${fileMeta.description}
 Language: ${fileMeta.language}`;
 
-    const content = await callClaudeSonnet(filePrompt, systemPrompt, 8192);
+    const content = await callClaudeSonnet(filePrompt, systemPrompt, 8192, undefined, meter);
     return this.stripMarkdownFences(content, fileMeta.language);
   }
 
   // ─── Auto-Fix Pass ────────────────────────────────────────────────────────────
 
-  private async autoFix(userPrompt: string, files: FileEntry[]): Promise<FileEntry[]> {
+  private async autoFix(userPrompt: string, files: FileEntry[], meter: UsageMeter): Promise<FileEntry[]> {
     if (files.length === 0) return files;
 
     const filesSummary = files
@@ -497,7 +505,9 @@ Return ALL files even if unchanged.`;
       response = await callClaudeSonnet(
         `Original task: ${userPrompt.slice(0, 200)}\n\nReview and fix these files:\n\n${filesSummary.slice(0, 12000)}`,
         systemPrompt,
-        8192
+        8192,
+        undefined,
+        meter
       );
     } catch (err) {
       console.warn('[CodeEngine] Auto-fix pass failed, returning original files:', err);

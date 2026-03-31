@@ -2,6 +2,7 @@ import { prisma } from '@arivarangam/db';
 import type { TaskEvent } from '@arivarangam/types';
 import { callClaudeSonnet } from '../connectors/claude';
 import { taskService } from '../services/TaskService';
+import { UsageMeter } from '../services/UsageMeter';
 
 // ─── Installed Library Stack (via CDN for browser preview) ────────────────────
 //
@@ -104,13 +105,14 @@ const NPM_PACKAGE_JSON = (projectName: string) => JSON.stringify({
 export class WebEngine {
   async execute(task: any, onEvent: (e: TaskEvent) => void): Promise<void> {
     const emit = async (e: TaskEvent) => onEvent(e);
+    const meter = new UsageMeter();
 
     await prisma.task.update({ where: { id: task.id }, data: { status: 'running' } });
 
     try {
       await emit({ type: 'log', data: { message: '🔍 Analyzing prompt and selecting visual libraries...' }, timestamp: new Date().toISOString() });
 
-      const plan = await this.planStructure(task.prompt);
+      const plan = await this.planStructure(task.prompt, meter);
 
       await emit({ type: 'log', data: { message: `📁 File plan ready: ${plan.files.length} files | Stack: ${plan.techStack.join(', ')}` }, timestamp: new Date().toISOString() });
 
@@ -120,7 +122,7 @@ export class WebEngine {
         const fileMeta = plan.files[i];
         await emit({ type: 'log', data: { message: `⚡ Building ${fileMeta.path} (${i + 1}/${plan.files.length})...` }, timestamp: new Date().toISOString() });
 
-        const content = await this.generateFile(task.prompt, fileMeta, generatedFiles, plan);
+        const content = await this.generateFile(task.prompt, fileMeta, generatedFiles, plan, meter);
         generatedFiles.push({ path: fileMeta.path, content });
 
         await emit({
@@ -132,7 +134,7 @@ export class WebEngine {
 
       // Auto-quality pass
       await emit({ type: 'log', data: { message: '🎨 Running visual quality & animation pass...' }, timestamp: new Date().toISOString() });
-      const fixedFiles = await this.qualityPass(task.prompt, generatedFiles);
+      const fixedFiles = await this.qualityPass(task.prompt, generatedFiles, meter);
 
       for (const fixed of fixedFiles) {
         const original = generatedFiles.find(f => f.path === fixed.path);
@@ -145,9 +147,9 @@ export class WebEngine {
         }
       }
 
-      const creditsUsed = Math.min(200, Math.max(80, 50 + fixedFiles.length * 12));
+      const creditsUsed = meter.toCredits();
       await taskService.completeTask(task.id, creditsUsed, {
-        files: fixedFiles, techStack: plan.techStack, fileCount: fixedFiles.length,
+        files: fixedFiles, techStack: plan.techStack, fileCount: fixedFiles.length, usage: meter.summary(),
       });
 
       await emit({
@@ -163,7 +165,7 @@ export class WebEngine {
 
   // ─── Plan File Structure ──────────────────────────────────────────────────────
 
-  private async planStructure(prompt: string): Promise<FilePlan> {
+  private async planStructure(prompt: string, meter: UsageMeter): Promise<FilePlan> {
     const systemPrompt = `You are an expert creative technologist planning an immersive web project.
 
 LIBRARY STACK INSTALLED (choose which to use based on the prompt):
@@ -204,7 +206,7 @@ Return ONLY valid JSON:
 
     const response = await callClaudeSonnet(
       `Plan immersive web project for: ${prompt}`,
-      systemPrompt, 2048
+      systemPrompt, 2048, undefined, meter
     );
     return this.parseJSON<FilePlan>(response, {
       files: [
@@ -225,7 +227,8 @@ Return ONLY valid JSON:
     userPrompt: string,
     fileMeta: { path: string; description: string; language: string },
     existingFiles: FileEntry[],
-    plan: FilePlan
+    plan: FilePlan,
+    meter: UsageMeter
   ): Promise<string> {
     const isHtml = fileMeta.path.endsWith('.html');
     const isPackageJson = fileMeta.path === 'package.json';
@@ -302,13 +305,13 @@ ${contextSummary}
 Generate the complete content for: ${fileMeta.path}
 Role of this file: ${fileMeta.description}`;
 
-    const content = await callClaudeSonnet(filePrompt, systemPrompt, 8192);
+    const content = await callClaudeSonnet(filePrompt, systemPrompt, 8192, undefined, meter);
     return this.stripFences(content, fileMeta.language);
   }
 
   // ─── Quality Pass ─────────────────────────────────────────────────────────────
 
-  private async qualityPass(userPrompt: string, files: FileEntry[]): Promise<FileEntry[]> {
+  private async qualityPass(userPrompt: string, files: FileEntry[], meter: UsageMeter): Promise<FileEntry[]> {
     if (files.length === 0) return files;
 
     const summary = files.map(f => `=== ${f.path} ===\n${f.content}`).join('\n\n');
@@ -342,7 +345,7 @@ Return ALL files even if unchanged.`;
     try {
       const response = await callClaudeSonnet(
         `Original prompt: ${userPrompt.slice(0, 200)}\n\nReview:\n${summary.slice(0, 14000)}`,
-        systemPrompt, 8192
+        systemPrompt, 8192, undefined, meter
       );
       const parsed = this.parseJSON<FileEntry[]>(response, []);
       if (!parsed || !Array.isArray(parsed) || parsed.length === 0) return files;
