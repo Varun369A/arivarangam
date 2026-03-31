@@ -102,7 +102,7 @@ function loadConfig(): AppConfig {
     OPENAI_API_KEY: isTest ? optionalEnv('OPENAI_API_KEY', 'test-key') : requireEnv('OPENAI_API_KEY'),
     PERPLEXITY_API_KEY: isTest ? optionalEnv('PERPLEXITY_API_KEY', 'test-key') : requireEnv('PERPLEXITY_API_KEY'),
     GEMINI_API_KEY: optionalEnv('GEMINI_API_KEY', ''), // optional — Gemini reviewer
-    ELEVENLABS_API_KEY: isTest ? optionalEnv('ELEVENLABS_API_KEY', 'test-key') : requireEnv('ELEVENLABS_API_KEY'),
+    ELEVENLABS_API_KEY: optionalEnv('ELEVENLABS_API_KEY', ''), // optional — only needed for voice tasks
 
     // Razorpay (optional — configure before enabling billing)
     RAZORPAY_KEY_ID: optionalEnv('RAZORPAY_KEY_ID', ''),

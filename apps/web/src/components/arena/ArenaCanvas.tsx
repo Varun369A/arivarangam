@@ -1,24 +1,33 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, Suspense } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { Stars, Float } from '@react-three/drei'
+import { Stars, Float, MeshReflectorMaterial } from '@react-three/drei'
+import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import { CharacterFigure, type CharacterState } from './CharacterFigure'
 import { CHARACTERS, CHARACTER_ORDER } from '@/lib/characters'
 
-// ─── Arena Floor ──────────────────────────────────────────────────────────────
+// ─── Arena Floor (reflective) ─────────────────────────────────────────────────
 
 function ArenaFloor() {
   return (
     <group>
-      {/* Main floor plane */}
+      {/* Reflective floor plane */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
         <planeGeometry args={[40, 40]} />
-        <meshStandardMaterial
-          color="#06060F"
-          roughness={0.9}
-          metalness={0.3}
+        <MeshReflectorMaterial
+          blur={[300, 100]}
+          resolution={512}
+          mixBlur={0.8}
+          mixStrength={20}
+          roughness={1}
+          depthScale={1.2}
+          minDepthThreshold={0.4}
+          maxDepthThreshold={1.4}
+          color="#050510"
+          metalness={0.6}
+          mirror={0}
         />
       </mesh>
 
@@ -75,31 +84,22 @@ function AmbientParticles() {
     }
   })
 
-  const count = PARTICLE_COUNT
-  const positions = PARTICLE_POSITIONS
-
   return (
     <points ref={points}>
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          count={count}
-          array={positions}
+          count={PARTICLE_COUNT}
+          array={PARTICLE_POSITIONS}
           itemSize={3}
         />
       </bufferGeometry>
-      <pointsMaterial
-        size={0.035}
-        color="#8B5CF6"
-        transparent
-        opacity={0.55}
-        sizeAttenuation
-      />
+      <pointsMaterial size={0.035} color="#8B5CF6" transparent opacity={0.55} sizeAttenuation />
     </points>
   )
 }
 
-// ─── Floating Orbs (atmosphere) ───────────────────────────────────────────────
+// ─── Floating Orbs ────────────────────────────────────────────────────────────
 
 function FloatingOrb({ position, color }: { position: [number, number, number]; color: string }) {
   return (
@@ -124,10 +124,8 @@ function FloatingOrb({ position, color }: { position: [number, number, number]; 
 function SceneLighting() {
   return (
     <>
-      {/* Ambient — cool dark blue base */}
       <ambientLight intensity={0.12} color="#1a1060" />
 
-      {/* Key light — warm white from above-front */}
       <directionalLight
         position={[3, 9, 6]}
         intensity={1.1}
@@ -142,13 +140,9 @@ function SceneLighting() {
         shadow-camera-bottom={-12}
       />
 
-      {/* Fill light — cool blue-purple from left */}
       <directionalLight position={[-8, 4, -3]} intensity={0.4} color="#4040CC" />
-
-      {/* Back rim light — adds depth */}
       <directionalLight position={[0, 3, -10]} intensity={0.3} color="#6030A0" />
 
-      {/* Center stage light — warm amber spotlight for Claude */}
       <spotLight
         position={[0, 8, 1]}
         angle={0.35}
@@ -159,6 +153,22 @@ function SceneLighting() {
         target-position={[0, 0, 0]}
       />
     </>
+  )
+}
+
+// ─── Post Processing ──────────────────────────────────────────────────────────
+
+function PostFX() {
+  return (
+    <EffectComposer>
+      <Bloom
+        luminanceThreshold={0.3}
+        luminanceSmoothing={0.9}
+        intensity={0.6}
+        mipmapBlur
+      />
+      <Vignette eskil={false} offset={0.15} darkness={0.6} />
+    </EffectComposer>
   )
 }
 
@@ -175,32 +185,32 @@ export function ArenaCanvas({ characterStates }: ArenaCanvasProps) {
     <Canvas
       shadows
       camera={{ position: [0, 3.2, 11], fov: 48 }}
-      gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1 }}
+      gl={{
+        antialias: true,
+        toneMapping: THREE.ACESFilmicToneMapping,
+        toneMappingExposure: 1.1,
+      }}
       style={{ background: '#060610' }}
     >
-      {/* Global fog */}
       <fog attach="fog" args={['#060610', 20, 40]} />
 
-      {/* Lighting */}
       <SceneLighting />
 
-      {/* Starfield background */}
       <Stars radius={35} depth={25} count={2500} factor={2.2} fade speed={0.4} />
 
-      {/* Floating ambient orbs */}
       <FloatingOrb position={[-8, 4, -5]}  color="#6366f1" />
       <FloatingOrb position={[8, 3.5, -4]} color="#8B5CF6" />
       <FloatingOrb position={[0, 6, -8]}   color="#0D9488" />
       <FloatingOrb position={[-4, 2.5, 4]} color="#D97706" />
       <FloatingOrb position={[5, 2, 3]}    color="#10B981" />
 
-      {/* Particle field */}
       <AmbientParticles />
 
-      {/* Floor */}
-      <ArenaFloor />
+      {/* Suspense boundary for MeshReflectorMaterial (uses render target) */}
+      <Suspense fallback={null}>
+        <ArenaFloor />
+      </Suspense>
 
-      {/* Characters */}
       {CHARACTER_ORDER.map(id => (
         <CharacterFigure
           key={id}
@@ -209,6 +219,8 @@ export function ArenaCanvas({ characterStates }: ArenaCanvasProps) {
           isActive={id === 'claude'}
         />
       ))}
+
+      <PostFX />
     </Canvas>
   )
 }

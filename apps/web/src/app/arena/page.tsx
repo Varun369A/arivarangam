@@ -319,6 +319,9 @@ export default function ArenaPage() {
     creditsApi.getBalance().then(r => setUserCredits((r as any).data?.balance ?? (r as any).balance ?? null)).catch(() => {})
   }, [user])
 
+  const isRunning = taskStatus === 'running'
+  const isDone    = taskStatus === 'done'
+
   // Debounced credit estimate as user types
   useEffect(() => {
     if (!inputText.trim() || inputText.length < 10 || isRunning) {
@@ -347,9 +350,6 @@ export default function ArenaPage() {
   useEffect(() => {
     if (files.length > 0) setShowPanel(true)
   }, [files.length])
-
-  const isRunning = taskStatus === 'running'
-  const isDone    = taskStatus === 'done'
 
   const handleSend = useCallback(async () => {
     const text = inputText.trim()
