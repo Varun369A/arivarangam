@@ -4,7 +4,7 @@ import { getConfig } from '@arivarangam/config';
 // Uses Perplexity's OpenAI-compatible API
 
 const PERPLEXITY_BASE = 'https://api.perplexity.ai';
-const SONAR_MODEL = 'llama-3.1-sonar-large-128k-online';
+const SONAR_MODEL = 'sonar-pro';
 
 interface PerplexityMessage {
   role: 'system' | 'user' | 'assistant';

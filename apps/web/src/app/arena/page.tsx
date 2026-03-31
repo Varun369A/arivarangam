@@ -289,11 +289,15 @@ export default function ArenaPage() {
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null)
   const [inputText, setInputText] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [stopping, setStopping] = useState(false)
   const [showPanel, setShowPanel] = useState(false)
   const [inputError, setInputError] = useState<string | null>(null)
   const [estimate, setEstimate] = useState<{ min: number; max: number; typical: number } | null>(null)
   const [estimating, setEstimating] = useState(false)
   const [userCredits, setUserCredits] = useState<number | null>(null)
+  const [showProjects, setShowProjects] = useState(false)
+  const [projectsList, setProjectsList] = useState<any[]>([])
+  const [projectsLoading, setProjectsLoading] = useState(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const estimateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -351,17 +355,43 @@ export default function ArenaPage() {
     if (files.length > 0) setShowPanel(true)
   }, [files.length])
 
+  const handleStop = useCallback(async () => {
+    if (!currentTaskId || stopping) return
+    setStopping(true)
+    try {
+      await tasksApi.cancel(currentTaskId)
+    } catch { /* stream will reflect cancelled status */ }
+    finally { setStopping(false) }
+  }, [currentTaskId, stopping])
+
+  const handleShowProjects = useCallback(async () => {
+    setProjectsLoading(true)
+    setShowProjects(true)
+    try {
+      const res = await tasksApi.list()
+      setProjectsList((res as any)?.data?.tasks ?? (res as any)?.tasks ?? [])
+    } catch { setProjectsList([]) }
+    finally { setProjectsLoading(false) }
+  }, [])
+
   const handleSend = useCallback(async () => {
     const text = inputText.trim()
     if (!text || submitting) return
     if (isRunning) return
+
+    // Intercept: "show my projects" command
+    if (/show.*project|my project|list.*project|view.*project|all project/i.test(text)) {
+      setInputText('')
+      handleShowProjects()
+      return
+    }
 
     setInputError(null)
     setSubmitting(true)
 
     try {
       if (isDone && currentTaskId) {
-        // Follow-up on existing task
+        // Follow-up / enhance existing task
         await tasksApi.followUp(currentTaskId, text)
         setInputText('')
         setShowPanel(true)
@@ -381,7 +411,7 @@ export default function ArenaPage() {
     } finally {
       setSubmitting(false)
     }
-  }, [inputText, submitting, isRunning, isDone, currentTaskId, reconnectForFollowUp])
+  }, [inputText, submitting, isRunning, isDone, currentTaskId, reconnectForFollowUp, handleShowProjects])
 
   if (authLoading) {
     return (
@@ -565,6 +595,29 @@ export default function ArenaPage() {
               lineHeight: 1.5,
             }}
           />
+          {isRunning && (
+            <button
+              onClick={handleStop}
+              disabled={stopping}
+              style={{
+                height: 40, padding: '0 14px',
+                borderRadius: 16,
+                background: stopping ? 'rgba(239,68,68,0.2)' : 'rgba(239,68,68,0.85)',
+                border: '1.5px solid rgba(239,68,68,0.6)',
+                cursor: stopping ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                gap: 6, color: 'white', fontSize: 12, fontWeight: 700,
+                flexShrink: 0, transition: 'all 0.2s',
+                boxShadow: stopping ? 'none' : '0 0 16px rgba(239,68,68,0.4)',
+              }}
+            >
+              {stopping
+                ? <span style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite', display: 'inline-block' }} />
+                : <span style={{ width: 10, height: 10, background: 'white', borderRadius: 2, display: 'inline-block' }} />
+              }
+              {stopping ? 'Stopping…' : 'Stop'}
+            </button>
+          )}
           <button
             onClick={handleSend}
             disabled={!inputText.trim() || isRunning || submitting}
@@ -583,7 +636,7 @@ export default function ArenaPage() {
               boxShadow: (!inputText.trim() || isRunning || submitting) ? 'none' : '0 0 20px rgba(99,102,241,0.5)',
             }}
           >
-            {submitting || isRunning
+            {submitting
               ? <span style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite', display: 'inline-block' }} />
               : '→'
             }
@@ -613,6 +666,18 @@ export default function ArenaPage() {
         {/* Quick prompts when idle */}
         {!currentTaskId && (
           <div style={{ display: 'flex', gap: 8, marginTop: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={handleShowProjects}
+              style={{
+                background: 'rgba(99,102,241,0.15)',
+                border: '1px solid rgba(99,102,241,0.35)',
+                borderRadius: 20, padding: '5px 14px',
+                color: '#a5b4fc', fontSize: 11, cursor: 'pointer',
+                backdropFilter: 'blur(8px)', fontWeight: 600,
+              }}
+            >
+              📂 My Projects
+            </button>
             {[
               'Build a SaaS landing page',
               'Create a portfolio website',
@@ -673,6 +738,124 @@ export default function ArenaPage() {
         taskStatus={taskStatus}
         onClose={() => setShowPanel(false)}
       />
+
+      {/* ── Projects modal ── */}
+      {showProjects && (
+        <div
+          onClick={() => setShowProjects(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 100,
+            background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 20,
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: 'rgba(6,6,24,0.98)',
+              border: '1.5px solid rgba(99,102,241,0.35)',
+              borderRadius: 24,
+              width: '100%', maxWidth: 600,
+              maxHeight: '80vh',
+              display: 'flex', flexDirection: 'column',
+              boxShadow: '0 0 60px rgba(99,102,241,0.25), 0 24px 64px rgba(0,0,0,0.8)',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Header */}
+            <div style={{
+              padding: '18px 24px',
+              borderBottom: '1px solid rgba(99,102,241,0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            }}>
+              <div>
+                <h2 style={{ color: '#f1f5f9', fontSize: 17, fontWeight: 700, margin: 0 }}>My Projects</h2>
+                <p style={{ color: '#64748b', fontSize: 12, margin: '3px 0 0' }}>
+                  Click a project to continue or enhance it
+                </p>
+              </div>
+              <button
+                onClick={() => setShowProjects(false)}
+                style={{ background: 'none', border: 'none', color: '#475569', fontSize: 20, cursor: 'pointer', lineHeight: 1 }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* List */}
+            <div style={{ overflowY: 'auto', flex: 1, padding: '12px 16px' }}>
+              {projectsLoading ? (
+                <div style={{ textAlign: 'center', padding: 40, color: '#475569', fontSize: 13 }}>
+                  <span style={{ display: 'inline-block', width: 20, height: 20, border: '2px solid rgba(99,102,241,0.3)', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                  <div style={{ marginTop: 10 }}>Loading projects…</div>
+                </div>
+              ) : projectsList.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: 40, color: '#475569', fontSize: 13 }}>
+                  No projects yet. Start building something!
+                </div>
+              ) : (
+                projectsList.map((task, i) => {
+                  const statusColor: Record<string, string> = {
+                    completed: '#34D399', running: '#60A5FA', failed: '#F87171',
+                    cancelled: '#94A3B8', pending: '#FCD34D', analyzing: '#A78BFA',
+                  }
+                  const col = statusColor[task.status] ?? '#64748b'
+                  return (
+                    <div
+                      key={task.id}
+                      onClick={() => {
+                        setCurrentTaskId(task.id)
+                        setShowProjects(false)
+                        if (task.status === 'completed') setShowPanel(true)
+                      }}
+                      style={{
+                        display: 'flex', alignItems: 'flex-start', gap: 14,
+                        padding: '14px 16px',
+                        borderRadius: 16,
+                        border: '1px solid rgba(99,102,241,0.15)',
+                        background: 'rgba(99,102,241,0.06)',
+                        marginBottom: 8,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      <span style={{
+                        minWidth: 28, height: 28, borderRadius: 10,
+                        background: 'rgba(99,102,241,0.2)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        color: '#a5b4fc', fontSize: 12, fontWeight: 800, flexShrink: 0,
+                      }}>
+                        {i + 1}
+                      </span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ color: '#e2e8f0', fontSize: 13, fontWeight: 600, lineHeight: 1.4, marginBottom: 4 }}>
+                          {task.prompt?.slice(0, 90)}{(task.prompt?.length ?? 0) > 90 ? '…' : ''}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{
+                            fontSize: 10, fontWeight: 700, color: col,
+                            background: `${col}18`, border: `1px solid ${col}40`,
+                            borderRadius: 8, padding: '2px 8px', textTransform: 'uppercase',
+                          }}>
+                            {task.status}
+                          </span>
+                          <span style={{ color: '#475569', fontSize: 11 }}>
+                            {new Date(task.createdAt).toLocaleDateString()}
+                          </span>
+                          {task.category && (
+                            <span style={{ color: '#6366f1', fontSize: 11 }}>#{task.category}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

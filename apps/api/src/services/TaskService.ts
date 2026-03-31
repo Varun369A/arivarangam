@@ -144,7 +144,7 @@ export class TaskService {
     if (!task) throw new Error(`Task ${taskId} not found`);
     if (task.userId !== userId) throw new Error('Not authorized to cancel this task');
 
-    const cancellable: string[] = ['pending', 'analyzing'];
+    const cancellable: string[] = ['pending', 'analyzing', 'running'];
     if (!cancellable.includes(task.status)) {
       throw new Error(`Cannot cancel task in status: ${task.status}`);
     }
