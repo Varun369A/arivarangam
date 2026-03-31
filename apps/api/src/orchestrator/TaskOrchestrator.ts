@@ -43,12 +43,24 @@ async function charReturn(onEvent: OnEvent, character: string, text: string, wai
   await sleep(waitMs);
 }
 
+// ─── Credit update helper ─────────────────────────────────────────────────────
+
+async function emitCreditUpdate(onEvent: OnEvent, meter: UsageMeter, isAdmin: boolean): Promise<void> {
+  const creditsUsed = isAdmin ? 0 : meter.toCredits();
+  await onEvent({
+    type: 'credit_update',
+    data: { creditsUsed, isAdmin },
+    timestamp: new Date().toISOString(),
+  });
+}
+
 // ─── Orchestrator ─────────────────────────────────────────────────────────────
 
 export class TaskOrchestrator {
   async execute(task: any, onEvent: OnEvent): Promise<void> {
     const meter = new UsageMeter();
     const { id: taskId, userId, category, prompt } = task;
+    const isAdmin: boolean = !!(task as any).isAdmin;
 
     // ── Phase 0: Route check ─────────────────────────────────────────────────
     // Some categories have dedicated engines that handle non-file output
@@ -91,10 +103,12 @@ export class TaskOrchestrator {
       await charReturn(onEvent, 'chatgpt', 'Good luck, Claude — you\'ve got this!', 2000);
     }
     const plan = await planBuild(prompt, category, analysis, categoryRules, onEvent, meter);
+    await emitCreditUpdate(onEvent, meter, isAdmin);
     await charThink(onEvent, 'claude', `Building ${plan.files.length} files…`, 2000);
 
     // ── Phase 4: Build ───────────────────────────────────────────────────────
     let files = await buildFiles(prompt, category, analysis, plan, categoryRules, onEvent, meter, designSpec);
+    await emitCreditUpdate(onEvent, meter, isAdmin);
 
     // ── Phase 5: Review ──────────────────────────────────────────────────────
     if (process.env.GEMINI_API_KEY) {
@@ -119,7 +133,7 @@ export class TaskOrchestrator {
     }
 
     // ── Phase 7: Complete ────────────────────────────────────────────────────
-    await this.completeTask(taskId, userId, files, meter, onEvent);
+    await this.completeTask(taskId, userId, files, meter, onEvent, isAdmin);
   }
 
   // ─── Complete Task ──────────────────────────────────────────────────────────
@@ -129,9 +143,10 @@ export class TaskOrchestrator {
     userId: string,
     files: BuiltFile[],
     meter: UsageMeter,
-    onEvent: OnEvent
+    onEvent: OnEvent,
+    isAdmin = false
   ): Promise<void> {
-    const creditsUsed = meter.toCredits();
+    const creditsUsed = isAdmin ? 0 : meter.toCredits();
 
     // Store files in task metadata
     await prisma.task.update({

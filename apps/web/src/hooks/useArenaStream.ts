@@ -14,6 +14,9 @@ export interface ArenaStreamState {
   files: TaskStreamFile[]
   previewAvailable: boolean
 
+  // Live credit tracking
+  creditsUsedLive: number
+
   // Character animation state
   characterStates: Record<CharacterId, CharacterState>
 
@@ -51,6 +54,7 @@ export function useArenaStream(taskId: string | null) {
     taskStatus: 'idle',
     files: [],
     previewAvailable: false,
+    creditsUsedLive: 0,
     characterStates: makeDefaultCharacterStates(),
     chatMessages: [],
     isConnected: false,
@@ -354,6 +358,15 @@ export function useArenaStream(taskId: string | null) {
       } catch { /* ignore */ }
     })
 
+    es.addEventListener('credit_update', (e: MessageEvent) => {
+      try {
+        const data = JSON.parse(e.data)
+        if (!data.isAdmin) {
+          setState(prev => ({ ...prev, creditsUsedLive: data.creditsUsed ?? prev.creditsUsedLive }))
+        }
+      } catch { /* ignore */ }
+    })
+
     es.addEventListener('cancelled', () => {
       setState(prev => ({ ...prev, taskStatus: 'cancelled' }))
     })
@@ -392,6 +405,7 @@ export function useArenaStream(taskId: string | null) {
       taskStatus: 'running',
       files: [],
       previewAvailable: false,
+      creditsUsedLive: 0,
       isConnected: false,
       isComplete: false,
       error: null,

@@ -100,12 +100,17 @@ async function processTaskJob(job: Job<TaskJobData>): Promise<void> {
   const { taskId, userId } = job.data;
   console.log(`[Worker] Job ${job.id} — task ${taskId} (attempt ${job.attemptsMade + 1})`);
 
-  // Load task
-  const task = await prisma.task.findUnique({ where: { id: taskId } });
+  // Load task + user (need isAdmin for credit bypass)
+  const task = await prisma.task.findUnique({
+    where: { id: taskId },
+    include: { user: { select: { isAdmin: true } } },
+  });
   if (!task) {
     console.error(`[Worker] Task ${taskId} not found — skipping`);
     return;
   }
+  // Attach isAdmin to task object so orchestrator can skip credit deduction
+  (task as any).isAdmin = (task as any).user?.isAdmin ?? false;
 
   // Idempotency: skip if already in terminal state
   if (['completed', 'cancelled', 'failed'].includes(task.status)) {
@@ -138,19 +143,15 @@ async function processTaskJob(job: Job<TaskJobData>): Promise<void> {
     });
 
     if (updatedTask && updatedTask.status !== 'completed') {
+      const actualCredits = updatedTask.creditsActuallyUsed ?? task.creditsEstimatedMin ?? 10;
       await prisma.task.update({
         where: { id: taskId },
-        data: {
-          status: 'completed',
-          creditsActuallyUsed: updatedTask.creditsActuallyUsed ?? task.creditsEstimatedMin ?? 10,
-          completedAt: new Date(),
-        },
+        data: { status: 'completed', creditsActuallyUsed: actualCredits, completedAt: new Date() },
       });
-      await creditService.finalizeCredits(
-        userId,
-        taskId,
-        updatedTask.creditsActuallyUsed ?? task.creditsEstimatedMin ?? 10
-      );
+      // Skip credit finalization for admin users (unlimited free)
+      if (!(task as any).isAdmin) {
+        await creditService.finalizeCredits(userId, taskId, actualCredits);
+      }
     }
 
     console.log(`[Worker] Task ${taskId} — done`);

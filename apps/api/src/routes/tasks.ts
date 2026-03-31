@@ -4,6 +4,7 @@ import { prisma } from '@arivarangam/db';
 import { requireAuth } from '../middleware/auth';
 import { sanitizePrompt, TASK_CREATE_RATE_LIMIT } from '../middleware/security';
 import { taskService } from '../services/TaskService';
+import { creditService } from '../services/CreditService';
 
 // ─── Schemas ──────────────────────────────────────────────────────────────────
 
@@ -35,6 +36,20 @@ const followUpSchema = z.object({
 export async function taskRoutes(fastify: FastifyInstance): Promise<void> {
   // All task routes require authentication
   fastify.addHook('preHandler', requireAuth);
+
+  // POST /estimate — get credit estimate for a prompt before creating a task
+  fastify.post('/estimate', async (request: FastifyRequest, reply: FastifyReply) => {
+    const body = request.body as any;
+    const prompt = String(body?.prompt ?? '').slice(0, 2000);
+    const category = String(body?.category ?? 'code');
+    if (!prompt) return reply.code(400).send({ success: false, error: 'prompt required' });
+    try {
+      const estimate = await creditService.estimateTask(prompt, category as any);
+      return reply.send({ success: true, data: { estimate } });
+    } catch {
+      return reply.send({ success: true, data: { estimate: { min: 50, max: 200, typical: 100, disclaimer: '' } } });
+    }
+  });
 
   // POST / — create task
   fastify.post('/', { config: { rateLimit: TASK_CREATE_RATE_LIMIT } }, async (request: FastifyRequest, reply: FastifyReply) => {
@@ -69,7 +84,7 @@ export async function taskRoutes(fastify: FastifyInstance): Promise<void> {
         });
       }
 
-      const { task, estimate } = await taskService.createTask(user.id, category, prompt, context);
+      const { task, estimate } = await taskService.createTask(user.id, category, prompt, context, !!user.isAdmin);
 
       // Start task asynchronously
       taskService.startTask(task.id).catch(err => {

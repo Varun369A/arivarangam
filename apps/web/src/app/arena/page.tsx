@@ -5,7 +5,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { useArenaStream } from '@/hooks/useArenaStream'
-import { tasksApi, getApiError } from '@/lib/api'
+import { tasksApi, creditsApi, getApiError } from '@/lib/api'
 import { CHARACTERS } from '@/lib/characters'
 import JSZip from 'jszip'
 
@@ -291,8 +291,12 @@ export default function ArenaPage() {
   const [submitting, setSubmitting] = useState(false)
   const [showPanel, setShowPanel] = useState(false)
   const [inputError, setInputError] = useState<string | null>(null)
+  const [estimate, setEstimate] = useState<{ min: number; max: number; typical: number } | null>(null)
+  const [estimating, setEstimating] = useState(false)
+  const [userCredits, setUserCredits] = useState<number | null>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const estimateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const {
     characterStates,
@@ -300,6 +304,7 @@ export default function ArenaPage() {
     taskStatus,
     files,
     previewAvailable,
+    creditsUsedLive,
     reconnectForFollowUp,
   } = useArenaStream(currentTaskId)
 
@@ -307,6 +312,31 @@ export default function ArenaPage() {
   useEffect(() => {
     if (!authLoading && !user) router.replace('/login')
   }, [authLoading, user, router])
+
+  // Load user credit balance
+  useEffect(() => {
+    if (!user) return
+    creditsApi.getBalance().then(r => setUserCredits((r as any).data?.balance ?? (r as any).balance ?? null)).catch(() => {})
+  }, [user])
+
+  // Debounced credit estimate as user types
+  useEffect(() => {
+    if (!inputText.trim() || inputText.length < 10 || isRunning) {
+      setEstimate(null)
+      return
+    }
+    if (estimateTimer.current) clearTimeout(estimateTimer.current)
+    setEstimating(true)
+    estimateTimer.current = setTimeout(async () => {
+      try {
+        const cat = detectCategory(inputText)
+        const res = await tasksApi.estimate(inputText, cat)
+        setEstimate((res as any).data?.estimate ?? (res as any).estimate ?? null)
+      } catch { setEstimate(null) }
+      finally { setEstimating(false) }
+    }, 800)
+    return () => { if (estimateTimer.current) clearTimeout(estimateTimer.current) }
+  }, [inputText, isRunning])
 
   // Auto-scroll chat
   useEffect(() => {
@@ -318,8 +348,8 @@ export default function ArenaPage() {
     if (files.length > 0) setShowPanel(true)
   }, [files.length])
 
-  const isRunning  = taskStatus === 'running'
-  const isDone     = taskStatus === 'done'
+  const isRunning = taskStatus === 'running'
+  const isDone    = taskStatus === 'done'
 
   const handleSend = useCallback(async () => {
     const text = inputText.trim()
@@ -414,10 +444,16 @@ export default function ArenaPage() {
           )}
           {user && (
             <span style={{
-              background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)',
-              borderRadius: 20, padding: '3px 10px', color: '#a5b4fc', fontSize: 11, fontWeight: 700,
+              background: isRunning && creditsUsedLive > 0 ? 'rgba(239,68,68,0.15)' : 'rgba(99,102,241,0.15)',
+              border: isRunning && creditsUsedLive > 0 ? '1px solid rgba(239,68,68,0.3)' : '1px solid rgba(99,102,241,0.3)',
+              borderRadius: 20, padding: '3px 10px',
+              color: isRunning && creditsUsedLive > 0 ? '#fca5a5' : '#a5b4fc',
+              fontSize: 11, fontWeight: 700,
+              transition: 'all 0.3s',
             }}>
-              {(user as any).credits ?? 0} cr
+              {isRunning && creditsUsedLive > 0
+                ? `-${creditsUsedLive} cr used`
+                : `${userCredits ?? (user as any).credits ?? 0} cr`}
             </span>
           )}
           <button
@@ -539,6 +575,26 @@ export default function ArenaPage() {
             }
           </button>
         </div>
+
+        {/* Credit estimate pill */}
+        {!isRunning && inputText.length >= 10 && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 8 }}>
+            {estimating ? (
+              <span style={{ fontSize: 11, color: '#475569', background: 'rgba(6,6,20,0.7)', borderRadius: 20, padding: '3px 12px' }}>
+                Estimating cost…
+              </span>
+            ) : estimate ? (
+              <span style={{
+                fontSize: 11, fontWeight: 600,
+                background: 'rgba(99,102,241,0.15)',
+                border: '1px solid rgba(99,102,241,0.25)',
+                borderRadius: 20, padding: '3px 14px', color: '#a5b4fc',
+              }}>
+                ≈ {estimate.min}–{estimate.max} credits · typical {estimate.typical} cr
+              </span>
+            ) : null}
+          </div>
+        )}
 
         {/* Quick prompts when idle */}
         {!currentTaskId && (

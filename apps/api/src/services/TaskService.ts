@@ -13,18 +13,21 @@ export class TaskService {
     userId: string,
     category: TaskCategory,
     prompt: string,
-    context?: string
+    context?: string,
+    isAdmin = false
   ): Promise<{ task: any; estimate: any }> {
     // 1. Estimate credits
     const estimate = await creditService.estimateTask(prompt, category);
 
-    // 2. Check user has enough credits (use max estimate)
-    const balance = await creditService.getBalance(userId);
-    if (balance < estimate.min) {
-      throw new Error(
-        `Insufficient credits. You have ${balance} credits but this task requires at least ${estimate.min}. ` +
-        `Please purchase more credits.`
-      );
+    // 2. Check user has enough credits — admin gets unlimited free usage
+    if (!isAdmin) {
+      const balance = await creditService.getBalance(userId);
+      if (balance < estimate.min) {
+        throw new Error(
+          `Insufficient credits. You have ${balance} credits but this task requires at least ${estimate.min}. ` +
+          `Please purchase more credits.`
+        );
+      }
     }
 
     // 3. Create task record
@@ -34,14 +37,16 @@ export class TaskService {
         category,
         prompt,
         status: 'pending',
-        creditsEstimatedMin: estimate.min,
-        creditsEstimatedMax: estimate.max,
+        creditsEstimatedMin: isAdmin ? 0 : estimate.min,
+        creditsEstimatedMax: isAdmin ? 0 : estimate.max,
         metadata: context ? { context } : undefined,
       },
     });
 
-    // 4. Reserve credits (use typical estimate)
-    await creditService.reserveCredits(userId, task.id, estimate.typical);
+    // 4. Reserve credits — skipped for admin (unlimited)
+    if (!isAdmin) {
+      await creditService.reserveCredits(userId, task.id, estimate.typical);
+    }
 
     return { task, estimate };
   }

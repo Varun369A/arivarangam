@@ -26,6 +26,50 @@ const performanceQuerySchema = z.object({
 
 export async function adminPlatformRoutes(fastify: FastifyInstance): Promise<void> {
 
+  // GET /stats — top-level platform overview numbers
+  fastify.get('/stats', async (_request: FastifyRequest, reply: FastifyReply) => {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekStart  = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const [
+      totalUsers,
+      newUsersToday,
+      totalTasks,
+      tasksToday,
+      tasksRunning,
+      tasksFailed,
+      creditsResult,
+      revenueResult,
+    ] = await Promise.all([
+      prisma.user.count(),
+      prisma.user.count({ where: { createdAt: { gte: todayStart } } }),
+      prisma.task.count(),
+      prisma.task.count({ where: { createdAt: { gte: todayStart } } }),
+      prisma.task.count({ where: { status: { in: ['running', 'analyzing', 'pending'] } } }),
+      prisma.task.count({ where: { status: 'failed', createdAt: { gte: weekStart } } }),
+      prisma.task.aggregate({ _sum: { creditsActuallyUsed: true } }),
+      prisma.creditTransaction.aggregate({
+        _sum: { amount: true },
+        where: { type: 'PURCHASE', status: 'COMPLETED' },
+      }),
+    ]);
+
+    return reply.send({
+      success: true,
+      data: {
+        totalUsers,
+        newUsersToday,
+        totalTasks,
+        tasksToday,
+        tasksRunning,
+        tasksFailed7d: tasksFailed,
+        totalCreditsUsed: creditsResult._sum.creditsActuallyUsed ?? 0,
+        totalRevenue: Math.abs(revenueResult._sum.amount ?? 0),
+      },
+    });
+  });
+
   // GET /logs — platform self-improvement logs
   fastify.get('/logs', async (request: FastifyRequest, reply: FastifyReply) => {
     const queryParse = listLogsSchema.safeParse(request.query);

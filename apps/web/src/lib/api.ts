@@ -279,6 +279,9 @@ export const tasksApi = {
   create: (payload: TaskCreatePayload) =>
     api.post<Task>('/tasks', payload).then((r) => r.data),
 
+  estimate: (prompt: string, category: string) =>
+    api.post<{ estimate: CreditEstimate }>('/tasks/estimate', { prompt, category }).then((r) => r.data),
+
   list: (params?: { page?: number; limit?: number; status?: string; category?: string }) =>
     api.get<PaginatedResponse<Task>>('/tasks', { params }).then((r) => r.data),
 
@@ -393,7 +396,26 @@ export const creditsApi = {
 // Admin API
 // ---------------------------------------------------------------------------
 
+export interface AdminStats {
+  totalUsers: number
+  newUsersToday: number
+  totalTasks: number
+  tasksToday: number
+  tasksRunning: number
+  tasksFailed7d: number
+  totalCreditsUsed: number
+  totalRevenue: number
+}
+
 export const adminApi = {
+  // Stats
+  getStats: () =>
+    api.get<{ success: boolean; data: AdminStats }>('/admin/platform/stats').then((r) => r.data.data),
+
+  // Health
+  getHealth: () =>
+    api.get<{ success: boolean; data: any }>('/admin/platform/health').then((r) => r.data.data),
+
   // Users
   listUsers: (params?: { page?: number; limit?: number; search?: string }) =>
     api.get<PaginatedResponse<AdminUser>>('/admin/users', { params }).then((r) => r.data),
