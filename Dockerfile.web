@@ -10,7 +10,10 @@ FROM base AS deps
 COPY package.json package-lock.json* ./
 COPY packages/types/package.json ./packages/types/
 COPY packages/config/package.json ./packages/config/
+COPY packages/db/package.json ./packages/db/
 COPY apps/web/package.json ./apps/web/
+COPY apps/api/package.json ./apps/api/
+COPY apps/worker/package.json ./apps/worker/
 RUN npm ci --workspace=apps/web --workspace=packages/types --workspace=packages/config
 
 # ─── Builder ──────────────────────────────────────────────────────────────────
