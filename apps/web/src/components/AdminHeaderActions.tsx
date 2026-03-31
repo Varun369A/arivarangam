@@ -10,7 +10,7 @@ export function AdminHeaderActions() {
     <div className="flex items-center gap-2">
       <Link
         href="/arena"
-        className="text-xs text-[#4F46E5] bg-[#EEF2FF] hover:bg-[#E0E7FF] px-3 py-1.5 rounded-lg font-semibold transition-colors flex items-center gap-1.5 border border-[#C7D2FE]"
+        className="text-xs text-white bg-[#1e1b4b] hover:bg-[#312e81] px-3 py-1.5 rounded-lg font-semibold transition-colors flex items-center gap-1.5 border border-[#3730a3]"
       >
         ← Back to App
       </Link>

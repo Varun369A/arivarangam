@@ -165,7 +165,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
 
         <Link
           href="/dashboard"
-          className="mt-2 flex items-center justify-center gap-2 text-xs text-gray-500 hover:text-indigo-600 transition-colors py-1"
+          className="mt-2 flex items-center justify-center gap-2 text-xs text-white bg-[#1e1b4b] hover:bg-[#312e81] transition-colors py-1.5 px-3 rounded-lg font-semibold border border-[#3730a3]"
         >
           ← Back to app
         </Link>

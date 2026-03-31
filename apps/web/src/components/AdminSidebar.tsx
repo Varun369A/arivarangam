@@ -82,7 +82,7 @@ export function AdminSidebar() {
       <div className="p-4 border-t border-[#E0E7FF]">
         <Link
           href="/arena"
-          className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-[#6B7280] hover:text-[#4F46E5] hover:bg-[#EEF2FF] transition-colors font-semibold"
+          className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-white bg-[#1e1b4b] hover:bg-[#312e81] transition-colors font-semibold border border-[#3730a3]"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to App
