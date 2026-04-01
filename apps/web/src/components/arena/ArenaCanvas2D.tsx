@@ -131,8 +131,8 @@ function AnimeCharSVG({
   const isDancing   = action === 'dancing'
 
   const fastLoop = { repeat: Infinity, repeatType: 'mirror' as const }
-  const walkB    = { duration: 0.52, ...fastLoop, ease: 'easeInOut' as const }
-  const danceB   = { duration: 0.28, ...fastLoop, ease: 'easeInOut' as const }
+  const walkB    = { duration: 0.44, ...fastLoop, ease: 'easeInOut' as const }
+  const danceB   = { duration: 0.26, ...fastLoop, ease: 'easeInOut' as const }
 
   return (
     <svg viewBox="0 0 100 240" style={{ width: '100%', height: '100%', overflow: 'visible', display: 'block' }}>
@@ -141,7 +141,7 @@ function AnimeCharSVG({
 
       {/* LEFT LEG + sock + shoe (all swing together) */}
       <motion.g style={{ transformOrigin: '33px 184px' } as React.CSSProperties}
-        animate={isWalking ? { rotate: ['-24deg','24deg'] } : isDancing ? { rotate: ['-18deg','18deg'] } : { rotate: '0deg' }}
+        animate={isWalking ? { rotate: ['-34deg','34deg'] } : isDancing ? { rotate: ['-22deg','22deg'] } : { rotate: '0deg' }}
         transition={isWalking ? walkB : isDancing ? danceB : { duration: 0.3 }}
       >
         <rect x="23" y="184" width="20" height="32" rx="10" fill={skin} />
@@ -153,7 +153,7 @@ function AnimeCharSVG({
 
       {/* RIGHT LEG + sock + shoe (opposite phase) */}
       <motion.g style={{ transformOrigin: '67px 184px' } as React.CSSProperties}
-        animate={isWalking ? { rotate: ['24deg','-24deg'] } : isDancing ? { rotate: ['18deg','-18deg'] } : { rotate: '0deg' }}
+        animate={isWalking ? { rotate: ['34deg','-34deg'] } : isDancing ? { rotate: ['22deg','-22deg'] } : { rotate: '0deg' }}
         transition={isWalking ? walkB : isDancing ? danceB : { duration: 0.3 }}
       >
         <rect x="57" y="184" width="20" height="32" rx="10" fill={skin} />
@@ -180,18 +180,18 @@ function AnimeCharSVG({
       <motion.g style={{ transformOrigin: '22px 106px' } as React.CSSProperties}
         animate={
           isDancing   ? { rotate: ['-100deg','-50deg'] } :
-          isWaving    ? { rotate: ['-55deg','-105deg'] } :
-          isWalking   ? { rotate: ['14deg','-14deg']   } :
+          isWaving    ? { rotate: ['-55deg','-115deg'] } :
+          isWalking   ? { rotate: ['34deg','-34deg']   } :
           isTalking   ? { rotate: ['-14deg','8deg']    } :
-          isCelebrate ? { rotate: ['-65deg','-25deg']  } :
+          isCelebrate ? { rotate: ['-65deg','-20deg']  } :
           { rotate: '0deg' }
         }
         transition={
           isDancing   ? danceB :
-          isWaving    ? { duration: 0.38, ...fastLoop } :
+          isWaving    ? { duration: 0.36, ...fastLoop } :
           isWalking   ? walkB :
           isTalking   ? { duration: 0.75, ...fastLoop } :
-          isCelebrate ? { duration: 0.3,  ...fastLoop } :
+          isCelebrate ? { duration: 0.28, ...fastLoop } :
           { duration: 0.35 }
         }
       >
@@ -202,22 +202,22 @@ function AnimeCharSVG({
       {/* RIGHT ARM */}
       <motion.g style={{ transformOrigin: '78px 106px' } as React.CSSProperties}
         animate={
-          isDancing   ? { rotate: ['-50deg','-100deg'] } :  // opposite phase to left
-          isWaving    ? { rotate: ['-55deg','-110deg'] } :
-          isCalling   ? { rotate: ['-75deg','-95deg']  } :
-          isWalking   ? { rotate: ['-14deg','14deg']   } :
+          isDancing   ? { rotate: ['-50deg','-100deg'] } :
+          isWaving    ? { rotate: ['-50deg','-115deg'] } :
+          isCalling   ? { rotate: ['-75deg','-98deg']  } :
+          isWalking   ? { rotate: ['-34deg','34deg']   } :
           isTalking   ? { rotate: ['14deg','-8deg']    } :
           isThinking  ? { rotate: '-28deg'             } :
-          isCelebrate ? { rotate: ['-65deg','-25deg']  } :
+          isCelebrate ? { rotate: ['-65deg','-20deg']  } :
           { rotate: '0deg' }
         }
         transition={
-          isDancing   ? { duration: 0.28, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut', delay: 0.14 } :
-          isWaving    ? { duration: 0.38, ...fastLoop } :
+          isDancing   ? { duration: 0.26, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut', delay: 0.13 } :
+          isWaving    ? { duration: 0.36, ...fastLoop } :
           isCalling   ? { duration: 0.5,  ...fastLoop } :
           isWalking   ? walkB :
           isTalking   ? { duration: 0.75, ...fastLoop } :
-          isCelebrate ? { duration: 0.3,  ...fastLoop } :
+          isCelebrate ? { duration: 0.28, ...fastLoop } :
           { duration: 0.35 }
         }
       >
@@ -233,16 +233,18 @@ function AnimeCharSVG({
       <motion.g
         style={{ transformOrigin: '50px 53px' } as React.CSSProperties}
         animate={
-          isDancing   ? { y: [0,-8,0], rotate: ['-5deg','5deg'] } :
-          isThinking  ? { rotate: '13deg', y: 8    } :
-          isTalking   ? { y: [0,-4,0]               } :
-          isCelebrate ? { y: [0,-14,0]              } :
-          isListening ? { rotate: '-7deg'           } :
+          isDancing   ? { y: [0,-8,0], rotate: ['-5deg','5deg']   } :
+          isWalking   ? { y: [0,-2.5,0], rotate: ['-3deg','3deg'] } :
+          isThinking  ? { rotate: '13deg', y: 8                   } :
+          isTalking   ? { y: [0,-4,0]                             } :
+          isCelebrate ? { y: [0,-14,0]                            } :
+          isListening ? { rotate: '-7deg'                         } :
           { rotate: '0deg', y: 0 }
         }
         transition={
-          isDancing   ? { duration: 0.28, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' } :
-          isTalking   ? { duration: 0.5, repeat: Infinity } :
+          isDancing   ? { duration: 0.26, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' } :
+          isWalking   ? { duration: 0.44, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' } :
+          isTalking   ? { duration: 0.5,  repeat: Infinity } :
           isCelebrate ? { duration: 0.32, repeat: Infinity } :
           { duration: 0.4 }
         }
@@ -728,15 +730,15 @@ export function ArenaCanvas2D({ characterStates, welcomeUser, taskStatus, danceM
           }}>
             <motion.div
               style={{ position: 'relative', width: '100%', height: '100%' }}
-              animate={{ y: isWalking ? [0,-2,0] : [0,-4,0] }}
-              transition={{ duration: isWalking ? 0.52 : 3.0, repeat: Infinity, ease: 'easeInOut' }}
+              animate={{ y: isWalking ? [0,-4,0] : [0,-5,0] }}
+              transition={{ duration: isWalking ? 0.44 : 3.0, repeat: Infinity, ease: 'easeInOut' }}
             >
-              {/* Speech bubble — counter-flip so text stays readable */}
-              <div style={{ position: 'absolute', inset: 0, transform: shouldFlip ? 'scaleX(-1)' : 'none', pointerEvents: 'none', zIndex: 20 }}>
+              {/* Speech bubble — NEVER flipped, always readable */}
+              <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 20 }}>
                 <SpeechBubble text={speech} color={visual.shirt} />
               </div>
 
-              {/* Character SVG */}
+              {/* Character SVG — flipped to face direction */}
               <div style={{ position: 'absolute', inset: 0, transform: shouldFlip ? 'scaleX(-1)' : 'none' }}>
                 <AnimeCharSVG
                   shirt={visual.shirt} skin={visual.skin} hair={visual.hair}
