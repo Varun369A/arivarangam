@@ -406,6 +406,8 @@ export default function ArenaPage() {
   const estimateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const [inputOpen, setInputOpen] = useState(false)
+  const [chatOpen,  setChatOpen]  = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
 
   const {
     characterStates,
@@ -463,10 +465,17 @@ export default function ArenaPage() {
     return () => { if (estimateTimer.current) clearTimeout(estimateTimer.current) }
   }, [inputText, isRunning])
 
-  // Auto-scroll chat
+  // Auto-scroll chat + track unread count
   useEffect(() => {
+    if (chatMessages.length === 0) return
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [chatMessages])
+    if (!chatOpen) setUnreadCount(prev => prev + 1)
+  }, [chatMessages]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Clear unread count when chat opens
+  useEffect(() => {
+    if (chatOpen) setUnreadCount(0)
+  }, [chatOpen])
 
   // Show build panel when files appear
   useEffect(() => {
@@ -579,7 +588,13 @@ export default function ArenaPage() {
           50%  { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(99,102,241,0); }
           100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(99,102,241,0); }
         }
-        @keyframes inputExpand { from { opacity: 0; transform: translateX(-50%) translateY(18px) scale(0.96); } to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); } }
+        @keyframes inputExpand  { from { opacity: 0; transform: translateX(-50%) translateY(18px) scale(0.96); } to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); } }
+        @keyframes chatSlideIn  { from { opacity: 0; transform: translateY(-50%) translateX(-24px) scale(0.96); } to { opacity: 1; transform: translateY(-50%) translateX(0) scale(1); } }
+        @keyframes chatBtnPulse {
+          0%   { transform: translateY(-50%) scale(1);    box-shadow: 0 0 0 0 rgba(16,185,129,0.7); }
+          50%  { transform: translateY(-50%) scale(1.08); box-shadow: 0 0 0 10px rgba(16,185,129,0); }
+          100% { transform: translateY(-50%) scale(1);    box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+        }
       `}</style>
 
       {/* ── Full-screen 3D arena ── */}
@@ -661,36 +676,109 @@ export default function ArenaPage() {
         </div>
       </div>
 
-      {/* ── Chat panel (left side) ── */}
-      <div style={{
-        position: 'absolute', left: 20, top: '50%',
-        transform: 'translateY(-50%)',
-        width: 320,
-        maxHeight: '55vh',
-        display: 'flex', flexDirection: 'column',
-        zIndex: 20,
-      }}>
-        <div style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: '12px 14px',
-          background: 'rgba(4,4,18,0.82)',
-          backdropFilter: 'blur(16px)',
-          borderRadius: 20,
-          border: '1px solid rgba(99,102,241,0.18)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-          maxHeight: '55vh',
-        }}>
-          {chatMessages.length === 0 ? (
-            <div style={{ color: '#334155', fontSize: 12, textAlign: 'center', padding: '24px 0' }}>
-              {currentTaskId ? 'Connecting…' : 'Tell Claude what to build'}
-            </div>
-          ) : (
-            chatMessages.map(msg => <ChatRow key={msg.id} msg={msg} />)
+      {/* ── Chat icon (collapsed, left side) ── */}
+      {!chatOpen && (
+        <button
+          onClick={() => setChatOpen(true)}
+          title="Open activity log"
+          style={{
+            position: 'absolute', left: 20, top: '50%',
+            transform: 'translateY(-50%)',
+            width: 52, height: 52,
+            borderRadius: '50%',
+            background: isRunning
+              ? 'linear-gradient(135deg, #059669, #10B981)'
+              : 'linear-gradient(135deg, #1e293b, #334155)',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 22,
+            color: 'white',
+            zIndex: 25,
+            animation: isRunning ? 'chatBtnPulse 2s ease-in-out infinite' : 'chatBtnPulse 4s ease-in-out infinite',
+            boxShadow: isRunning
+              ? '0 0 20px rgba(16,185,129,0.55), 0 4px 14px rgba(0,0,0,0.4)'
+              : '0 0 14px rgba(99,102,241,0.3), 0 4px 14px rgba(0,0,0,0.3)',
+          }}
+        >
+          📋
+          {/* Unread badge */}
+          {unreadCount > 0 && (
+            <span style={{
+              position: 'absolute', top: 2, right: 2,
+              width: 18, height: 18, borderRadius: '50%',
+              background: '#EF4444',
+              color: 'white', fontSize: 9, fontWeight: 800,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: '2px solid rgba(6,6,20,0.8)',
+              animation: 'pulseGlow 1.2s ease-in-out infinite',
+            }}>
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
           )}
-          <div ref={chatEndRef} />
+        </button>
+      )}
+
+      {/* ── Chat panel (expanded, left side) ── */}
+      {chatOpen && (
+        <div style={{
+          position: 'absolute', left: 20, top: '50%',
+          transform: 'translateY(-50%)',
+          width: 300,
+          maxHeight: '55vh',
+          display: 'flex', flexDirection: 'column',
+          zIndex: 25,
+          animation: 'chatSlideIn 0.25s ease',
+        }}>
+          {/* Header with close button */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '8px 12px 6px',
+            background: 'rgba(4,4,18,0.92)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: '16px 16px 0 0',
+            border: '1px solid rgba(99,102,241,0.22)',
+            borderBottom: 'none',
+          }}>
+            <span style={{ color: '#94a3b8', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              Activity
+            </span>
+            <button
+              onClick={() => setChatOpen(false)}
+              style={{
+                background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.2)',
+                borderRadius: '50%', width: 22, height: 22,
+                cursor: 'pointer', color: '#64748b', fontSize: 13,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              ×
+            </button>
+          </div>
+
+          {/* Messages */}
+          <div style={{
+            flex: 1, overflowY: 'auto',
+            padding: '10px 12px',
+            background: 'rgba(4,4,18,0.88)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: '0 0 16px 16px',
+            border: '1px solid rgba(99,102,241,0.22)',
+            borderTop: 'none',
+            maxHeight: 'calc(55vh - 38px)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+          }}>
+            {chatMessages.length === 0 ? (
+              <div style={{ color: '#334155', fontSize: 12, textAlign: 'center', padding: '20px 0' }}>
+                {currentTaskId ? 'Connecting…' : 'No activity yet'}
+              </div>
+            ) : (
+              chatMessages.map(msg => <ChatRow key={msg.id} msg={msg} />)
+            )}
+            <div ref={chatEndRef} />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Collapsed chat icon (default) ── */}
       {!inputOpen && (
