@@ -405,6 +405,8 @@ export default function ArenaPage() {
   const inputRef = useRef<HTMLInputElement>(null)
   const estimateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  const [inputOpen, setInputOpen] = useState(false)
+
   const {
     characterStates,
     chatMessages,
@@ -412,7 +414,10 @@ export default function ArenaPage() {
     files,
     previewAvailable,
     creditsUsedLive,
+    danceMode,
     reconnectForFollowUp,
+    triggerDance,
+    triggerAllGather,
   } = useArenaStream(currentTaskId, user?.name?.split(' ')[0] ?? user?.email?.split('@')[0])
 
   // Redirect to login if not authenticated
@@ -495,7 +500,24 @@ export default function ArenaPage() {
     // Intercept: "show my projects" command
     if (/show.*project|my project|list.*project|view.*project|all project/i.test(text)) {
       setInputText('')
+      setInputOpen(false)
       handleShowProjects()
+      return
+    }
+
+    // Intercept: dance / party command
+    if (/dance|sing|party|celebrate|everyone.*come|come.*everyone|all.*dance|all.*come/i.test(text)) {
+      setInputText('')
+      setInputOpen(false)
+      triggerDance()
+      return
+    }
+
+    // Intercept: gather all AIs command
+    if (/gather|all.*ai|bring.*all|call.*all|discuss.*all|everyone.*discuss|all.*discuss/i.test(text)) {
+      setInputText('')
+      setInputOpen(false)
+      triggerAllGather()
       return
     }
 
@@ -507,6 +529,7 @@ export default function ArenaPage() {
         // Follow-up / enhance existing task
         await tasksApi.followUp(currentTaskId, text)
         setInputText('')
+        setInputOpen(false)
         setShowPanel(true)
         reconnectForFollowUp()
       } else {
@@ -517,6 +540,7 @@ export default function ArenaPage() {
         if (!newTaskId) throw new Error('Task creation failed')
         setCurrentTaskId(newTaskId)
         setInputText('')
+        setInputOpen(false)
         setShowPanel(false)
       }
     } catch (err) {
@@ -524,7 +548,7 @@ export default function ArenaPage() {
     } finally {
       setSubmitting(false)
     }
-  }, [inputText, submitting, isRunning, isDone, currentTaskId, reconnectForFollowUp, handleShowProjects])
+  }, [inputText, submitting, isRunning, isDone, currentTaskId, reconnectForFollowUp, handleShowProjects, triggerDance, triggerAllGather])
 
   if (authLoading) {
     return (
@@ -550,6 +574,12 @@ export default function ArenaPage() {
         @keyframes fadeInBubble { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulseGlow { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+        @keyframes inputBtnPulse {
+          0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgba(99,102,241,0.7); }
+          50%  { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(99,102,241,0); }
+          100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(99,102,241,0); }
+        }
+        @keyframes inputExpand { from { opacity: 0; transform: translateX(-50%) translateY(18px) scale(0.96); } to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); } }
       `}</style>
 
       {/* ── Full-screen 3D arena ── */}
@@ -558,6 +588,7 @@ export default function ArenaPage() {
           characterStates={characterStates}
           welcomeUser={welcomeUser}
           taskStatus={taskStatus}
+          danceMode={danceMode}
         />
       </div>
 
@@ -661,15 +692,45 @@ export default function ArenaPage() {
         </div>
       </div>
 
-      {/* ── Input bar (bottom center) ── */}
-      <div style={{
-        position: 'absolute', bottom: 28, left: '50%',
-        transform: 'translateX(-50%)',
-        width: '100%', maxWidth: 680,
-        padding: '0 20px',
-        zIndex: 30,
-        animation: 'slideUp 0.6s ease',
-      }}>
+      {/* ── Collapsed chat icon (default) ── */}
+      {!inputOpen && (
+        <button
+          onClick={() => { setInputOpen(true); setTimeout(() => inputRef.current?.focus(), 80) }}
+          title="Open chat"
+          style={{
+            position: 'absolute', bottom: 32, left: '50%',
+            transform: 'translateX(-50%)',
+            width: 56, height: 56,
+            borderRadius: '50%',
+            background: isRunning
+              ? 'linear-gradient(135deg, #EF4444, #DC2626)'
+              : 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 24,
+            color: 'white',
+            zIndex: 30,
+            animation: 'inputBtnPulse 2.2s ease-in-out infinite',
+            boxShadow: isRunning
+              ? '0 0 24px rgba(239,68,68,0.6), 0 4px 16px rgba(0,0,0,0.4)'
+              : '0 0 24px rgba(99,102,241,0.6), 0 4px 16px rgba(0,0,0,0.4)',
+          }}
+        >
+          {isRunning ? '⚙' : '💬'}
+        </button>
+      )}
+
+      {/* ── Expanded input bar ── */}
+      {inputOpen && (
+        <div style={{
+          position: 'absolute', bottom: 28, left: '50%',
+          transform: 'translateX(-50%)',
+          width: '100%', maxWidth: 680,
+          padding: '0 20px',
+          zIndex: 30,
+          animation: 'inputExpand 0.25s ease',
+        }}>
         {inputError && (
           <div style={{
             color: '#FCA5A5', fontSize: 12, textAlign: 'center',
@@ -682,22 +743,39 @@ export default function ArenaPage() {
 
         <div style={{
           display: 'flex', gap: 10, alignItems: 'center',
-          background: 'rgba(6, 6, 20, 0.94)',
+          background: 'rgba(6, 6, 20, 0.96)',
           backdropFilter: 'blur(24px)',
-          border: '1.5px solid rgba(99,102,241,0.35)',
+          border: '1.5px solid rgba(99,102,241,0.45)',
           borderRadius: 24,
           padding: '10px 10px 10px 20px',
-          boxShadow: '0 0 40px rgba(99,102,241,0.2), 0 8px 32px rgba(0,0,0,0.5)',
+          boxShadow: '0 0 40px rgba(99,102,241,0.25), 0 8px 32px rgba(0,0,0,0.5)',
         }}>
+          {/* Close button */}
+          <button
+            onClick={() => setInputOpen(false)}
+            style={{
+              width: 28, height: 28, borderRadius: '50%',
+              background: 'rgba(99,102,241,0.15)',
+              border: '1px solid rgba(99,102,241,0.25)',
+              cursor: 'pointer', color: '#64748b', fontSize: 14,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0, transition: 'all 0.2s',
+            }}
+          >
+            ×
+          </button>
           <input
             ref={inputRef}
             value={inputText}
             onChange={e => setInputText(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) handleSend() }}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && !e.shiftKey) handleSend()
+              if (e.key === 'Escape') setInputOpen(false)
+            }}
             placeholder={
               isRunning ? '⚙ Building your project…' :
               isDone ? 'Ask for changes or improvements…' :
-              user ? `What would you like to build, ${user.name?.split(' ')[0]}?` :
+              user ? `What shall we build, ${user.name?.split(' ')[0]}? (or "dance", "gather all")` :
               'What would you like to build?'
             }
             disabled={isRunning || submitting}
@@ -822,6 +900,7 @@ export default function ArenaPage() {
           </div>
         )}
       </div>
+      )}
 
       {/* ── Build panel toggle button (when panel is hidden but files exist) ── */}
       {!showPanel && files.length > 0 && (

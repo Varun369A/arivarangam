@@ -20,6 +20,9 @@ export interface ArenaStreamState {
   // Character animation state
   characterStates: Record<CharacterId, CharacterState>
 
+  // Dance mode — all AIs gather and dance together
+  danceMode: boolean
+
   // Chat / activity log (non-character events only)
   chatMessages: ChatMessage[]
 
@@ -56,6 +59,7 @@ export function useArenaStream(taskId: string | null, username?: string) {
     previewAvailable: false,
     creditsUsedLive: 0,
     characterStates: makeDefaultCharacterStates(),
+    danceMode: false,
     chatMessages: [],
     isConnected: false,
     isComplete: false,
@@ -68,6 +72,9 @@ export function useArenaStream(taskId: string | null, username?: string) {
   const speechTimersRef    = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
   // Tracks when a walking-in character will arrive — prevents speak events interrupting walk
   const walkEndTimeRef     = useRef<Record<string, number>>({})
+  // Keep latest username accessible in callbacks without re-creating them
+  const usernameRef        = useRef(username)
+  useEffect(() => { usernameRef.current = username }, [username])
 
   // ── Speech management ──────────────────────────────────────────────────────
 
@@ -518,5 +525,131 @@ export function useArenaStream(taskId: string | null, username?: string) {
     connect(taskId)
   }, [taskId, connect])
 
-  return { ...state, reconnectForFollowUp }
+  // ── Dance mode: all AIs walk in together and dance ─────────────────────────
+
+  const triggerDance = useCallback(() => {
+    const uname = usernameRef.current ?? 'there'
+    const others = ['perplexity', 'chatgpt', 'gemini', 'sarvam'] as CharacterId[]
+
+    // Claude hypes the crowd
+    setCharacterAction('claude', 'waving')
+    setSpeech('claude', `Dance party time, ${uname}! Everyone join in! 🕺`, 6000)
+
+    // Stagger walk-ins (every 600ms)
+    others.forEach((id, i) => {
+      setTimeout(() => {
+        setCharacterAction(id, 'walking', CHARACTERS[id].meetPosition as [number, number, number])
+        walkEndTimeRef.current[id] = Date.now() + 5500
+      }, 300 + i * 600)
+    })
+
+    // Activate dance mode at 4s (characters in position)
+    setTimeout(() => {
+      setState(prev => ({ ...prev, danceMode: true }))
+      setCharacterAction('claude', 'dancing' as any)
+
+      const danceLines: Partial<Record<CharacterId, string>> = {
+        perplexity: 'I found 1000 dance moves — using all of them right now! 💃',
+        chatgpt:    'Optimal dance strategy: maximum fun, zero regrets! 🕺',
+        gemini:     'The visual flow of this dance is absolutely stunning! ✨',
+        sarvam:     'ஆடுவோம் பாடுவோம்! Let\'s celebrate together! 🎉',
+      }
+      let delay = 0
+      for (const [id, line] of Object.entries(danceLines) as [CharacterId, string][]) {
+        setTimeout(() => setSpeech(id, line, 6000), delay)
+        delay += 3000
+      }
+    }, 4000)
+
+    // Auto-end dance after 35s
+    setTimeout(() => {
+      setState(prev => ({ ...prev, danceMode: false }))
+      setCharacterAction('claude', 'celebrating')
+      setSpeech('claude', `Great moves everyone! Back to work now! 💪`, 6000)
+
+      // Wave goodbye and walk home
+      others.forEach((id, i) => {
+        setTimeout(() => {
+          setCharacterAction(id, 'waving')
+          setSpeech(id, `Bye ${uname}! That was fun! 👋`, 3500)
+        }, i * 400)
+        setTimeout(() => {
+          delete walkEndTimeRef.current[id]
+          setCharacterAction(id, 'walking', CHARACTERS[id].homePosition as [number, number, number])
+          setTimeout(() => setCharacterAction(id, 'idle'), 7000)
+        }, 4500 + i * 400)
+      })
+      setTimeout(() => setCharacterAction('claude', 'idle'), 7000)
+    }, 35000)
+  }, [setCharacterAction, setSpeech])
+
+  // ── All gather: all AIs walk in for group discussion ──────────────────────
+
+  const triggerAllGather = useCallback(() => {
+    const uname = usernameRef.current ?? 'there'
+    const others = ['perplexity', 'chatgpt', 'gemini', 'sarvam'] as CharacterId[]
+
+    // Claude calls everyone
+    setCharacterAction('claude', 'calling')
+    setSpeech('claude', `Everyone gather round! Let's all discuss this together, ${uname}!`, 7000)
+
+    // Stagger walk-ins
+    others.forEach((id, i) => {
+      setTimeout(() => {
+        setCharacterAction(id, 'walking', CHARACTERS[id].meetPosition as [number, number, number])
+        walkEndTimeRef.current[id] = Date.now() + 5500
+      }, 500 + i * 700)
+
+      // Each greets on arrival
+      setTimeout(() => {
+        setCharacterAction(id, 'waving')
+        const g = CHARACTERS[id].greetings[Math.floor(Math.random() * CHARACTERS[id].greetings.length)]
+        setSpeech(id, `Hi ${uname}! ${g}`, 6000)
+      }, 7500 + i * 700)
+    })
+
+    // Discussion round — each AI speaks in turn
+    const discussion: { at: number; id: CharacterId; text: string }[] = [
+      { at: 16000, id: 'perplexity', text: CHARACTERS.perplexity.workingPhrases[0] },
+      { at: 23000, id: 'chatgpt',    text: CHARACTERS.chatgpt.workingPhrases[0]    },
+      { at: 30000, id: 'gemini',     text: CHARACTERS.gemini.workingPhrases[0]     },
+      { at: 37000, id: 'sarvam',     text: CHARACTERS.sarvam.workingPhrases[0]     },
+      { at: 44000, id: 'claude',     text: 'Excellent perspectives from everyone! This gives me a clear direction to build from.'  },
+      { at: 51000, id: 'perplexity', text: CHARACTERS.perplexity.workingPhrases[1] },
+      { at: 58000, id: 'chatgpt',    text: CHARACTERS.chatgpt.workingPhrases[1]    },
+      { at: 65000, id: 'gemini',     text: CHARACTERS.gemini.workingPhrases[1]     },
+    ]
+
+    discussion.forEach(({ at, id, text }) => {
+      setTimeout(() => {
+        setCharacterAction(id, 'talking')
+        setSpeech(id, text, 7000)
+        setTimeout(() => setCharacterAction(id, 'listening'), 7200)
+      }, at)
+    })
+
+    // Claude wraps up at 73s
+    setTimeout(() => {
+      setCharacterAction('claude', 'talking')
+      setSpeech('claude', `Brilliant session! Thank you all — great work. You can go now!`, 7000)
+    }, 73000)
+
+    // All wave goodbye at 82s
+    setTimeout(() => {
+      others.forEach((id, i) => {
+        setTimeout(() => {
+          setCharacterAction(id, 'waving')
+          setSpeech(id, `Bye ${uname}! Good luck! 👋`, 3500)
+        }, i * 400)
+        setTimeout(() => {
+          delete walkEndTimeRef.current[id]
+          setCharacterAction(id, 'walking', CHARACTERS[id].homePosition as [number, number, number])
+          setTimeout(() => setCharacterAction(id, 'idle'), 7000)
+        }, 4000 + i * 400)
+      })
+      setTimeout(() => setCharacterAction('claude', 'idle'), 6000)
+    }, 82000)
+  }, [setCharacterAction, setSpeech])
+
+  return { ...state, reconnectForFollowUp, triggerDance, triggerAllGather }
 }

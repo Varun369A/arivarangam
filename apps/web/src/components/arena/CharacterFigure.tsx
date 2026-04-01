@@ -11,6 +11,7 @@ export type CharacterAction =
   | 'celebrating'
   | 'listening'
   | 'calling'
+  | 'dancing'
 
 export interface CharacterState {
   action: CharacterAction
