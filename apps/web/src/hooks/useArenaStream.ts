@@ -49,7 +49,7 @@ function makeDefaultCharacterStates(): Record<CharacterId, CharacterState> {
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
-export function useArenaStream(taskId: string | null) {
+export function useArenaStream(taskId: string | null, username?: string) {
   const [state, setState] = useState<ArenaStreamState>({
     taskStatus: 'idle',
     files: [],
@@ -74,7 +74,7 @@ export function useArenaStream(taskId: string | null) {
   const setSpeech = useCallback((
     characterId: CharacterId,
     text: string,
-    durationMs = 4000
+    durationMs = 7000
   ) => {
     // Clear previous timer for this character
     if (speechTimersRef.current[characterId]) {
@@ -183,38 +183,87 @@ export function useArenaStream(taskId: string | null) {
         break
 
       case 'call': {
-        // Claude calls another character — they walk in slowly and have a real conversation
+        // Claude calls another character — slow walk-in, ~1 minute real conversation
+        const uname = username ?? 'there'
         setCharacterAction(charId, 'calling')
-        if (text) setSpeech(charId, text, 4500)
+        if (text) setSpeech(charId, text, 7000)
+
         if (targetChar && CHARACTERS[targetChar]) {
           const tc = CHARACTERS[targetChar]
-          // Walk starts after call — mark when it will complete so speak events don't interrupt
+
+          // ── 0.8s: target starts walking in (5.5s walk) ──────────────────
           setTimeout(() => {
             setCharacterAction(targetChar, 'walking', tc.meetPosition as [number, number, number])
-            walkEndTimeRef.current[targetChar] = Date.now() + 9200
+            walkEndTimeRef.current[targetChar] = Date.now() + 5500
           }, 800)
-          // Arrival greeting — after slow walk (~8.5s)
+
+          // ── 7s: arrived — target greets user by name ────────────────────
           setTimeout(() => {
-            setCharacterAction(targetChar, 'talking')
-            setSpeech(targetChar, tc.greetings[Math.floor(Math.random() * tc.greetings.length)] ?? 'Here to help!', 7000)
-          }, 8500)
-          // Claude responds
+            setCharacterAction(targetChar, 'waving')
+            const g = tc.greetings[Math.floor(Math.random() * tc.greetings.length)] ?? 'Hi! Ready to help.'
+            setSpeech(targetChar, `Hi ${uname}! ${g}`, 7000)
+          }, 7000)
+
+          // ── 7s: Claude responds to target arriving ──────────────────────
           setTimeout(() => {
             setCharacterAction(charId, 'talking')
-            setSpeech(charId, tc.thinkingPhrases[0] ?? 'Let\'s work on this together.', 6000)
-          }, 16000)
-          // Target continues working
+            setSpeech(charId, tc.thinkingPhrases[0] ?? "Great, let's work through this together.", 7000)
+          }, 14000)
+
+          // ── 21s: target explains findings ───────────────────────────────
+          setTimeout(() => {
+            setCharacterAction(targetChar, 'talking')
+            const wp = tc.workingPhrases[0] ?? 'Here is what I found...'
+            setSpeech(targetChar, wp, 7000)
+          }, 21000)
+
+          // ── 28s: Claude asks follow-up ───────────────────────────────────
+          setTimeout(() => {
+            setCharacterAction(charId, 'talking')
+            const tp = tc.thinkingPhrases[1] ?? 'That makes sense. Can you go deeper on that?'
+            setSpeech(charId, tp, 7000)
+          }, 28000)
+
+          // ── 35s: target digs deeper ──────────────────────────────────────
           setTimeout(() => {
             setCharacterAction(targetChar, 'thinking')
-            setSpeech(targetChar, tc.workingPhrases[0] ?? 'On it...', 7000)
-          }, 22500)
-          // Claude listening to the result
+            const wp2 = tc.workingPhrases[1] ?? 'Looking into it more carefully...'
+            setSpeech(targetChar, wp2, 7000)
+          }, 35000)
+
+          // ── 42s: target gives final answer ──────────────────────────────
           setTimeout(() => {
-            setCharacterAction(charId, 'listening')
             setCharacterAction(targetChar, 'talking')
-          }, 30000)
+            const g2 = tc.greetings[1] ?? "That covers everything I found."
+            setSpeech(targetChar, g2, 7000)
+          }, 42000)
+
+          // ── 49s: Claude thanks and dismisses ────────────────────────────
+          setTimeout(() => {
+            setCharacterAction(charId, 'talking')
+            setSpeech(
+              charId,
+              `Thank you ${tc.name}, that was really helpful! You can go now, great work.`,
+              7000
+            )
+          }, 49000)
+
+          // ── 56s: target waves goodbye ────────────────────────────────────
+          setTimeout(() => {
+            setCharacterAction(targetChar, 'waving')
+            setSpeech(targetChar, `Anytime, ${uname}! Good luck with the build!`, 5000)
+          }, 56000)
+
+          // ── 61s: target walks home ───────────────────────────────────────
+          setTimeout(() => {
+            delete walkEndTimeRef.current[targetChar]
+            setCharacterAction(targetChar, 'walking', CHARACTERS[targetChar].homePosition as [number, number, number])
+          }, 62000)
+
+          setTimeout(() => setCharacterAction(targetChar, 'idle'), 68000)
         }
-        setTimeout(() => setCharacterAction(charId, 'listening'), 5000)
+
+        setTimeout(() => setCharacterAction(charId, 'listening'), 7500)
         break
       }
 
@@ -226,13 +275,14 @@ export function useArenaStream(taskId: string | null) {
         break
 
       case 'return':
-        // Character says goodbye then slowly walks back off-screen
+        // Character waves goodbye then slowly walks back off-screen
         delete walkEndTimeRef.current[charId]
-        if (text) setSpeech(charId, text, 5000)
+        setCharacterAction(charId, 'waving')
+        if (text) setSpeech(charId, text, 7000)
         setTimeout(() => {
           setCharacterAction(charId, 'walking', CHARACTERS[charId].homePosition as [number, number, number])
-        }, 5500)
-        setTimeout(() => setCharacterAction(charId, 'idle'), 16000)
+        }, 7500)
+        setTimeout(() => setCharacterAction(charId, 'idle'), 14000)
         break
 
       case 'point':

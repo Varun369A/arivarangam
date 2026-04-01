@@ -9,10 +9,10 @@ import { tasksApi, creditsApi, getApiError } from '@/lib/api'
 import { CHARACTERS } from '@/lib/characters'
 import JSZip from 'jszip'
 
-// ─── Load Three.js scene client-side only (no SSR) ───────────────────────────
-const ArenaCanvas = dynamic(
-  () => import('@/components/arena/ArenaCanvas').then(m => m.ArenaCanvas),
-  { ssr: false, loading: () => <div style={{ width: '100vw', height: '100vh', background: '#060610' }} /> }
+// ─── Load 2D SVG arena client-side only (no SSR) ─────────────────────────────
+const ArenaCanvas2D = dynamic(
+  () => import('@/components/arena/ArenaCanvas2D').then(m => m.ArenaCanvas2D),
+  { ssr: false, loading: () => <div style={{ width: '100vw', height: '100vh', background: '#f0e8d8' }} /> }
 )
 
 // ─── Category auto-detect from user message ───────────────────────────────────
@@ -398,6 +398,7 @@ export default function ArenaPage() {
   const [showProjects, setShowProjects] = useState(false)
   const [projectsList, setProjectsList] = useState<any[]>([])
   const [projectsLoading, setProjectsLoading] = useState(false)
+  const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null)
   const [welcomeUser, setWelcomeUser] = useState<string | null>(null)
   const welcomedRef = useRef(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
@@ -412,7 +413,7 @@ export default function ArenaPage() {
     previewAvailable,
     creditsUsedLive,
     reconnectForFollowUp,
-  } = useArenaStream(currentTaskId)
+  } = useArenaStream(currentTaskId, user?.name?.split(' ')[0] ?? user?.email?.split('@')[0])
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -528,7 +529,7 @@ export default function ArenaPage() {
   if (authLoading) {
     return (
       <div style={{
-        width: '100vw', height: '100vh', background: '#060610',
+        width: '100vw', height: '100vh', background: '#f0e8d8',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         <div style={{
@@ -541,7 +542,7 @@ export default function ArenaPage() {
   }
 
   return (
-    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative', background: '#060610' }}>
+    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative', background: '#f0e8d8' }}>
 
       {/* ── Global animations style ── */}
       <style>{`
@@ -553,7 +554,11 @@ export default function ArenaPage() {
 
       {/* ── Full-screen 3D arena ── */}
       <div style={{ position: 'absolute', inset: 0 }}>
-        <ArenaCanvas characterStates={characterStates} welcomeUser={welcomeUser} />
+        <ArenaCanvas2D
+          characterStates={characterStates}
+          welcomeUser={welcomeUser}
+          taskStatus={taskStatus}
+        />
       </div>
 
       {/* ── Top bar ── */}
