@@ -548,17 +548,16 @@ export function useArenaStream(taskId: string | null, username?: string) {
       setState(prev => ({ ...prev, danceMode: true }))
       setCharacterAction('claude', 'dancing' as any)
 
-      const danceLines: Partial<Record<CharacterId, string>> = {
-        perplexity: 'I found 1000 dance moves — using all of them right now! 💃',
-        chatgpt:    'Optimal dance strategy: maximum fun, zero regrets! 🕺',
-        gemini:     'The visual flow of this dance is absolutely stunning! ✨',
-        sarvam:     'ஆடுவோம் பாடுவோம்! Let\'s celebrate together! 🎉',
-      }
-      let delay = 0
-      for (const [id, line] of Object.entries(danceLines) as [CharacterId, string][]) {
-        setTimeout(() => setSpeech(id, line, 6000), delay)
-        delay += 3000
-      }
+      // Stagger dance speeches — each finishes before the next starts (8s gap, no overlap)
+      const danceLines: [CharacterId, string][] = [
+        ['perplexity', 'I found 1000 dance moves — using every single one right now!'],
+        ['chatgpt',    'Optimal dance strategy activated: maximum fun, zero regrets!'],
+        ['gemini',     'The visual flow of this dance is absolutely immaculate!'],
+        ['sarvam',     'ஆடுவோம் பாடுவோம்! Let\'s celebrate together!'],
+      ]
+      danceLines.forEach(([id, line], i) => {
+        setTimeout(() => setSpeech(id, line, 7000), i * 8000)
+      })
     }, 4000)
 
     // Auto-end dance after 35s

@@ -14,14 +14,14 @@ const ROAM_SECS   = 6
 // ─── Visual config ────────────────────────────────────────────────────────────
 
 type Side = 'center' | 'left' | 'right'
-interface CharVisual { shirt: string; skin: string; hair: string; label: string; side: Side; voiceRate: number }
+interface CharVisual { shirt: string; skin: string; hair: string; label: string; side: Side }
 
 const CHAR_VISUAL: Record<CharacterId, CharVisual> = {
-  claude:     { shirt: '#D97706', skin: '#F5CBA7', hair: '#1c1c1c', label: 'Claude',     side: 'center', voiceRate: 0.90 },
-  perplexity: { shirt: '#0D9488', skin: '#EBD5BC', hair: '#1c1c1c', label: 'Perplexity', side: 'right',  voiceRate: 0.95 },
-  chatgpt:    { shirt: '#10B981', skin: '#F0B07A', hair: '#2a1a0a', label: 'ChatGPT',    side: 'right',  voiceRate: 0.85 },
-  gemini:     { shirt: '#8B5CF6', skin: '#D4A76A', hair: '#1c1c1c', label: 'Gemini',     side: 'left',   voiceRate: 0.88 },
-  sarvam:     { shirt: '#F59E0B', skin: '#C47B3E', hair: '#0f0a00', label: 'Sarvam',     side: 'left',   voiceRate: 0.92 },
+  claude:     { shirt: '#D97706', skin: '#F5CBA7', hair: '#1c1c1c', label: 'Claude',     side: 'center' },
+  perplexity: { shirt: '#0D9488', skin: '#EBD5BC', hair: '#1c1c1c', label: 'Perplexity', side: 'right'  },
+  chatgpt:    { shirt: '#10B981', skin: '#F0B07A', hair: '#2a1a0a', label: 'ChatGPT',    side: 'right'  },
+  gemini:     { shirt: '#8B5CF6', skin: '#D4A76A', hair: '#1c1c1c', label: 'Gemini',     side: 'left'   },
+  sarvam:     { shirt: '#F59E0B', skin: '#C47B3E', hair: '#0f0a00', label: 'Sarvam',     side: 'left'   },
 }
 
 // ─── Positions — perspective effect (far = small + high, near = full + floor) ─
@@ -53,48 +53,34 @@ const DANCE_POS: Record<CharacterId, Pos> = {
   sarvam:     { x: 22, bottomPct: 17, scale: 0.9  },
 }
 
-// ─── TTS ─────────────────────────────────────────────────────────────────────
+// ─── Speech Bubble — 7s per sentence ────────────────────────────────────────
 
-function speakText(text: string, rate = 0.9) {
-  if (typeof window === 'undefined' || !window.speechSynthesis) return
-  window.speechSynthesis.cancel()
-  const utter = new SpeechSynthesisUtterance(text)
-  utter.rate = rate; utter.volume = 0.82; utter.pitch = 1.0
-  window.speechSynthesis.speak(utter)
-}
-
-// ─── Speech Bubble — 7s per sentence, TTS per sentence ───────────────────────
-
-function SpeechBubble({ text, color, voiceRate }: { text: string | null; color: string; voiceRate: number }) {
+function SpeechBubble({ text, color }: { text: string | null; color: string }) {
   const [current, setCurrent] = useState<string | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (timerRef.current) clearTimeout(timerRef.current)
-    if (!text) {
-      setCurrent(null)
-      if (typeof window !== 'undefined') window.speechSynthesis?.cancel()
-      return
-    }
+    if (!text) { setCurrent(null); return }
+
     const sentences = text.split(/(?<=[.!?।])\s+/).map(s => s.trim()).filter(Boolean)
-    if (!sentences.length) { setCurrent(text); speakText(text, voiceRate); return }
+    if (!sentences.length) { setCurrent(text); return }
 
     let idx = 0
-    setCurrent(sentences[0]); speakText(sentences[0], voiceRate)
+    setCurrent(sentences[0])
 
     const tick = () => {
       idx++
       if (idx < sentences.length) {
-        setCurrent(sentences[idx]); speakText(sentences[idx], voiceRate)
+        setCurrent(sentences[idx])
         timerRef.current = setTimeout(tick, SENTENCE_MS)
-      } else setCurrent(null)
+      } else {
+        setCurrent(null)
+      }
     }
     timerRef.current = setTimeout(tick, SENTENCE_MS)
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
-      if (typeof window !== 'undefined') window.speechSynthesis?.cancel()
-    }
-  }, [text, voiceRate])
+    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
+  }, [text])
 
   return (
     <AnimatePresence mode="wait">
@@ -150,30 +136,32 @@ function AnimeCharSVG({
 
   return (
     <svg viewBox="0 0 100 240" style={{ width: '100%', height: '100%', overflow: 'visible', display: 'block' }}>
+      {/* Ground shadow */}
       <ellipse cx="50" cy="237" rx="27" ry="5.5" fill="rgba(0,0,0,0.13)" />
 
-      {/* SHOES */}
-      <ellipse cx="33" cy="226" rx="19" ry="8"   fill="#14142a" />
-      <ellipse cx="67" cy="226" rx="19" ry="8"   fill="#14142a" />
-      <line x1="23" y1="221" x2="43" y2="221" stroke="white" strokeWidth="1.4" strokeOpacity="0.7" />
-      <line x1="57" y1="221" x2="77" y2="221" stroke="white" strokeWidth="1.4" strokeOpacity="0.7" />
-      <ellipse cx="42" cy="226" rx="7" ry="4" fill="#0c0c20" />
-      <ellipse cx="58" cy="226" rx="7" ry="4" fill="#0c0c20" />
-
-      {/* SOCKS */}
-      <rect x="23" y="212" width="20" height="15" rx="4" fill="white" />
-      <rect x="57" y="212" width="20" height="15" rx="4" fill="white" />
-
-      {/* LEGS */}
+      {/* LEFT LEG + sock + shoe (all swing together) */}
       <motion.g style={{ transformOrigin: '33px 184px' } as React.CSSProperties}
-        animate={isWalking ? { rotate: ['-22deg','22deg'] } : isDancing ? { rotate: ['-15deg','15deg'] } : { rotate: '0deg' }}
+        animate={isWalking ? { rotate: ['-24deg','24deg'] } : isDancing ? { rotate: ['-18deg','18deg'] } : { rotate: '0deg' }}
         transition={isWalking ? walkB : isDancing ? danceB : { duration: 0.3 }}
-      ><rect x="23" y="184" width="20" height="30" rx="10" fill={skin} /></motion.g>
+      >
+        <rect x="23" y="184" width="20" height="32" rx="10" fill={skin} />
+        <rect x="23" y="210" width="20" height="16" rx="4"  fill="white" />
+        <ellipse cx="33" cy="227" rx="19" ry="8" fill="#14142a" />
+        <line x1="23" y1="222" x2="43" y2="222" stroke="white" strokeWidth="1.4" strokeOpacity="0.7" />
+        <ellipse cx="42" cy="227" rx="7" ry="4" fill="#0c0c20" />
+      </motion.g>
 
+      {/* RIGHT LEG + sock + shoe (opposite phase) */}
       <motion.g style={{ transformOrigin: '67px 184px' } as React.CSSProperties}
-        animate={isWalking ? { rotate: ['22deg','-22deg'] } : isDancing ? { rotate: ['15deg','-15deg'] } : { rotate: '0deg' }}
+        animate={isWalking ? { rotate: ['24deg','-24deg'] } : isDancing ? { rotate: ['18deg','-18deg'] } : { rotate: '0deg' }}
         transition={isWalking ? walkB : isDancing ? danceB : { duration: 0.3 }}
-      ><rect x="57" y="184" width="20" height="30" rx="10" fill={skin} /></motion.g>
+      >
+        <rect x="57" y="184" width="20" height="32" rx="10" fill={skin} />
+        <rect x="57" y="210" width="20" height="16" rx="4"  fill="white" />
+        <ellipse cx="67" cy="227" rx="19" ry="8" fill="#14142a" />
+        <line x1="57" y1="222" x2="77" y2="222" stroke="white" strokeWidth="1.4" strokeOpacity="0.7" />
+        <ellipse cx="58" cy="227" rx="7" ry="4" fill="#0c0c20" />
+      </motion.g>
 
       {/* SHORTS */}
       <rect x="22" y="153" width="56" height="35" rx="8" fill="#14142a" />
@@ -406,6 +394,10 @@ export function ArenaCanvas2D({ characterStates, welcomeUser, taskStatus, danceM
   const [claudeIsRoaming, setClaudeIsRoaming] = useState(false)
   const roamDirRef = useRef(1)
 
+  // Walk transition timers — prevent re-triggering on each render
+  const walkTimersRef  = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+  const prevActionRef  = useRef<Record<CharacterId, string>>({} as Record<CharacterId, string>)
+
   // Write cycle
   const [writePhase, setWritePhase] = useState<'look' | 'write'>('look')
 
@@ -439,52 +431,92 @@ export function ArenaCanvas2D({ characterStates, welcomeUser, taskStatus, danceM
   }, [taskStatus, danceMode])
 
   // ── Walk position updates from character state ────────────────────────────
+  // Only fires on action CHANGE to 'walking'; characters walk in from background.
   useEffect(() => {
     const ids = Object.keys(characterStates) as CharacterId[]
     for (const id of ids) {
       if (id === 'claude') continue
-      const state = characterStates[id]
-      if (state.action === 'walking' && state.targetPosition) {
+      const state    = characterStates[id]
+      const prevAct  = prevActionRef.current[id] ?? 'idle'
+
+      if (state.action === 'walking' && prevAct !== 'walking' && state.targetPosition) {
         const goingHome = Math.abs(state.targetPosition[0]) > 10
-        setPos(prev => ({ ...prev, [id]: goingHome ? { ...HOME_POS[id] } : { ...MEET_POS[id] } }))
-        setPresent(prev => ({ ...prev, [id]: !goingHome }))
+        if (walkTimersRef.current[id]) clearTimeout(walkTimersRef.current[id])
+
+        if (!goingHome) {
+          // 1) Appear instantly at HOME_POS (small, background)
+          setPos(prev => ({ ...prev, [id]: { ...HOME_POS[id] } }))
+          setPresent(prev => ({ ...prev, [id]: true }))
+          // 2) After one frame, start CSS transition to MEET_POS (full-size, floor)
+          walkTimersRef.current[id] = setTimeout(() => {
+            setPos(prev => ({ ...prev, [id]: { ...MEET_POS[id] } }))
+          }, 80)
+        } else {
+          // Walk back home: start transition to HOME_POS …
+          setPos(prev => ({ ...prev, [id]: { ...HOME_POS[id] } }))
+          // … then hide once they arrive
+          walkTimersRef.current[id] = setTimeout(() => {
+            setPresent(prev => ({ ...prev, [id]: false }))
+          }, (WALK_SECS + 1.5) * 1000)
+        }
       }
+
+      prevActionRef.current[id] = state.action
     }
   }, [characterStates])
 
-  // ── Dance mode: all AIs walk to dance positions ───────────────────────────
+  // ── Dance mode: all AIs appear at HOME_POS then walk to dance positions ───
   useEffect(() => {
     if (!danceMode) {
-      // Reset dance overrides
       setLocalAction({})
       setLocalSpeech({})
+      // Return non-Claude AIs to hidden
+      ;(['perplexity','chatgpt','gemini','sarvam'] as CharacterId[]).forEach(id => {
+        setPos(prev => ({ ...prev, [id]: { ...HOME_POS[id] } }))
+        setPresent(prev => ({ ...prev, [id]: false }))
+      })
+      setPos(prev => ({ ...prev, claude: { ...HOME_POS.claude } }))
       return
     }
-    const ALL: CharacterId[] = ['perplexity', 'chatgpt', 'gemini', 'sarvam']
-    // Walk all to dance positions
-    ALL.forEach(id => {
-      setPos(prev => ({ ...prev, [id]: { ...DANCE_POS[id] } }))
-      setPresent(prev => ({ ...prev, [id]: true }))
-    })
-    setPos(prev => ({ ...prev, claude: { ...DANCE_POS.claude } }))
 
-    const DANCE_PHRASES: Record<CharacterId, string> = {
-      claude:     "Let's go! This is our moment! 🎉",
-      perplexity: "Research says dancing is healthy! ♪",
-      chatgpt:    "Best party ever! Let's do this! ♫",
-      gemini:     "The visual vibes are immaculate! 🎶",
-      sarvam:     "நடனம் ஆடலாம்! Dance time! 🕺",
+    const ALL4: CharacterId[] = ['perplexity', 'chatgpt', 'gemini', 'sarvam']
+
+    // Step 1: make AIs appear at background HOME positions (staggered)
+    ALL4.forEach((id, i) => {
+      setTimeout(() => {
+        setPos(prev => ({ ...prev, [id]: { ...HOME_POS[id] } }))
+        setPresent(prev => ({ ...prev, [id]: true }))
+      }, i * 200)
+    })
+
+    // Step 2: walk to dance positions (CSS transition handles the walk)
+    const t1 = setTimeout(() => {
+      ALL4.forEach(id => setPos(prev => ({ ...prev, [id]: { ...DANCE_POS[id] } })))
+      setPos(prev => ({ ...prev, claude: { ...DANCE_POS.claude } }))
+    }, ALL4.length * 200 + 100)
+
+    // Step 3: start dancing once everyone arrives
+    const DANCE_PHRASES: Partial<Record<CharacterId, string>> = {
+      claude:     "Let's dance, everyone! This is our moment!",
+      perplexity: "Research says dancing is healthy — science confirmed!",
+      chatgpt:    "Best party ever! Maximum fun achieved!",
+      gemini:     "The visual vibes here are absolutely immaculate!",
+      sarvam:     "நடனம் ஆடலாம்! Everyone dance together!",
     }
-    // Start dancing after walk
-    const t = setTimeout(() => {
-      const actions: Partial<Record<CharacterId, string>> = {}
-      const speeches: Partial<Record<CharacterId, string>> = {}
+    const t2 = setTimeout(() => {
       const ALL5: CharacterId[] = ['claude', 'perplexity', 'chatgpt', 'gemini', 'sarvam']
-      ALL5.forEach(id => { actions[id] = 'dancing'; speeches[id] = DANCE_PHRASES[id] })
+      const actions: Partial<Record<CharacterId, string>> = {}
+      ALL5.forEach(id => { actions[id] = 'dancing' })
       setLocalAction(actions)
-      setLocalSpeech(speeches)
-    }, WALK_SECS * 1000 + 500)
-    return () => clearTimeout(t)
+      // Stagger dance speech so only one AI speaks at a time
+      ALL5.forEach((id, i) => {
+        setTimeout(() => {
+          setLocalSpeech(prev => ({ ...prev, [id]: DANCE_PHRASES[id] ?? '' }))
+        }, i * 7000)
+      })
+    }, ALL4.length * 200 + WALK_SECS * 1000 + 600)
+
+    return () => { clearTimeout(t1); clearTimeout(t2) }
   }, [danceMode])
 
   // ── Write cycle ───────────────────────────────────────────────────────────
@@ -601,7 +633,7 @@ export function ArenaCanvas2D({ characterStates, welcomeUser, taskStatus, danceM
         />
       ))}
 
-      {/* Desk */}
+      {/* Desk — z-index 8 so it overlaps Claude's legs (makes Claude look seated) */}
       <AnimatePresence>
         {isBuilding && !danceMode && (
           <motion.div key="desk"
@@ -610,8 +642,8 @@ export function ArenaCanvas2D({ characterStates, welcomeUser, taskStatus, danceM
             exit={{ opacity: 0, scale: 0.65, y: 50 }}
             transition={{ duration: 0.75, ease: [0.34, 1.56, 0.64, 1] }}
             style={{
-              position: 'absolute', bottom: '13%', left: '26%',
-              width: '27%', height: '20%', zIndex: 3,
+              position: 'absolute', bottom: '14%', left: '24%',
+              width: '30%', height: '22%', zIndex: 8,
             }}
           >
             <DeskSVG color={CHAR_VISUAL.claude.shirt} />
@@ -666,14 +698,17 @@ export function ArenaCanvas2D({ characterStates, welcomeUser, taskStatus, danceM
           return false
         })()
 
-        const bottomOverride = (isBuilding && id === 'claude' && !danceMode)
-          ? charPos.bottomPct + 8
-          : charPos.bottomPct
+        // When building, Claude stays at normal floor level — desk (z-index 8) covers their legs
+        const bottomOverride = charPos.bottomPct
 
         const currentX = (id === 'claude' && claudeIsRoaming && !danceMode)
           ? claudeRoamX : charPos.x
 
-        const walkDur = isWalking ? WALK_SECS : 0.5
+        // Hide non-Claude characters until they are called
+        if (id !== 'claude' && !present[id] && !danceMode) return null
+
+        const walkDur    = isWalking ? WALK_SECS : 0.5
+        const roamingDur = (id === 'claude' && claudeIsRoaming) ? ROAM_SECS * 0.95 : walkDur
 
         return (
           <div key={id} style={{
@@ -686,19 +721,19 @@ export function ArenaCanvas2D({ characterStates, welcomeUser, taskStatus, danceM
             transformOrigin: 'bottom center',
             zIndex: id === 'claude' ? 6 : (present[id] ? 5 : 2),
             transition: [
-              `left ${walkDur}s ${isWalking ? 'ease-in-out' : 'ease-out'}`,
+              `left ${roamingDur}s ${isWalking || claudeIsRoaming ? 'ease-in-out' : 'ease-out'}`,
               `bottom ${walkDur}s ease-out`,
               `transform ${walkDur}s ease-out`,
             ].join(', '),
           }}>
             <motion.div
               style={{ position: 'relative', width: '100%', height: '100%' }}
-              animate={{ y: isWalking ? [0,-5,0] : [0,-4,0] }}
-              transition={{ duration: isWalking ? 0.52 : 2.3, repeat: Infinity, ease: 'easeInOut' }}
+              animate={{ y: isWalking ? [0,-2,0] : [0,-4,0] }}
+              transition={{ duration: isWalking ? 0.52 : 3.0, repeat: Infinity, ease: 'easeInOut' }}
             >
               {/* Speech bubble — counter-flip so text stays readable */}
               <div style={{ position: 'absolute', inset: 0, transform: shouldFlip ? 'scaleX(-1)' : 'none', pointerEvents: 'none', zIndex: 20 }}>
-                <SpeechBubble text={speech} color={visual.shirt} voiceRate={visual.voiceRate} />
+                <SpeechBubble text={speech} color={visual.shirt} />
               </div>
 
               {/* Character SVG */}
